@@ -288,9 +288,9 @@ export function TabContainer() {
   }, [pendingAction, queryTabs])
 
   return (
-    <div className="h-full flex flex-col bg-black">
+    <div className="h-full flex flex-col bg-background">
       {/* Tab Bar */}
-      <div className="flex items-center bg-zinc-950 border-b border-zinc-900 min-w-0">
+      <div className="flex items-center bg-muted/30 border-b border-border/50 min-w-0">
         <div className="flex items-center gap-0.5 px-1 pt-1 overflow-x-auto flex-1 min-w-0 no-scrollbar">
           {queryTabs.map((tab, index) => {
             const isActive = tab.id === activeTabId
@@ -327,12 +327,12 @@ export function TabContainer() {
                 tabIndex={0}
                 aria-selected={isActive}
                 className={cn(
-                  'group relative flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-t-md border-t border-l border-r transition-all shrink-0 cursor-pointer select-none',
+                  'group relative flex items-center gap-2 px-3 py-2 text-xs rounded-t-lg border-t border-l border-r transition-all duration-200 shrink-0 cursor-pointer select-none',
                   isActive
-                    ? 'bg-black border-zinc-800 text-zinc-200'
-                    : 'bg-zinc-900/50 border-transparent text-zinc-400 hover:text-zinc-300 hover:bg-zinc-900',
-                  isDragging && 'opacity-50 cursor-grabbing',
-                  isDragOver && 'border-l-2 border-l-blue-500 bg-blue-500/10',
+                    ? 'bg-background border-border/50 text-foreground shadow-sm'
+                    : 'bg-muted/20 border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/40',
+                  isDragging && 'opacity-50 cursor-grabbing scale-105',
+                  isDragOver && 'border-l-2 border-l-primary bg-primary/10',
                   !isAnyDragging && !isEditing && 'cursor-grab',
                 )}
               >
@@ -350,13 +350,13 @@ export function TabContainer() {
                     onKeyDown={(e) => handleRenameKeyDown(e, tab.id)}
                     onBlur={() => handleRenameSubmit(tab.id)}
                     onClick={(e) => e.stopPropagation()}
-                    className="w-24 bg-zinc-800 border border-zinc-700 rounded px-1 py-0.5 text-xs text-zinc-200 outline-none focus:border-blue-500"
+                    className="w-24 bg-input border border-border rounded-md px-2 py-0.5 text-xs text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all"
                   />
                 ) : (
-                  <span className={cn('max-w-32 truncate', isAnyDragging && 'pointer-events-none')}>
+                  <span className={cn('max-w-32 truncate font-medium', isAnyDragging && 'pointer-events-none')}>
                     {isTableTab ? (
                       <>
-                        {tab.tableName} <span className="text-zinc-500">/all</span>
+                        {tab.tableName} <span className="text-muted-foreground/60 font-normal">/all</span>
                       </>
                     ) : (
                       getTabLabel(tab.id, tab.connectionId, tab.customName)
@@ -385,10 +385,10 @@ export function TabContainer() {
                       )
                     }
                     className={cn(
-                      'p-0.5 rounded-sm transition-opacity',
+                      'p-1 rounded-md transition-all duration-200',
                       isActive
-                        ? 'opacity-0 group-hover:opacity-50 hover:opacity-100! hover:bg-zinc-800'
-                        : 'opacity-0 group-hover:opacity-50 hover:opacity-100! hover:bg-zinc-800',
+                        ? 'opacity-0 group-hover:opacity-60 hover:opacity-100! hover:bg-accent'
+                        : 'opacity-0 group-hover:opacity-60 hover:opacity-100! hover:bg-accent',
                     )}
                   >
                     <Pencil className="size-3" />
@@ -399,10 +399,10 @@ export function TabContainer() {
                     type="button"
                     onClick={(e) => handleCloseTab(e, tab.id)}
                     className={cn(
-                      'ml-1 p-0.5 rounded-sm transition-opacity',
+                      'ml-0.5 p-1 rounded-md transition-all duration-200',
                       isActive
-                        ? 'opacity-50 hover:opacity-100 hover:bg-zinc-800'
-                        : 'opacity-0 group-hover:opacity-50 hover:opacity-100! hover:bg-zinc-800',
+                        ? 'opacity-60 hover:opacity-100 hover:bg-destructive/20 hover:text-destructive'
+                        : 'opacity-0 group-hover:opacity-60 hover:opacity-100! hover:bg-destructive/20 hover:text-destructive',
                     )}
                   >
                     <X className="size-3" />
@@ -416,19 +416,19 @@ export function TabContainer() {
         {/* New Tab Button */}
         <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
           <DropdownMenuTrigger
-            className="flex items-center justify-center size-7 mx-1 rounded-md transition-colors shrink-0 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+            className="flex items-center justify-center size-8 mx-2 rounded-lg transition-all duration-200 shrink-0 text-muted-foreground hover:text-foreground hover:bg-accent border border-transparent hover:border-border/50"
             render={<button type="button" />}
           >
             <Plus className="size-4" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" sideOffset={6} className="min-w-40">
-            <DropdownMenuItem onClick={handleNewQuery}>
-              <Code2 className="size-4" />
-              New Query
+          <DropdownMenuContent align="end" sideOffset={8} className="min-w-44 animate-scale-in">
+            <DropdownMenuItem onClick={handleNewQuery} className="gap-3">
+              <Code2 className="size-4 text-primary" />
+              <span>New Query</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleOpenTable}>
-              <IconTable className="size-4" />
-              Open Table
+            <DropdownMenuItem onClick={handleOpenTable} className="gap-3">
+              <IconTable className="size-4 text-primary" />
+              <span>Open Table</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -453,19 +453,30 @@ export function TabContainer() {
             )
           })
         ) : (
-          <div className="flex items-center justify-center h-full bg-black">
-            <div className="text-center max-w-md px-4">
-              <div className="size-16 rounded-full bg-zinc-900 flex items-center justify-center mx-auto mb-4">
-                <Code2 className="size-8 text-zinc-600" />
+          <div className="flex items-center justify-center h-full bg-background">
+            <div className="text-center max-w-md px-6 animate-fade-in">
+              <div className="relative">
+                <div className="size-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-6 border border-primary/20 shadow-lg glow-primary">
+                  <Code2 className="size-10 text-primary/80" />
+                </div>
+                <div className="absolute -top-1 -right-1 size-4 rounded-full bg-primary/30 animate-pulse" />
               </div>
-              <h2 className="text-lg font-medium text-zinc-300 mb-2">
-                {hasConnections ? 'No tabs open' : 'No active connections'}
+              <h2 className="text-xl font-semibold text-foreground mb-3">
+                {hasConnections ? 'Ready to query' : 'Welcome to Anko'}
               </h2>
-              <p className="text-sm text-zinc-500">
+              <p className="text-sm text-muted-foreground leading-relaxed mb-6">
                 {hasConnections
-                  ? 'Create a new query or open a table to get started'
-                  : 'Select a connection from the sidebar to start querying your databases'}
+                  ? 'Create a new query or open a table to start exploring your data'
+                  : 'Connect to a database from the sidebar to start your journey'}
               </p>
+              {hasConnections && (
+                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground/60">
+                  <kbd className="px-2 py-1 rounded-md bg-muted/50 border border-border text-foreground/70 font-mono">Cmd</kbd>
+                  <span>+</span>
+                  <kbd className="px-2 py-1 rounded-md bg-muted/50 border border-border text-foreground/70 font-mono">N</kbd>
+                  <span className="ml-1">to create new query</span>
+                </div>
+              )}
             </div>
           </div>
         )}

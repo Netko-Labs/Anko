@@ -47,7 +47,7 @@ export function WorkspaceSwitcher({
         <DropdownMenu>
           <TooltipTrigger
             render={
-              <DropdownMenuTrigger className="flex size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+              <DropdownMenuTrigger className="flex size-9 items-center justify-center rounded-lg bg-primary/15 text-primary border border-primary/20 shadow-sm transition-all duration-200 hover:bg-primary/25 hover:shadow glow-primary">
                 {activeWorkspace ? (
                   <WorkspaceIcon icon={activeWorkspace.icon} />
                 ) : (
@@ -56,20 +56,20 @@ export function WorkspaceSwitcher({
               </DropdownMenuTrigger>
             }
           />
-          <DropdownMenuContent side="right" align="start" sideOffset={8} className="min-w-48">
+          <DropdownMenuContent side="right" align="start" sideOffset={8} className="min-w-52 animate-scale-in">
             {workspaces.map((workspace) => (
               <ContextMenu key={workspace.id}>
                 <ContextMenuTrigger>
                   <DropdownMenuItem
                     onClick={() => onWorkspaceSelect(workspace.id)}
-                    className="gap-2"
+                    className="gap-3 py-2"
                   >
-                    <div className="flex size-6 items-center justify-center rounded border text-sm">
+                    <div className="flex size-7 items-center justify-center rounded-lg bg-muted/50 border border-border/50 text-foreground/70">
                       <WorkspaceIcon icon={workspace.icon} />
                     </div>
-                    <span className="flex-1 truncate">{workspace.name}</span>
+                    <span className="flex-1 truncate font-medium">{workspace.name}</span>
                     {workspace.id === activeWorkspaceId && (
-                      <span className="text-xs text-muted-foreground">Active</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/15 text-primary font-medium">Active</span>
                     )}
                   </DropdownMenuItem>
                 </ContextMenuTrigger>

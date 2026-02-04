@@ -19,15 +19,15 @@ export function SidebarIconButton({
       <TooltipTrigger
         onClick={onClick}
         className={cn(
-          'flex size-8 items-center justify-center rounded-md transition-colors',
+          'flex size-9 items-center justify-center rounded-lg transition-all duration-200',
           isActive
-            ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-            : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+            ? 'bg-primary/15 text-primary shadow-sm border border-primary/20'
+            : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
         )}
       >
-        <Icon className="size-4" />
+        <Icon className={cn('size-4 transition-transform duration-200', isActive && 'scale-110')} />
       </TooltipTrigger>
-      <TooltipContent side="right">{tooltip}</TooltipContent>
+      <TooltipContent side="right" className="font-medium">{tooltip}</TooltipContent>
     </Tooltip>
   )
 }

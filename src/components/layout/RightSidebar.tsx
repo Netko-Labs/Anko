@@ -64,8 +64,8 @@ export function RightSidebar({ children, className }: RightSidebarProps) {
       <div
         ref={sidebarRef}
         className={cn(
-          'fixed top-9 bottom-0 right-0 z-10 hidden border-l bg-sidebar transition-[right] duration-200 ease-linear md:flex flex-col',
-          !open && 'right-[-500px]',
+          'fixed top-10 bottom-0 right-0 z-10 hidden border-l border-border/50 bg-sidebar/60 backdrop-blur-lg transition-all duration-300 ease-out md:flex flex-col',
+          !open && 'right-[-500px] opacity-0',
           isResizing && 'select-none',
           className,
         )}
@@ -79,8 +79,8 @@ export function RightSidebar({ children, className }: RightSidebarProps) {
           aria-valuenow={width}
           onMouseDown={handleMouseDown}
           className={cn(
-            'absolute left-0 top-0 bottom-0 w-1 cursor-col-resize z-20 hover:bg-primary/50 transition-colors',
-            isResizing && 'bg-primary/50',
+            'absolute left-0 top-0 bottom-0 w-1 cursor-col-resize z-20 hover:bg-primary transition-colors',
+            isResizing && 'bg-primary',
           )}
         />
         {/* Content wrapper to ensure proper flex sizing */}

@@ -34,13 +34,13 @@ export function SettingsMenu({ theme, onThemeChange }: SettingsMenuProps) {
         <DropdownMenu>
           <DropdownMenuTrigger
             className={cn(
-              'flex size-8 items-center justify-center rounded-md transition-colors',
-              'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+              'flex size-9 items-center justify-center rounded-lg transition-all duration-200',
+              'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
             )}
           >
-            <IconSettings className="size-4" />
+            <IconSettings className="size-4 transition-transform duration-300 hover:rotate-45" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent side="right" align="end" sideOffset={8}>
+          <DropdownMenuContent side="right" align="end" sideOffset={8} className="min-w-44 animate-scale-in">
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
                 {theme === 'dark' ? (

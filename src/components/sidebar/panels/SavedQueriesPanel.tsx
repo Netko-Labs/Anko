@@ -196,34 +196,47 @@ export function SavedQueriesPanel() {
     <>
       <div className="flex flex-col h-full min-h-0">
         {/* Header */}
-        <div className="flex flex-col gap-2 border-b px-3 py-2.5">
+        <div className="flex flex-col gap-3 border-b border-border/50 px-3 py-3">
           <div className="flex w-full items-center justify-between">
-            <div className="text-foreground text-sm font-medium">Saved Queries</div>
+            <div className="text-foreground text-sm font-semibold tracking-tight">Saved Queries</div>
             <button
               type="button"
               onClick={handleNewQuery}
-              className="size-6 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center transition-colors"
+              className="size-7 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow glow-primary"
               title="New Saved Query"
             >
-              <IconPlus className="size-3.5" />
+              <IconPlus className="size-4" />
             </button>
           </div>
           <Input
-            placeholder="Search..."
+            placeholder="Search queries..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 text-xs"
+            className="h-8 text-xs bg-muted/30 border-border/50 focus:border-primary/50 transition-colors"
           />
         </div>
 
         {/* Queries list */}
         <ScrollArea className="flex-1 min-h-0">
-          <div className="p-2 space-y-0.5">
+          <div className="p-2 space-y-1">
             {isLoading ? (
-              <div className="p-4 text-center text-sm text-muted-foreground">Loading...</div>
+              <div className="p-6 text-center animate-fade-in">
+                <div className="size-12 rounded-xl bg-muted/30 flex items-center justify-center mx-auto mb-3 border border-border/50 animate-pulse">
+                  <IconCode className="size-5 text-muted-foreground/50" />
+                </div>
+                <p className="text-sm text-muted-foreground">Loading queries...</p>
+              </div>
             ) : filteredQueries.length === 0 ? (
-              <div className="p-4 text-center text-sm text-muted-foreground">
-                {searchQuery ? 'No matching queries' : 'No saved queries yet'}
+              <div className="p-6 text-center animate-fade-in">
+                <div className="size-12 rounded-xl bg-muted/30 flex items-center justify-center mx-auto mb-3 border border-border/50">
+                  <IconCode className="size-5 text-muted-foreground/50" />
+                </div>
+                <p className="text-sm text-muted-foreground font-medium">
+                  {searchQuery ? 'No matches found' : 'No saved queries'}
+                </p>
+                <p className="text-xs text-muted-foreground/60 mt-1">
+                  {searchQuery ? 'Try a different search' : 'Click + to save your first query'}
+                </p>
               </div>
             ) : (
               filteredQueries.map((query) => (
@@ -272,24 +285,24 @@ function SavedQueryItem({ query, onDelete, onCopy, onOpenInEditor, onEdit }: Sav
         <div
           role="button"
           tabIndex={0}
-          className="group px-2 py-1.5 rounded-md hover:bg-accent/50 cursor-pointer select-none"
+          className="group px-3 py-2 rounded-lg hover:bg-accent/30 cursor-pointer select-none transition-colors duration-200"
           onDoubleClick={onOpenInEditor}
           onKeyDown={(e) => e.key === 'Enter' && onOpenInEditor()}
         >
           {/* Name */}
-          <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-            <IconCode className="size-3.5 text-primary/70" />
+          <div className="flex items-center gap-2 text-xs font-medium text-foreground">
+            <IconCode className="size-4 text-primary" />
             {query.name}
           </div>
 
           {/* Query preview */}
-          <div className="text-[10px] font-mono truncate text-muted-foreground mt-0.5">
+          <div className="text-[10px] font-mono truncate text-muted-foreground/70 mt-1 pl-6">
             {queryPreview}
           </div>
 
           {/* Description if exists */}
           {query.description && (
-            <div className="text-[10px] text-muted-foreground/60 truncate mt-0.5">
+            <div className="text-[10px] text-muted-foreground/50 truncate mt-0.5 pl-6">
               {query.description}
             </div>
           )}

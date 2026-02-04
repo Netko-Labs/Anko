@@ -124,7 +124,7 @@ export function AppSidebar({ onConnectionSelect }: AppSidebarProps) {
         {/* Gap element for layout */}
         <div
           className={cn(
-            'relative bg-transparent transition-[width] duration-200 ease-linear',
+            'relative bg-transparent transition-[width] duration-300 ease-out',
             open
               ? 'w-[calc(var(--sidebar-width-icon)+var(--sidebar-width)+1px)]'
               : 'w-[calc(var(--sidebar-width-icon)+1px)]',
@@ -132,9 +132,9 @@ export function AppSidebar({ onConnectionSelect }: AppSidebarProps) {
         />
 
         {/* Fixed sidebar container */}
-        <div className="fixed top-9 bottom-0 left-0 z-10 flex">
+        <div className="fixed top-10 bottom-0 left-0 z-10 flex">
           {/* Icon sidebar */}
-          <div className="flex h-full w-[calc(var(--sidebar-width-icon)+1px)] flex-col border-r bg-sidebar">
+          <div className="flex h-full w-[calc(var(--sidebar-width-icon)+1px)] flex-col border-r border-border/50 bg-sidebar/80 backdrop-blur-xl">
             <WorkspaceSwitcher
               workspaces={workspaces}
               activeWorkspace={activeWorkspace}
@@ -173,8 +173,8 @@ export function AppSidebar({ onConnectionSelect }: AppSidebarProps) {
           {/* Content sidebar */}
           <div
             className={cn(
-              'h-full w-(--sidebar-width) flex-col border-r bg-sidebar transition-[width,opacity] duration-200 ease-linear min-h-0',
-              open ? 'flex opacity-100' : 'w-0 opacity-0 overflow-hidden',
+              'h-full w-(--sidebar-width) flex-col border-r border-border/50 bg-sidebar/60 backdrop-blur-lg transition-all duration-300 ease-out min-h-0',
+              open ? 'flex opacity-100 translate-x-0' : 'w-0 opacity-0 -translate-x-2 overflow-hidden',
             )}
           >
             {renderSidebarContent()}

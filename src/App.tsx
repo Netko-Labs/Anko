@@ -128,7 +128,7 @@ function App() {
         />
 
         {/* Main content area below title bar */}
-        <div className="h-screen pt-9 flex overflow-hidden">
+        <div className="h-screen pt-10 flex overflow-hidden">
           <AppSidebar onConnectionSelect={handleConnectionSelect} />
 
           {/* Main content */}

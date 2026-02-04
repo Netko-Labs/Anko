@@ -1,5 +1,6 @@
 import {
   IconChevronRight,
+  IconDatabase,
   IconPencil,
   IconPlugConnected,
   IconPlus,
@@ -158,46 +159,54 @@ export function DatabasesPanel({
   return (
     <div className="flex flex-col h-full min-h-0">
       {/* Header */}
-      <div className="flex flex-col gap-2 border-b px-3 py-2.5">
+      <div className="flex flex-col gap-3 border-b border-border/50 px-3 py-3">
         <div className="flex w-full items-center justify-between">
-          <div className="text-foreground text-sm font-medium">Connections</div>
+          <div className="text-foreground text-sm font-semibold tracking-tight">Connections</div>
           <button
             type="button"
             onClick={onNewConnection}
-            className="size-6 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center transition-colors"
+            className="size-7 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow glow-primary"
             title="New Connection"
           >
-            <IconPlus className="size-3.5" />
+            <IconPlus className="size-4" />
           </button>
         </div>
         <Input
-          placeholder="Search..."
+          placeholder="Search connections..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="h-7 text-xs"
+          className="h-8 text-xs bg-muted/30 border-border/50 focus:border-primary/50 transition-colors"
         />
       </div>
 
       {/* Tree content */}
       <ScrollArea className="flex-1 min-h-0">
-        <div className="p-2 space-y-0.5">
+        <div className="p-2 space-y-1">
           {filteredConnections.length === 0 ? (
-            <div className="p-4 text-center text-sm text-muted-foreground">
-              {searchQuery ? 'No connections found' : 'No connections yet'}
+            <div className="p-6 text-center animate-fade-in">
+              <div className="size-12 rounded-xl bg-muted/30 flex items-center justify-center mx-auto mb-3 border border-border/50">
+                <IconDatabase className="size-6 text-muted-foreground/50" />
+              </div>
+              <p className="text-sm text-muted-foreground font-medium">
+                {searchQuery ? 'No matches found' : 'No connections yet'}
+              </p>
+              <p className="text-xs text-muted-foreground/60 mt-1">
+                {searchQuery ? 'Try a different search' : 'Click + to add one'}
+              </p>
             </div>
           ) : (
             <>
               {/* Connected section */}
               {connectedList.length > 0 && (
                 <Collapsible open={connectedExpanded} onOpenChange={setConnectedExpanded}>
-                  <CollapsibleTrigger className="flex items-center gap-1 px-1.5 py-0.5 w-full hover:bg-accent/50 rounded-sm cursor-pointer select-none">
+                  <CollapsibleTrigger className="flex items-center gap-1.5 px-2 py-1.5 w-full hover:bg-accent/30 rounded-lg cursor-pointer select-none transition-colors duration-200">
                     <IconChevronRight
-                      className={`size-2.5 text-muted-foreground transition-transform ${
+                      className={`size-3 text-muted-foreground transition-transform duration-200 ${
                         connectedExpanded ? 'rotate-90' : ''
                       }`}
                     />
-                    <span className="size-1.5 rounded-full bg-green-500" />
-                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">
+                    <span className="size-2 rounded-full bg-primary animate-pulse" />
+                    <span className="text-[11px] text-foreground/80 font-medium tracking-wide">
                       Active ({connectedList.length})
                     </span>
                   </CollapsibleTrigger>
@@ -218,15 +227,15 @@ export function DatabasesPanel({
               {/* Saved section */}
               {disconnectedList.length > 0 && (
                 <Collapsible open={savedExpanded} onOpenChange={setSavedExpanded}>
-                  {connectedList.length > 0 && <div className="h-1" />}
-                  <CollapsibleTrigger className="flex items-center gap-1 px-1.5 py-0.5 w-full hover:bg-accent/50 rounded-sm cursor-pointer select-none">
+                  {connectedList.length > 0 && <div className="h-2" />}
+                  <CollapsibleTrigger className="flex items-center gap-1.5 px-2 py-1.5 w-full hover:bg-accent/30 rounded-lg cursor-pointer select-none transition-colors duration-200">
                     <IconChevronRight
-                      className={`size-2.5 text-muted-foreground transition-transform ${
+                      className={`size-3 text-muted-foreground transition-transform duration-200 ${
                         savedExpanded ? 'rotate-90' : ''
                       }`}
                     />
-                    <span className="size-1.5 rounded-full bg-muted-foreground/30" />
-                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">
+                    <span className="size-2 rounded-full bg-muted-foreground/40" />
+                    <span className="text-[11px] text-muted-foreground font-medium tracking-wide">
                       Saved ({disconnectedList.length})
                     </span>
                   </CollapsibleTrigger>

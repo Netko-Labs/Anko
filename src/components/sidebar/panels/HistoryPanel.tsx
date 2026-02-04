@@ -178,32 +178,32 @@ export function HistoryPanel() {
   return (
     <div className="flex flex-col h-full min-h-0">
       {/* Header */}
-      <div className="flex flex-col gap-2 border-b px-3 py-2.5">
+      <div className="flex flex-col gap-3 border-b border-border/50 px-3 py-3">
         <div className="flex w-full items-center justify-between">
-          <div className="text-foreground text-sm font-medium">History</div>
+          <div className="text-foreground text-sm font-semibold tracking-tight">History</div>
           {entries.length > 0 && (
             <button
               type="button"
               onClick={handleClearAll}
-              className="size-6 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive flex items-center justify-center transition-colors"
+              className="size-7 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive flex items-center justify-center transition-all duration-200"
               title="Clear All History"
             >
-              <IconTrash className="size-3.5" />
+              <IconTrash className="size-4" />
             </button>
           )}
         </div>
         <div className="flex gap-2">
           <Input
-            placeholder="Search..."
+            placeholder="Search history..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 text-xs flex-1"
+            className="h-8 text-xs flex-1 bg-muted/30 border-border/50 focus:border-primary/50 transition-colors"
           />
           <Select
             value={filterConnectionId ?? 'all'}
             onValueChange={(v) => setFilterConnectionId(v === 'all' ? null : v)}
           >
-            <SelectTrigger className="h-7 w-24 text-xs">
+            <SelectTrigger className="h-8 w-28 text-xs bg-muted/30 border-border/50">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -220,12 +220,25 @@ export function HistoryPanel() {
 
       {/* History list */}
       <ScrollArea className="flex-1 min-h-0">
-        <div className="p-2 space-y-0.5">
+        <div className="p-2 space-y-1">
           {isLoading ? (
-            <div className="p-4 text-center text-sm text-muted-foreground">Loading...</div>
+            <div className="p-6 text-center animate-fade-in">
+              <div className="size-12 rounded-xl bg-muted/30 flex items-center justify-center mx-auto mb-3 border border-border/50 animate-pulse">
+                <IconClock className="size-5 text-muted-foreground/50" />
+              </div>
+              <p className="text-sm text-muted-foreground">Loading history...</p>
+            </div>
           ) : filteredEntries.length === 0 ? (
-            <div className="p-4 text-center text-sm text-muted-foreground">
-              {searchQuery ? 'No matching history' : 'No query history yet'}
+            <div className="p-6 text-center animate-fade-in">
+              <div className="size-12 rounded-xl bg-muted/30 flex items-center justify-center mx-auto mb-3 border border-border/50">
+                <IconClock className="size-5 text-muted-foreground/50" />
+              </div>
+              <p className="text-sm text-muted-foreground font-medium">
+                {searchQuery ? 'No matches found' : 'No history yet'}
+              </p>
+              <p className="text-xs text-muted-foreground/60 mt-1">
+                {searchQuery ? 'Try a different search' : 'Run a query to start building history'}
+              </p>
             </div>
           ) : (
             filteredEntries.map((entry) => (
@@ -288,26 +301,26 @@ function HistoryEntry({
         <div
           role="button"
           tabIndex={0}
-          className="group px-2 py-1.5 rounded-md hover:bg-accent/50 cursor-pointer select-none"
+          className="group px-3 py-2 rounded-lg hover:bg-accent/30 cursor-pointer select-none transition-colors duration-200"
           onDoubleClick={onOpenInEditor}
           onKeyDown={(e) => e.key === 'Enter' && onOpenInEditor()}
         >
           {/* Status and time */}
-          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mb-0.5">
+          <div className="flex items-center gap-2 text-[10px] text-muted-foreground mb-1">
             {entry.success ? (
-              <IconCheck className="size-3 text-green-500" />
+              <span className="size-2 rounded-full bg-primary" />
             ) : (
-              <IconX className="size-3 text-destructive" />
+              <span className="size-2 rounded-full bg-destructive" />
             )}
-            <span className="flex items-center gap-1">
-              <IconClock className="size-2.5" />
+            <span className="flex items-center gap-1 font-medium">
+              <IconClock className="size-3" />
               {formattedTime}
             </span>
             {entry.executionTimeMs !== null && (
-              <span className="text-muted-foreground/60">{entry.executionTimeMs}ms</span>
+              <span className="text-muted-foreground/50 text-[9px] px-1.5 py-0.5 bg-muted/30 rounded">{entry.executionTimeMs}ms</span>
             )}
             {entry.rowCount !== null && entry.success && (
-              <span className="text-muted-foreground/60">{entry.rowCount} rows</span>
+              <span className="text-muted-foreground/50 text-[9px] px-1.5 py-0.5 bg-muted/30 rounded">{entry.rowCount} rows</span>
             )}
           </div>
 
@@ -315,8 +328,8 @@ function HistoryEntry({
           <div className="text-xs font-mono truncate text-foreground/80">{queryPreview}</div>
 
           {/* Connection info */}
-          <div className="flex items-center gap-1 text-[10px] text-muted-foreground/60 mt-0.5">
-            <IconDatabase className="size-2.5" />
+          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/50 mt-1">
+            <IconDatabase className="size-3" />
             <span className="truncate">
               {entry.connectionName}
               {entry.databaseName && ` / ${entry.databaseName}`}
