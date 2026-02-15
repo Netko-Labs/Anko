@@ -1,6 +1,4 @@
 import { Loader2 } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -19,56 +17,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { formatErrorMessage } from '@/lib/error-utils'
-import {
-  addConnectionToWorkspace,
-  saveConnection,
-  testConnection,
-  updateConnection,
-} from '@/lib/tauri'
-import { ensureMinimumToastDuration } from '@/lib/toast-utils'
-import { useConnectionStore } from '@/stores/connection'
-import type { ConnectionConfig, DatabaseDriver } from '@/types'
-import {
-  type ConnectionDialogProps,
-  DEFAULT_PORTS,
-  DEFAULT_USERS,
-  type InputMode,
-} from './definitions'
-
-type OperationState =
-  | { type: 'idle' }
-  | { type: 'testing' }
-  | { type: 'saving' }
-  | { type: 'test_success' }
-  | { type: 'test_error'; message: string }
-  | { type: 'save_error'; message: string }
-
-// Parse connection URL like mysql://user:password@host:port/database or postgresql://...
-function parseConnectionUrl(url: string): Partial<ConnectionConfig> | null {
-  try {
-    // Handle common URL formats
-    const urlMatch = url.match(
-      /^(mysql|postgresql|postgres):\/\/(?:([^:@]+)(?::([^@]*))?@)?([^:/]+)(?::(\d+))?(?:\/(.*))?$/i,
-    )
-    if (!urlMatch) return null
-
-    const [, protocol, user, password, host, port, database] = urlMatch
-    const driver: DatabaseDriver = protocol.toLowerCase() === 'mysql' ? 'mysql' : 'postgresql'
-    const defaultPort = driver === 'mysql' ? 3306 : 5432
-
-    return {
-      driver,
-      host: host || 'localhost',
-      port: port ? Number.parseInt(port, 10) : defaultPort,
-      username: user || (driver === 'mysql' ? 'root' : 'postgres'),
-      password: password || '',
-      database: database || '',
-    }
-  } catch {
-    return null
-  }
-}
+import { useConnectionForm } from '@/hooks/useConnectionForm'
+import type { DatabaseDriver } from '@/types'
+import { type ConnectionDialogProps, DEFAULT_PORTS, DEFAULT_USERS } from './definitions'
 
 export function ConnectionDialog({
   open,
@@ -77,157 +28,21 @@ export function ConnectionDialog({
   workspaceId,
   onConnectionAdded,
 }: ConnectionDialogProps) {
-  const addSavedConnection = useConnectionStore((s) => s.addSavedConnection)
-  const [operationState, setOperationState] = useState<OperationState>({ type: 'idle' })
-  const [connectionUrl, setConnectionUrl] = useState('')
-  const [urlError, setUrlError] = useState<string | null>(null)
-  const [inputMode, setInputMode] = useState<InputMode>('form')
-
-  const getDefaultFormData = useCallback(
-    (driver: DatabaseDriver = 'mysql'): ConnectionConfig => ({
-      name: '',
-      host: 'localhost',
-      port: DEFAULT_PORTS[driver],
-      username: DEFAULT_USERS[driver],
-      password: '',
-      database: '',
-      driver,
-    }),
-    [],
-  )
-
-  const [formData, setFormData] = useState<ConnectionConfig>(() => {
-    if (editConnection) {
-      return {
-        name: editConnection.name,
-        host: editConnection.host,
-        port: editConnection.port,
-        username: editConnection.username,
-        password: '',
-        database: editConnection.database ?? '',
-        driver: editConnection.driver,
-      }
-    }
-    return getDefaultFormData()
-  })
-
-  // Reset form when dialog opens/closes or edit connection changes
-  useEffect(() => {
-    if (open) {
-      if (editConnection) {
-        setFormData({
-          name: editConnection.name,
-          host: editConnection.host,
-          port: editConnection.port,
-          username: editConnection.username,
-          password: '',
-          database: editConnection.database ?? '',
-          driver: editConnection.driver,
-        })
-      } else {
-        setFormData(getDefaultFormData())
-      }
-      setConnectionUrl('')
-      setUrlError(null)
-      setOperationState({ type: 'idle' })
-      setInputMode('form')
-    }
-  }, [open, editConnection, getDefaultFormData])
-
-  const handleChange = (field: keyof ConnectionConfig, value: string | number) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-    setOperationState({ type: 'idle' })
-  }
-
-  const handleDriverChange = (driver: DatabaseDriver) => {
-    setFormData((prev) => ({
-      ...prev,
-      driver,
-      port: DEFAULT_PORTS[driver],
-      username:
-        prev.username === DEFAULT_USERS[prev.driver] ? DEFAULT_USERS[driver] : prev.username,
-    }))
-    setOperationState({ type: 'idle' })
-  }
-
-  const handleUrlImport = () => {
-    setUrlError(null)
-    const parsed = parseConnectionUrl(connectionUrl.trim())
-    if (parsed) {
-      setFormData((prev) => ({
-        ...prev,
-        ...parsed,
-      }))
-      setInputMode('form')
-      setConnectionUrl('')
-    } else {
-      setUrlError(
-        'Invalid connection URL. Expected format: mysql://user:password@host:port/database',
-      )
-    }
-  }
-
-  const handleTest = async () => {
-    setOperationState({ type: 'testing' })
-
-    const startTime = Date.now()
-    const toastId = toast.loading('Testing connection...', {
-      description: `Attempting to connect to ${formData.host}:${formData.port}`,
-    })
-
-    try {
-      await testConnection(formData)
-      setOperationState({ type: 'test_success' })
-
-      // Ensure minimum toast display time before showing success
-      await ensureMinimumToastDuration(startTime)
-      toast.success('Connected', {
-        id: toastId,
-        description: `${formData.host}:${formData.port}`,
-      })
-    } catch (e) {
-      const message = formatErrorMessage(e)
-      setOperationState({ type: 'test_error', message })
-
-      // Show error immediately (no delay needed for errors)
-      toast.error('Connection failed', {
-        id: toastId,
-        description: message,
-      })
-    }
-  }
-
-  const handleSave = async () => {
-    setOperationState({ type: 'saving' })
-
-    try {
-      if (editConnection) {
-        await updateConnection(editConnection.id, formData)
-        toast.success('Connection updated', {
-          description: `"${formData.name}" has been updated`,
-        })
-      } else {
-        const saved = await saveConnection(formData)
-        addSavedConnection(saved)
-
-        // Add to current workspace if one is selected
-        if (workspaceId) {
-          await addConnectionToWorkspace(workspaceId, saved.id)
-          onConnectionAdded?.()
-        }
-        toast.success('Connection saved', {
-          description: `"${formData.name}" has been added`,
-        })
-      }
-      onOpenChange(false)
-    } catch (e) {
-      const message = formatErrorMessage(e)
-      setOperationState({ type: 'save_error', message })
-      toast.error('Failed to save connection', {
-        description: message,
-      })
-    }
-  }
+  const {
+    formData,
+    operationState,
+    connectionUrl,
+    setConnectionUrl,
+    urlError,
+    setUrlError,
+    inputMode,
+    setInputMode,
+    handleChange,
+    handleDriverChange,
+    handleUrlImport,
+    handleTest,
+    handleSave,
+  } = useConnectionForm({ open, editConnection, workspaceId, onOpenChange, onConnectionAdded })
 
   const driverLabel = formData.driver === 'mysql' ? 'MySQL' : 'PostgreSQL'
 

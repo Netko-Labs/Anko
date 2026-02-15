@@ -1,6 +1,6 @@
 import { IconTable } from '@tabler/icons-react'
 import { Code2, Pencil, Plus, X } from 'lucide-react'
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import {
   DropdownMenu,
@@ -8,6 +8,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useTabDragAndDrop } from '@/hooks/useTabDragAndDrop'
+import { useTabRename } from '@/hooks/useTabRename'
 import { tabLogger } from '@/lib/debug'
 import { cn } from '@/lib/utils'
 import { useConnectionStore } from '@/stores/connection'
@@ -17,20 +19,13 @@ import { TableTabContent } from './TableTabContent'
 import { UnsavedChangesDialog } from './UnsavedChangesDialog'
 
 export function TabContainer() {
-  // Data selectors (stable object references)
   const queryTabs = useConnectionStore((s) => s.queryTabs)
   const activeTabId = useConnectionStore((s) => s.activeTabId)
   const activeConnections = useConnectionStore((s) => s.activeConnections)
 
-  // Store actions - use refs to stabilize dependencies and prevent infinite re-renders
   const setActiveTabIdRef = useRef(useConnectionStore.getState().setActiveTabId)
   const removeQueryTabRef = useRef(useConnectionStore.getState().removeQueryTab)
   const discardAllChangesRef = useRef(useConnectionStore.getState().discardAllChanges)
-  const reorderQueryTabsRef = useRef(useConnectionStore.getState().reorderQueryTabs)
-  const renameQueryTabRef = useRef(useConnectionStore.getState().renameQueryTab)
-
-  // Note: Refs are initialized with getState() above and don't need updating
-  // since Zustand store actions are stable references
 
   const [dialogMode, setDialogMode] = useState<'query' | 'table' | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -41,24 +36,23 @@ export function TabContainer() {
     targetTabId?: string
   } | null>(null)
 
-  // Drag-and-drop state using mouse events (more reliable than HTML5 drag in Tauri)
-  const [dragState, setDragState] = useState<{
-    isDragging: boolean
-    draggedIndex: number | null
-    overIndex: number | null
-    startX: number
-  }>({ isDragging: false, draggedIndex: null, overIndex: null, startX: 0 })
-  const tabRefs = useRef<Map<number, HTMLDivElement>>(new Map())
+  // Tab rename hook
+  const {
+    editingTabId,
+    editingName,
+    setEditingName,
+    editInputRef,
+    handleStartRename,
+    handleRenameSubmit,
+    handleRenameKeyDown,
+  } = useTabRename()
 
-  // Tab renaming state
-  const [editingTabId, setEditingTabId] = useState<string | null>(null)
-  const [editingName, setEditingName] = useState('')
-  const editInputRef = useRef<HTMLInputElement>(null)
+  // Tab drag-and-drop hook
+  const { dragState, tabRefs, handleMouseDown } = useTabDragAndDrop(queryTabs, editingTabId)
 
   const hasTabs = queryTabs.length > 0
   const hasConnections = activeConnections.length > 0
 
-  // Helper to check if a tab has pending changes
   const getTabWithChanges = useCallback(
     (tabId: string) => {
       const tab = queryTabs.find((t) => t.id === tabId)
@@ -70,7 +64,6 @@ export function TabContainer() {
     [queryTabs],
   )
 
-  // Memoized tab indices by connection - O(N) instead of O(N²)
   const tabIndicesByConnection = useMemo(() => {
     const map = new Map<string, Map<string, number>>()
     queryTabs.forEach((tab) => {
@@ -83,9 +76,7 @@ export function TabContainer() {
 
   const handleNewQuery = () => {
     if (!hasConnections) {
-      toast.error('No active connections', {
-        description: 'Connect to a database first',
-      })
+      toast.error('No active connections', { description: 'Connect to a database first' })
       setMenuOpen(false)
       return
     }
@@ -96,9 +87,7 @@ export function TabContainer() {
 
   const handleOpenTable = () => {
     if (!hasConnections) {
-      toast.error('No active connections', {
-        description: 'Connect to a database first',
-      })
+      toast.error('No active connections', { description: 'Connect to a database first' })
       setMenuOpen(false)
       return
     }
@@ -111,99 +100,6 @@ export function TabContainer() {
     if (customName) return customName
     const tabIndex = tabIndicesByConnection.get(connectionId)?.get(tabId) ?? 1
     return `Query #${tabIndex}`
-  }
-
-  // Mouse-based drag-and-drop handlers (more reliable in Tauri than HTML5 drag)
-  const handleMouseDown = (e: React.MouseEvent, index: number) => {
-    if (e.button !== 0) return // Only left click
-    if (editingTabId === queryTabs[index]?.id) return // Don't drag while editing
-
-    setDragState({
-      isDragging: false,
-      draggedIndex: index,
-      overIndex: null,
-      startX: e.clientX,
-    })
-  }
-
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      if (dragState.draggedIndex === null) return
-
-      // Start dragging after moving 5px (to differentiate from click)
-      if (!dragState.isDragging && Math.abs(e.clientX - dragState.startX) > 5) {
-        setDragState((prev) => ({ ...prev, isDragging: true }))
-      }
-
-      if (!dragState.isDragging) return
-
-      // Find which tab we're over
-      let overIndex: number | null = null
-      tabRefs.current.forEach((element, idx) => {
-        if (element && idx !== dragState.draggedIndex) {
-          const rect = element.getBoundingClientRect()
-          if (e.clientX >= rect.left && e.clientX <= rect.right) {
-            overIndex = idx
-          }
-        }
-      })
-
-      if (overIndex !== dragState.overIndex) {
-        setDragState((prev) => ({ ...prev, overIndex }))
-      }
-    },
-    [dragState.draggedIndex, dragState.isDragging, dragState.startX, dragState.overIndex],
-  )
-
-  const handleMouseUp = useCallback(() => {
-    if (dragState.isDragging && dragState.draggedIndex !== null && dragState.overIndex !== null) {
-      console.log('[Reorder]', { from: dragState.draggedIndex, to: dragState.overIndex })
-      reorderQueryTabsRef.current(dragState.draggedIndex, dragState.overIndex)
-    }
-    setDragState({ isDragging: false, draggedIndex: null, overIndex: null, startX: 0 })
-  }, [dragState.isDragging, dragState.draggedIndex, dragState.overIndex])
-
-  // Global mouse event listeners for drag
-  React.useEffect(() => {
-    if (dragState.draggedIndex !== null) {
-      window.addEventListener('mousemove', handleMouseMove)
-      window.addEventListener('mouseup', handleMouseUp)
-      return () => {
-        window.removeEventListener('mousemove', handleMouseMove)
-        window.removeEventListener('mouseup', handleMouseUp)
-      }
-    }
-  }, [dragState.draggedIndex, handleMouseMove, handleMouseUp])
-
-  // Tab renaming handlers
-  const handleStartRename = (e: React.MouseEvent, tabId: string, currentName: string) => {
-    e.stopPropagation()
-    setEditingTabId(tabId)
-    setEditingName(currentName)
-    // Focus the input after render
-    setTimeout(() => editInputRef.current?.focus(), 0)
-  }
-
-  const handleRenameSubmit = (tabId: string) => {
-    const trimmedName = editingName.trim()
-    renameQueryTabRef.current(tabId, trimmedName || undefined)
-    setEditingTabId(null)
-    setEditingName('')
-  }
-
-  const handleRenameCancel = () => {
-    setEditingTabId(null)
-    setEditingName('')
-  }
-
-  const handleRenameKeyDown = (e: React.KeyboardEvent, tabId: string) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      handleRenameSubmit(tabId)
-    } else if (e.key === 'Escape') {
-      e.preventDefault()
-      handleRenameCancel()
-    }
   }
 
   const handleTabDoubleClick = (
@@ -220,7 +116,6 @@ export function TabContainer() {
   const handleCloseTab = (e: React.MouseEvent, tabId: string) => {
     e.stopPropagation()
 
-    // Check for unsaved changes
     const tabWithChanges = getTabWithChanges(tabId)
     if (tabWithChanges) {
       tabLogger.debug('tab close blocked - unsaved changes', {
@@ -239,7 +134,6 @@ export function TabContainer() {
   const handleTabClick = (tabId: string) => {
     if (tabId === activeTabId) return
 
-    // Check if current tab has unsaved changes
     if (activeTabId) {
       const tabWithChanges = getTabWithChanges(activeTabId)
       if (tabWithChanges) {
@@ -261,8 +155,6 @@ export function TabContainer() {
     if (!pendingAction) return
 
     tabLogger.debug('changes discarded', { tabId: pendingAction.tabId, action: pendingAction.type })
-
-    // Discard changes for the tab
     discardAllChangesRef.current(pendingAction.tabId)
     setShowUnsavedDialog(false)
 
@@ -280,7 +172,6 @@ export function TabContainer() {
     setPendingAction(null)
   }, [])
 
-  // Get changes count for the dialog
   const pendingChangesCount = useMemo(() => {
     if (!pendingAction) return 0
     const tab = queryTabs.find((t) => t.id === pendingAction.tabId)
@@ -288,9 +179,9 @@ export function TabContainer() {
   }, [pendingAction, queryTabs])
 
   return (
-    <div className="h-full flex flex-col bg-black">
+    <div className="h-full flex flex-col bg-background">
       {/* Tab Bar */}
-      <div className="flex items-center bg-zinc-950 border-b border-zinc-900 min-w-0">
+      <div className="flex items-center bg-muted/50 border-b border-border min-w-0">
         <div className="flex items-center gap-0.5 px-1 pt-1 overflow-x-auto flex-1 min-w-0 no-scrollbar">
           {queryTabs.map((tab, index) => {
             const isActive = tab.id === activeTabId
@@ -310,7 +201,6 @@ export function TabContainer() {
                 }}
                 onMouseDown={(e) => handleMouseDown(e, index)}
                 onClick={() => {
-                  // Only handle click if we weren't dragging
                   if (!dragState.isDragging && !isEditing) {
                     handleTabClick(tab.id)
                   }
@@ -329,8 +219,8 @@ export function TabContainer() {
                 className={cn(
                   'group relative flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-t-md border-t border-l border-r transition-all shrink-0 cursor-pointer select-none',
                   isActive
-                    ? 'bg-black border-zinc-800 text-zinc-200'
-                    : 'bg-zinc-900/50 border-transparent text-zinc-400 hover:text-zinc-300 hover:bg-zinc-900',
+                    ? 'bg-background border-border text-foreground'
+                    : 'bg-muted/50 border-transparent text-muted-foreground hover:text-foreground hover:bg-muted',
                   isDragging && 'opacity-50 cursor-grabbing',
                   isDragOver && 'border-l-2 border-l-blue-500 bg-blue-500/10',
                   !isAnyDragging && !isEditing && 'cursor-grab',
@@ -350,20 +240,19 @@ export function TabContainer() {
                     onKeyDown={(e) => handleRenameKeyDown(e, tab.id)}
                     onBlur={() => handleRenameSubmit(tab.id)}
                     onClick={(e) => e.stopPropagation()}
-                    className="w-24 bg-zinc-800 border border-zinc-700 rounded px-1 py-0.5 text-xs text-zinc-200 outline-none focus:border-blue-500"
+                    className="w-24 bg-muted border border-border rounded px-1 py-0.5 text-xs text-foreground outline-none focus:border-ring"
                   />
                 ) : (
                   <span className={cn('max-w-32 truncate', isAnyDragging && 'pointer-events-none')}>
                     {isTableTab ? (
                       <>
-                        {tab.tableName} <span className="text-zinc-500">/all</span>
+                        {tab.tableName} <span className="text-muted-foreground">/all</span>
                       </>
                     ) : (
                       getTabLabel(tab.id, tab.connectionId, tab.customName)
                     )}
                   </span>
                 )}
-                {/* Unsaved changes indicator */}
                 {hasChanges && (
                   <span
                     className={cn(
@@ -373,7 +262,6 @@ export function TabContainer() {
                     title="Unsaved changes"
                   />
                 )}
-                {/* Rename button for query tabs */}
                 {!isTableTab && !isEditing && !isAnyDragging && (
                   <button
                     type="button"
@@ -387,8 +275,8 @@ export function TabContainer() {
                     className={cn(
                       'p-0.5 rounded-sm transition-opacity',
                       isActive
-                        ? 'opacity-0 group-hover:opacity-50 hover:opacity-100! hover:bg-zinc-800'
-                        : 'opacity-0 group-hover:opacity-50 hover:opacity-100! hover:bg-zinc-800',
+                        ? 'opacity-0 group-hover:opacity-50 hover:opacity-100! hover:bg-muted'
+                        : 'opacity-0 group-hover:opacity-50 hover:opacity-100! hover:bg-muted',
                     )}
                   >
                     <Pencil className="size-3" />
@@ -401,8 +289,8 @@ export function TabContainer() {
                     className={cn(
                       'ml-1 p-0.5 rounded-sm transition-opacity',
                       isActive
-                        ? 'opacity-50 hover:opacity-100 hover:bg-zinc-800'
-                        : 'opacity-0 group-hover:opacity-50 hover:opacity-100! hover:bg-zinc-800',
+                        ? 'opacity-50 hover:opacity-100 hover:bg-muted'
+                        : 'opacity-0 group-hover:opacity-50 hover:opacity-100! hover:bg-muted',
                     )}
                   >
                     <X className="size-3" />
@@ -416,7 +304,7 @@ export function TabContainer() {
         {/* New Tab Button */}
         <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
           <DropdownMenuTrigger
-            className="flex items-center justify-center size-7 mx-1 rounded-md transition-colors shrink-0 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+            className="flex items-center justify-center size-7 mx-1 rounded-md transition-colors shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted"
             render={<button type="button" />}
           >
             <Plus className="size-4" />
@@ -453,15 +341,15 @@ export function TabContainer() {
             )
           })
         ) : (
-          <div className="flex items-center justify-center h-full bg-black">
+          <div className="flex items-center justify-center h-full bg-background">
             <div className="text-center max-w-md px-4">
-              <div className="size-16 rounded-full bg-zinc-900 flex items-center justify-center mx-auto mb-4">
-                <Code2 className="size-8 text-zinc-600" />
+              <div className="size-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                <Code2 className="size-8 text-muted-foreground" />
               </div>
-              <h2 className="text-lg font-medium text-zinc-300 mb-2">
+              <h2 className="text-lg font-medium text-foreground mb-2">
                 {hasConnections ? 'No tabs open' : 'No active connections'}
               </h2>
-              <p className="text-sm text-zinc-500">
+              <p className="text-sm text-muted-foreground">
                 {hasConnections
                   ? 'Create a new query or open a table to get started'
                   : 'Select a connection from the sidebar to start querying your databases'}
@@ -479,7 +367,6 @@ export function TabContainer() {
         }}
       />
 
-      {/* Unsaved Changes Dialog */}
       <UnsavedChangesDialog
         open={showUnsavedDialog}
         changesCount={pendingChangesCount}

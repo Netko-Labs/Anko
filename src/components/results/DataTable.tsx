@@ -7,8 +7,7 @@ import {
   useReactTable,
   type VisibilityState,
 } from '@tanstack/react-table'
-import { memo, useCallback, useMemo, useRef, useState } from 'react'
-import { toast } from 'sonner'
+import { memo, useCallback, useMemo, useState } from 'react'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -24,10 +23,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { useDataTableContextMenu } from '@/hooks/useDataTableContextMenu'
+import { useRowChangeTracking } from '@/hooks/useRowChangeTracking'
 import { tableLogger } from '@/lib/debug'
-import { createPrimaryKeyHash } from '@/lib/table-utils'
 import { cn } from '@/lib/utils'
-import { useRightSidebarStore } from '@/stores/right-sidebar'
 import { createDynamicColumns } from './data-table/columns'
 import { DataTableCell } from './data-table/data-table-cell'
 import { DataTableHeader } from './data-table/data-table-header'
@@ -62,13 +61,22 @@ export const DataTable = memo(function DataTable({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({})
 
-  // Track right-clicked cell for context menu
-  const contextMenuCellRef = useRef<{
-    value: unknown
-    columnName: string
-    dataType: string
-    row: Record<string, unknown>
-  } | null>(null)
+  // Row change tracking hook
+  const { getPrimaryKeyValues, getRowDeletionChangeId, isCellModified } = useRowChangeTracking(
+    pendingChanges,
+    primaryKeyColumns,
+  )
+
+  // Context menu hook
+  const {
+    contextMenuCellRef,
+    handleRowClick,
+    handleCellDoubleClick,
+    handleCopyCellValue,
+    handleCopyRowAsJson,
+    handleViewRowDetails,
+    handleViewCellDetails,
+  } = useDataTableContextMenu(result)
 
   // Memoize data conversion for existing rows
   const existingData = useMemo(
@@ -95,10 +103,10 @@ export const DataTable = memo(function DataTable({
   // Combine new rows (at top) with existing data
   const data = useMemo(() => [...newRowsData, ...existingData], [newRowsData, existingData])
 
-  // Memoize column definitions - only recreate when column structure changes
+  // Memoize column definitions
   const columns = useMemo(() => createDynamicColumns(result.columns), [result.columns])
 
-  // Memoize row model getters to prevent recreation on every render
+  // Memoize row model getters
   const coreRowModel = useMemo(() => getCoreRowModel(), [])
   const sortedRowModel = useMemo(
     () => (enableSorting ? getSortedRowModel() : undefined),
@@ -120,63 +128,6 @@ export const DataTable = memo(function DataTable({
       columnSizing,
     },
   })
-
-  // Helper to get primary key values for a row
-  const getPrimaryKeyValues = useCallback(
-    (row: Record<string, unknown>): Record<string, unknown> => {
-      const pkValues: Record<string, unknown> = {}
-      for (const pkCol of primaryKeyColumns) {
-        pkValues[pkCol] = row[pkCol]
-      }
-      return pkValues
-    },
-    [primaryKeyColumns],
-  )
-
-  // Pre-compute deletion map: pkHash -> changeId (O(N) instead of O(N*M) per render)
-  const deletionMap = useMemo(() => {
-    const map = new Map<string, string>()
-    for (const change of pendingChanges) {
-      if (change.type === 'delete') {
-        const pkHash = createPrimaryKeyHash(change.primaryKeyValues)
-        map.set(pkHash, change.id)
-      }
-    }
-    return map
-  }, [pendingChanges])
-
-  // Pre-compute modification map: pkHash -> Set of modified column names
-  const modificationMap = useMemo(() => {
-    const map = new Map<string, Set<string>>()
-    for (const change of pendingChanges) {
-      if (change.type === 'update') {
-        const pkHash = createPrimaryKeyHash(change.primaryKeyValues)
-        const columns = new Set(change.edits.map((e) => e.columnName))
-        map.set(pkHash, columns)
-      }
-    }
-    return map
-  }, [pendingChanges])
-
-  // O(1) lookup instead of O(N) iteration per row
-  const getRowDeletionChangeId = useCallback(
-    (row: Record<string, unknown>): string | undefined => {
-      const pkValues = getPrimaryKeyValues(row)
-      const pkHash = createPrimaryKeyHash(pkValues)
-      return deletionMap.get(pkHash)
-    },
-    [deletionMap, getPrimaryKeyValues],
-  )
-
-  // O(1) lookup instead of O(N) iteration per cell
-  const isCellModified = useCallback(
-    (row: Record<string, unknown>, columnName: string): boolean => {
-      const pkValues = getPrimaryKeyValues(row)
-      const pkHash = createPrimaryKeyHash(pkValues)
-      return modificationMap.get(pkHash)?.has(columnName) ?? false
-    },
-    [modificationMap, getPrimaryKeyValues],
-  )
 
   // Handle cell value change
   const handleCellValueChange = useCallback(
@@ -211,85 +162,6 @@ export const DataTable = memo(function DataTable({
     [onRowDelete, getPrimaryKeyValues],
   )
 
-  // Right sidebar actions
-  const showRowDetails = useRightSidebarStore((s) => s.showRowDetails)
-  const showCellDetails = useRightSidebarStore((s) => s.showCellDetails)
-
-  // Convert result.columns to ColumnDetail format for the sidebar
-  const columnDetails = useMemo(
-    () =>
-      result.columns.map((col) => ({
-        name: col.name,
-        data_type: col.data_type,
-        nullable: col.nullable,
-        key: (col as { key?: string }).key,
-        default_value: (col as { default_value?: string }).default_value,
-        extra: (col as { extra?: string }).extra,
-      })),
-    [result.columns],
-  )
-
-  // Handle row click to show details
-  const handleRowClick = useCallback(
-    (row: Record<string, unknown>) => {
-      // Clean up internal markers before showing
-      const cleanRow = { ...row }
-      delete cleanRow[NEW_ROW_MARKER]
-      delete cleanRow[CHANGE_ID_MARKER]
-      showRowDetails(cleanRow, columnDetails)
-    },
-    [showRowDetails, columnDetails],
-  )
-
-  // Handle cell double-click to show cell details
-  const handleCellDoubleClick = useCallback(
-    (value: unknown, columnName: string, dataType: string) => {
-      showCellDetails(value, columnName, dataType)
-    },
-    [showCellDetails],
-  )
-
-  // Context menu handlers
-  const handleCopyCellValue = useCallback(() => {
-    const cellInfo = contextMenuCellRef.current
-    if (!cellInfo) return
-
-    const valueStr = cellInfo.value === null ? 'NULL' : String(cellInfo.value)
-    navigator.clipboard.writeText(valueStr)
-    toast.success('Cell value copied to clipboard')
-  }, [])
-
-  const handleCopyRowAsJson = useCallback(() => {
-    const cellInfo = contextMenuCellRef.current
-    if (!cellInfo) return
-
-    // Clean up internal markers before copying
-    const cleanRow = { ...cellInfo.row }
-    delete cleanRow[NEW_ROW_MARKER]
-    delete cleanRow[CHANGE_ID_MARKER]
-
-    navigator.clipboard.writeText(JSON.stringify(cleanRow, null, 2))
-    toast.success('Row copied as JSON')
-  }, [])
-
-  const handleViewRowDetails = useCallback(() => {
-    const cellInfo = contextMenuCellRef.current
-    if (!cellInfo) return
-
-    // Clean up internal markers before showing
-    const cleanRow = { ...cellInfo.row }
-    delete cleanRow[NEW_ROW_MARKER]
-    delete cleanRow[CHANGE_ID_MARKER]
-    showRowDetails(cleanRow, columnDetails)
-  }, [showRowDetails, columnDetails])
-
-  const handleViewCellDetails = useCallback(() => {
-    const cellInfo = contextMenuCellRef.current
-    if (!cellInfo) return
-
-    showCellDetails(cellInfo.value, cellInfo.columnName, cellInfo.dataType)
-  }, [showCellDetails])
-
   return (
     <div className="h-full flex flex-col bg-black overflow-hidden">
       {enableColumnVisibility && <DataTableToolbar table={table} />}
@@ -316,7 +188,6 @@ export const DataTable = memo(function DataTable({
                           )}
                         >
                           <DataTableHeader header={header} />
-                          {/* Resize handle */}
                           {header.column.getCanResize() && (
                             <div
                               role="slider"
@@ -382,7 +253,6 @@ export const DataTable = memo(function DataTable({
                           const meta = cell.column.columnDef.meta as ColumnMeta | undefined
                           const value = cell.getValue()
                           const columnName = cell.column.id
-                          // For new rows, allow editing all columns including primary keys
                           const isPrimaryKey = !isNewRow && primaryKeyColumns.includes(columnName)
                           const isModified = isNewRow ? false : isCellModified(rowData, columnName)
 
@@ -437,10 +307,8 @@ export const DataTable = memo(function DataTable({
                                   isNewRow={isNewRow}
                                   onValueChange={(newValue) => {
                                     if (isNewRow && changeId) {
-                                      // For new rows, update the newRow in pending changes
                                       onUpdateNewRowCell?.(changeId, columnName, newValue)
                                     } else {
-                                      // For existing rows, create an edit
                                       handleCellValueChange(
                                         rowIndex,
                                         rowData,
