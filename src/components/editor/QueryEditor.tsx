@@ -4,28 +4,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { useQueryExecution } from '@/hooks/useQueryExecution'
 import { createTimer, editorLogger } from '@/lib/debug'
 import { formatErrorMessage } from '@/lib/error-utils'
-import { addQueryHistory, createSavedQuery, executeQuery, getDatabases } from '@/lib/tauri'
+import { getDatabases } from '@/lib/tauri'
 import { useConnectionStore } from '@/stores/connection'
-import { useQueryHistoryStore } from '@/stores/query-history'
-import { useSavedQueriesStore } from '@/stores/saved-queries'
 import { useWorkspaceStore } from '@/stores/workspace'
+import { SaveQueryDialog } from './SaveQueryDialog'
 import { SQLEditor } from './SQLEditor'
 import type { SchemaContext } from './sql-autocomplete'
 
@@ -34,32 +24,21 @@ interface QueryEditorProps {
 }
 
 export function QueryEditor({ tabId }: QueryEditorProps) {
-  // Save query dialog state
   const [saveDialogOpen, setSaveDialogOpen] = useState(false)
-  const [saveQueryName, setSaveQueryName] = useState('')
-  const [saveQueryDescription, setSaveQueryDescription] = useState('')
 
-  // Data selectors (these are stable object references from store)
+  // Data selectors
   const queryTabs = useConnectionStore((s) => s.queryTabs)
   const activeConnections = useConnectionStore((s) => s.activeConnections)
   const schemaCache = useConnectionStore((s) => s.schemaCache)
   const workspaces = useWorkspaceStore((s) => s.workspaces)
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
-  const addSavedQuery = useSavedQueriesStore((s) => s.addQuery)
 
-  // Refs for store actions (prevents infinite re-renders)
+  // Refs for store actions
   const updateQueryTabRef = useRef(useConnectionStore.getState().updateQueryTab)
-  const setQueryResultRef = useRef(useConnectionStore.getState().setQueryResult)
-  const setQueryErrorRef = useRef(useConnectionStore.getState().setQueryError)
-  const setQueryExecutingRef = useRef(useConnectionStore.getState().setQueryExecuting)
   const setSelectedDatabaseRef = useRef(useConnectionStore.getState().setSelectedDatabase)
   const setDatabasesRef = useRef(useConnectionStore.getState().setDatabases)
-  const addHistoryEntryRef = useRef(useQueryHistoryStore.getState().addEntry)
 
-  // Note: Refs are initialized with getState() above and don't need updating
-  // since Zustand store actions are stable references
-
-  // Derive tab and connection from stable selectors
+  // Derive tab and connection
   const tab = useMemo(() => queryTabs.find((t) => t.id === tabId), [queryTabs, tabId])
   const connection = useMemo(
     () => activeConnections.find((c) => c.id === tab?.connectionId),
@@ -74,13 +53,12 @@ export function QueryEditor({ tabId }: QueryEditorProps) {
   const connectionInfoId = connection?.id
   const selectedDatabase = connection?.selectedDatabase
   const schemaCacheForConnection = connectionId ? schemaCache[connectionId] : undefined
+  const connectionName = connection?.info.name ?? ''
 
-  // Get databases list
   const databases = useMemo(() => {
     return schemaCacheForConnection?.databases || []
   }, [schemaCacheForConnection])
 
-  // Get schema context for autocomplete
   const schema: SchemaContext | undefined = useMemo(() => {
     if (!schemaCacheForConnection) return undefined
     return {
@@ -112,7 +90,6 @@ export function QueryEditor({ tabId }: QueryEditorProps) {
       .then((dbs) => {
         timer.end({ count: dbs.length })
         setDatabasesRef.current(connectionId, dbs)
-        // Auto-select first database if none selected
         if (!selectedDatabase && dbs.length > 0) {
           setSelectedDatabaseRef.current(connectionInfoId, dbs[0].name)
         }
@@ -123,7 +100,6 @@ export function QueryEditor({ tabId }: QueryEditorProps) {
       })
   }, [connectionId, connectionInfoId, selectedDatabase, schemaCacheForConnection])
 
-  // Handle database change
   const handleDatabaseChange = useCallback(
     (database: string) => {
       if (connectionInfoId) {
@@ -134,7 +110,6 @@ export function QueryEditor({ tabId }: QueryEditorProps) {
     [connectionInfoId],
   )
 
-  // Handle connection change
   const handleConnectionChange = useCallback(
     (newConnectionInfoId: string) => {
       updateQueryTabRef.current(tabId, { connectionId: newConnectionInfoId })
@@ -142,86 +117,15 @@ export function QueryEditor({ tabId }: QueryEditorProps) {
     [tabId],
   )
 
-  // Use ref for query to avoid re-creating handleExecute on every keystroke
-  const queryRef = useRef(tab?.query)
-  useEffect(() => {
-    queryRef.current = tab?.query
-  }, [tab?.query])
-
-  // Store connection info for history logging
-  const connectionName = connection?.info.name ?? ''
-
-  const handleExecute = useCallback(async () => {
-    const query = queryRef.current
-    if (!query?.trim() || !connectionId || !connectionInfoId) return
-
-    editorLogger.debug('executing query', {
-      tabId,
-      connectionId,
-      database: selectedDatabase,
-      queryLength: query.length,
-    })
-    const timer = createTimer(editorLogger, 'query execution')
-    const startTime = performance.now()
-    setQueryExecutingRef.current(tabId, true)
-
-    try {
-      const result = await executeQuery(connectionId, query, selectedDatabase)
-      setQueryResultRef.current(tabId, result)
-      const rowCount = result.rows?.length ?? 0
-      const executionTimeMs = Math.round(performance.now() - startTime)
-      timer.end({ rowCount, executionTimeMs: result.execution_time_ms })
-
-      // Log to history
-      addQueryHistory({
-        query: query.trim(),
-        connectionId: connectionInfoId,
-        connectionName,
-        databaseName: selectedDatabase ?? null,
-        executionTimeMs,
-        rowCount,
-        success: true,
-        errorMessage: null,
-      })
-        .then((entry) => {
-          addHistoryEntryRef.current(entry)
-        })
-        .catch((e) => {
-          editorLogger.warn('Failed to log query to history', e)
-        })
-
-      toast.success('Query executed', {
-        description: `${rowCount} row${rowCount !== 1 ? 's' : ''} returned`,
-      })
-    } catch (e) {
-      timer.fail(e)
-      const executionTimeMs = Math.round(performance.now() - startTime)
-      const errorMessage = formatErrorMessage(e)
-      setQueryErrorRef.current(tabId, errorMessage)
-
-      // Log failed query to history
-      addQueryHistory({
-        query: query.trim(),
-        connectionId: connectionInfoId,
-        connectionName,
-        databaseName: selectedDatabase ?? null,
-        executionTimeMs,
-        rowCount: null,
-        success: false,
-        errorMessage,
-      })
-        .then((entry) => {
-          addHistoryEntryRef.current(entry)
-        })
-        .catch((err) => {
-          editorLogger.warn('Failed to log query to history', err)
-        })
-
-      toast.error('Query failed', {
-        description: errorMessage,
-      })
-    }
-  }, [connectionId, connectionInfoId, connectionName, tabId, selectedDatabase])
+  // Query execution hook
+  const { queryRef, handleExecute } = useQueryExecution({
+    tabId,
+    connectionId,
+    connectionInfoId,
+    connectionName,
+    selectedDatabase,
+    query: tab?.query,
+  })
 
   const handleChange = useCallback(
     (value: string) => {
@@ -230,49 +134,15 @@ export function QueryEditor({ tabId }: QueryEditorProps) {
     [tabId],
   )
 
-  // Handle opening save dialog
-  const handleOpenSaveDialog = useCallback(() => {
-    const query = queryRef.current?.trim()
-    if (!query) return
-    // Generate default name from first line of query
-    const firstLine = query.split('\n')[0]
-    const defaultName = firstLine.length > 30 ? `${firstLine.slice(0, 30)}...` : firstLine
-    setSaveQueryName(defaultName)
-    setSaveQueryDescription('')
-    setSaveDialogOpen(true)
-  }, [])
-
-  // Handle saving query
-  const handleSaveQuery = useCallback(async () => {
-    const query = queryRef.current?.trim()
-    if (!query || !saveQueryName.trim()) return
-
-    try {
-      const saved = await createSavedQuery({
-        name: saveQueryName.trim(),
-        query,
-        description: saveQueryDescription.trim() || null,
-        workspaceId: activeWorkspaceId !== 'default' ? activeWorkspaceId : null,
-        connectionId: connectionInfoId ?? null,
-        databaseName: selectedDatabase ?? null,
-      })
-      addSavedQuery(saved)
-      setSaveDialogOpen(false)
-      toast.success('Query saved', {
-        description: 'You can find it in the Saved Queries panel',
-      })
-    } catch (e) {
-      editorLogger.warn('Failed to save query', e)
-      toast.error('Failed to save query')
-    }
-  }, [
-    saveQueryName,
-    saveQueryDescription,
+  // Save query dialog
+  const { handleOpenSaveDialog, dialog: saveDialog } = SaveQueryDialog({
+    open: saveDialogOpen,
+    onOpenChange: setSaveDialogOpen,
+    queryRef,
     activeWorkspaceId,
     connectionInfoId,
     selectedDatabase,
-    addSavedQuery,
-  ])
+  })
 
   if (!tab || !connection) return null
 
@@ -282,7 +152,6 @@ export function QueryEditor({ tabId }: QueryEditorProps) {
       <div className="flex items-center justify-between px-3 py-1.5 border-b border-zinc-900 bg-zinc-950">
         {/* Left: Breadcrumbs */}
         <div className="flex items-center gap-1 text-xs">
-          {/* Workspace */}
           <span className={workspace?.name ? 'text-zinc-400' : 'text-zinc-600'}>
             {workspace?.name || '—'}
           </span>
@@ -433,53 +302,7 @@ export function QueryEditor({ tabId }: QueryEditorProps) {
       </div>
 
       {/* Save Query Dialog */}
-      <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
-        <DialogContent className="sm:max-w-[400px]">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              handleSaveQuery()
-            }}
-          >
-            <DialogHeader>
-              <DialogTitle>Save Query</DialogTitle>
-              <DialogDescription>Save this query for quick access later.</DialogDescription>
-            </DialogHeader>
-
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="save-query-name">Name</Label>
-                <Input
-                  id="save-query-name"
-                  value={saveQueryName}
-                  onChange={(e) => setSaveQueryName(e.target.value)}
-                  placeholder="e.g., Get all active users"
-                  autoFocus
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="save-query-description">Description (optional)</Label>
-                <Input
-                  id="save-query-description"
-                  value={saveQueryDescription}
-                  onChange={(e) => setSaveQueryDescription(e.target.value)}
-                  placeholder="Brief description of what this query does"
-                />
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setSaveDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={!saveQueryName.trim()}>
-                Save Query
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      {saveDialog}
     </div>
   )
 }
