@@ -1,0 +1,2 @@
+export const RIGHT_SIDEBAR_MIN_WIDTH = 200
+export const RIGHT_SIDEBAR_MAX_WIDTH = 500

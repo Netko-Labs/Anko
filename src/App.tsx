@@ -1,10 +1,10 @@
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { useCallback, useEffect, useState } from 'react'
 import { ErrorBoundary } from '@/components/errors/ErrorBoundary'
-import { CloseAppDialog, getCloseAppPreference } from '@/components/layout/CloseAppDialog'
-import { RightSidebar } from '@/components/layout/RightSidebar'
-import { RightSidebarContextContent } from '@/components/layout/right-sidebar'
-import { TitleBar } from '@/components/layout/TitleBar'
+import { CloseAppDialog } from '@/components/layout/close-app-dialog/CloseAppDialog'
+import { getCloseAppPreference } from '@/components/layout/close-app-dialog/close-app-preference/CloseAppPreference'
+import { RightSidebar, RightSidebarContent } from '@/components/layout/right-sidebar'
+import { TitleBar } from '@/components/layout/title-bar/TitleBar'
 import { TabContainer } from '@/components/layout/tabs'
 import { AppSidebar } from '@/components/sidebar/AppSidebar'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
@@ -137,7 +137,7 @@ function App() {
           </main>
 
           <RightSidebar>
-            <RightSidebarContextContent />
+            <RightSidebarContent />
           </RightSidebar>
         </div>
 

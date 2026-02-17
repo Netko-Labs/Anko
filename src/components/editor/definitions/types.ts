@@ -28,3 +28,7 @@ export interface SQLEditorProps {
   placeholder?: string
   readOnly?: boolean
 }
+
+export interface QueryEditorTabProps {
+  tabId: string
+}

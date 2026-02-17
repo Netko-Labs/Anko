@@ -12,7 +12,7 @@ import { useTreeEventHandlers } from '@/hooks/useTreeEventHandlers'
 import { initialTreeState, treeReducer } from '@/reducers/tree-reducer'
 import { useConnectionStore } from '@/stores/connection'
 import type { DatabaseTreeProps } from '../definitions'
-import { DatabaseTypeIcon } from './DatabaseIcons'
+import { DatabaseTypeIcon } from './database-icons'
 import { TreeNode } from './TreeNode'
 import { DatabaseNode } from './nodes'
 
@@ -64,7 +64,7 @@ export function DatabaseTree({ connection, onEdit, onDelete, onInsertText }: Dat
             level={0}
           />
         </ContextMenuTrigger>
-        <ContextMenuContent className="bg-zinc-950 border-zinc-800">
+        <ContextMenuContent>
           <ContextMenuItem onClick={handleDisconnect}>
             <IconPlugConnected className="size-4 mr-2" />
             Disconnect
