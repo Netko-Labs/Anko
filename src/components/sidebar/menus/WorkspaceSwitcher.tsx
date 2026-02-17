@@ -1,4 +1,4 @@
-import { IconDatabase, IconEggs, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react'
+import { IconDatabase, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -14,23 +14,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { DEFAULT_WORKSPACE_ICON, WORKSPACE_ICONS } from '@/components/workspace/definitions'
-import type { Workspace } from '@/types'
-
-interface WorkspaceSwitcherProps {
-  workspaces: Workspace[]
-  activeWorkspace?: Workspace
-  activeWorkspaceId?: string | null
-  onWorkspaceSelect: (workspaceId: string) => void
-  onNewWorkspace: () => void
-  onEditWorkspace?: (workspace: Workspace) => void
-  onDeleteWorkspace?: (workspace: Workspace) => void
-}
-
-export function WorkspaceIcon({ icon, className }: { icon: string; className?: string }) {
-  const IconComponent = WORKSPACE_ICONS[icon] || WORKSPACE_ICONS[DEFAULT_WORKSPACE_ICON] || IconEggs
-  return <IconComponent className={className ?? 'size-4'} />
-}
+import { type WorkspaceSwitcherProps } from './definitions'
+import { WORKSPACE_SWITCHER_VALUES } from './definitions/values'
+import { WorkspaceIcon } from './workspace-icon/WorkspaceIcon'
 
 export function WorkspaceSwitcher({
   workspaces,
@@ -100,7 +86,9 @@ export function WorkspaceSwitcher({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <TooltipContent side="right">{activeWorkspace?.name ?? 'All Connections'}</TooltipContent>
+        <TooltipContent side="right">
+          {activeWorkspace?.name ?? WORKSPACE_SWITCHER_VALUES.allConnectionsLabel}
+        </TooltipContent>
       </Tooltip>
     </div>
   )

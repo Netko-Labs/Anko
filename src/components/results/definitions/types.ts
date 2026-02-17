@@ -1,4 +1,5 @@
-import type { PendingRowChange, QueryResult } from '@/types'
+import type { ColumnInfo, FilterCondition, QueryResult } from '@/types'
+import type { PendingRowChange } from '@/types'
 
 export interface ResultsTableProps {
   result?: QueryResult
@@ -38,4 +39,21 @@ export interface ColumnMeta {
   isPrimaryKey: boolean
   isRowNumber?: boolean
   sticky?: boolean
+}
+
+export interface ResultsFooterProps {
+  result?: QueryResult
+  isExecuting?: boolean
+  tableName?: string
+}
+
+export interface DebugPanelProps {
+  originalQuery?: string
+  executedQuery?: string
+}
+
+export interface FilterBarProps {
+  columns: ColumnInfo[]
+  filters: FilterCondition[]
+  onFiltersChange: (filters: FilterCondition[]) => void
 }

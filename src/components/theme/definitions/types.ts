@@ -8,5 +8,6 @@ export interface ThemeProviderProps {
 
 export interface ThemeProviderState {
   theme: Theme
+  resolvedTheme: 'light' | 'dark'
   setTheme: (theme: Theme) => void
 }

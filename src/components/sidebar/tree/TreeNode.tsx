@@ -1,22 +1,6 @@
 import { ChevronRight, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-interface TreeNodeProps {
-  label: string
-  secondaryLabel?: string
-  icon?: React.ReactNode
-  rightIcon?: React.ReactNode
-  isExpanded?: boolean
-  isExpandable?: boolean
-  isLoading?: boolean
-  isActive?: boolean
-  level?: number
-  onClick?: () => void
-  onDoubleClick?: () => void
-  onContextMenu?: (e: React.MouseEvent) => void
-  children?: React.ReactNode
-  className?: string
-}
+import { type TreeNodeProps } from './definitions'
 
 export function TreeNode({
   label,

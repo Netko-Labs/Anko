@@ -1,9 +1,10 @@
 import type { ColumnInfo } from '@/types'
+import type { RowData } from './definitions'
 
 // Format cell value for display
 export function formatCellValue(value: unknown): React.ReactNode {
   if (value === null) {
-    return <span className="text-zinc-600 italic">NULL</span>
+    return <span className="text-muted-foreground italic">NULL</span>
   }
   if (typeof value === 'boolean') {
     return value ? 'true' : 'false'
@@ -36,9 +37,6 @@ export function isPrimaryKey(column: ColumnInfo): boolean {
   const name = column.name.toLowerCase()
   return name === 'id' || name.endsWith('_id') || name === 'pk'
 }
-
-// Row data type for TanStack Table (converted from arrays)
-export type RowData = Record<string, unknown>
 
 // Convert row arrays to objects for TanStack Table
 export function convertRowsToObjects(rows: unknown[][], columns: ColumnInfo[]): RowData[] {

@@ -24,11 +24,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { useDevToolsActions } from '@/hooks/useDevToolsActions'
 import { ConfirmDialog } from './ConfirmDialog'
-
-interface DevToolsDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}
+import { type DevToolsDialogProps } from './definitions'
 
 export function DevToolsDialog({ open, onOpenChange }: DevToolsDialogProps) {
   const {
