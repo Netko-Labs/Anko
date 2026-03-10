@@ -20,11 +20,11 @@ export default {
       'src/native/libWindowDrag.dylib': 'native/libWindowDrag.dylib',
     },
     mac: {
-      codesign: false,
-      notarize: false,
+      codesign: true,
+      notarize: true,
     },
   },
   release: {
-    baseUrl: '',
+    baseUrl: 'https://github.com/Netko-Labs/Anko/releases/latest/download',
   },
 } satisfies ElectrobunConfig

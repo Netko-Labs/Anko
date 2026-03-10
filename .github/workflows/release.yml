@@ -198,6 +198,32 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Import Apple certificate
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        run: |
+          CERTIFICATE_PATH=$RUNNER_TEMP/certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+
+          # Decode certificate
+          echo "$APPLE_CERTIFICATE" | base64 --decode > "$CERTIFICATE_PATH"
+
+          # Create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          # Import certificate
+          security import "$CERTIFICATE_PATH" -P "$APPLE_CERTIFICATE_PASSWORD" \
+            -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: \
+            -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          # Add to search list
+          security list-keychains -d user -s "$KEYCHAIN_PATH" login.keychain-db
+
       - name: Install dependencies
         run: bun install
 
@@ -208,6 +234,11 @@ jobs:
         run: bun run build:native
 
       - name: Build Electrobun app
+        env:
+          ELECTROBUN_DEVELOPER_ID: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          ELECTROBUN_APPLEID: ${{ secrets.APPLE_ID }}
+          ELECTROBUN_APPLEIDPASS: ${{ secrets.APPLE_PASSWORD }}
+          ELECTROBUN_TEAMID: ${{ secrets.APPLE_TEAM_ID }}
         run: bun run build:app
 
       - name: Upload artifacts to release
@@ -217,6 +248,10 @@ jobs:
           for file in artifacts/*; do
             [ -f "$file" ] && gh release upload ${{ needs.check-release.outputs.version }} "$file" --repo ${{ github.repository }} --clobber
           done
+
+      - name: Cleanup keychain
+        if: always()
+        run: security delete-keychain $RUNNER_TEMP/app-signing.keychain-db 2>/dev/null || true
 
   publish-release:
     needs: [check-release, create-release, build]
