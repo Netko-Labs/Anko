@@ -1,10 +1,4 @@
-import {
-  IconClipboard,
-  IconCode,
-  IconFileCode,
-  IconPencil,
-  IconTrash,
-} from '@tabler/icons-react'
+import { IconClipboard, IconCode, IconFileCode, IconPencil, IconTrash } from '@tabler/icons-react'
 import { useMemo } from 'react'
 import {
   ContextMenu,
@@ -13,9 +7,15 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from '@/components/ui/context-menu'
-import { type SavedQueryItemProps } from './definitions'
+import type { SavedQueryItemProps } from './definitions'
 
-export function SavedQueryItem({ query, onDelete, onCopy, onOpenInEditor, onEdit }: SavedQueryItemProps) {
+export function SavedQueryItem({
+  query,
+  onDelete,
+  onCopy,
+  onOpenInEditor,
+  onEdit,
+}: SavedQueryItemProps) {
   const queryPreview = useMemo(() => {
     const trimmed = query.query.trim().replace(/\s+/g, ' ')
     return trimmed.length > 80 ? `${trimmed.slice(0, 80)}...` : trimmed

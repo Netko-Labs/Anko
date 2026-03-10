@@ -2,8 +2,8 @@ import { useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 import { createTimer, tableLogger } from '@/lib/debug'
 import { formatErrorMessage } from '@/lib/error-utils'
-import { generateCommitSQL } from '@/lib/sql-generator'
 import { executeQuery } from '@/lib/rpc'
+import { generateCommitSQL } from '@/lib/sql-generator'
 import { useConnectionStore } from '@/stores/connection'
 import type { DatabaseDriver, PendingRowChange } from '@/types'
 
@@ -78,7 +78,16 @@ export function useTableCommit({
     } finally {
       setCommittingRef.current(tabId, false)
     }
-  }, [runtimeConnectionId, tableName, databaseName, schemaName, driver, tabId, pendingChanges, handleRefresh])
+  }, [
+    runtimeConnectionId,
+    tableName,
+    databaseName,
+    schemaName,
+    driver,
+    tabId,
+    pendingChanges,
+    handleRefresh,
+  ])
 
   const handleDiscard = useCallback(() => {
     discardAllChangesRef.current(tabId)

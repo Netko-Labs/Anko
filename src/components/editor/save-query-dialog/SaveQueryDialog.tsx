@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label'
 import { editorLogger } from '@/lib/debug'
 import { createSavedQuery } from '@/lib/rpc'
 import { useSavedQueriesStore } from '@/stores/saved-queries'
-import { type SaveQueryDialogProps } from './definitions'
+import type { SaveQueryDialogProps } from './definitions'
 
 export function SaveQueryDialog({
   open,

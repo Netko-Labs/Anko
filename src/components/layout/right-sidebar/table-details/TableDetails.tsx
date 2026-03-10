@@ -5,7 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 import { generateZodSchema } from '@/lib/zod-generator'
-import { type ColumnRowProps, type TableDetailsProps } from './definitions'
+import type { ColumnRowProps, TableDetailsProps } from './definitions'
 
 export function TableDetails({ tableName, columns, database, schema }: TableDetailsProps) {
   const [activeTab, setActiveTab] = useState('schema')

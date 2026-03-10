@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { toast } from 'sonner'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { formatValue, isJsonLike, prettyPrintJson } from '@/lib/zod-generator'
-import { type CellDetailsProps } from './definitions'
+import type { CellDetailsProps } from './definitions'
 
 export function CellDetails({ value, columnName, columnType }: CellDetailsProps) {
   const formattedValue = useMemo(() => {

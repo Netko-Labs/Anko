@@ -9,8 +9,8 @@ import {
   getTables as fetchTables,
   getDatabases,
 } from '@/lib/rpc'
-import { useConnectionStore } from '@/stores/connection'
 import type { TreeAction, TreeState } from '@/reducers/tree-reducer'
+import { useConnectionStore } from '@/stores/connection'
 
 export function useTreeDataLoading(
   connectionId: string,

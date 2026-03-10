@@ -24,7 +24,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { useDevToolsActions } from '@/hooks/useDevToolsActions'
 import { ConfirmDialog } from './ConfirmDialog'
-import { type DevToolsDialogProps } from './definitions'
+import type { DevToolsDialogProps } from './definitions'
 
 export function DevToolsDialog({ open, onOpenChange }: DevToolsDialogProps) {
   const {

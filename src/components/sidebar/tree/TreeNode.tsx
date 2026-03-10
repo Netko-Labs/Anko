@@ -1,6 +1,6 @@
 import { ChevronRight, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { type TreeNodeProps } from './definitions'
+import type { TreeNodeProps } from './definitions'
 
 export function TreeNode({
   label,

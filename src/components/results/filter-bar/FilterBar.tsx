@@ -1,7 +1,7 @@
 import { Plus, X } from 'lucide-react'
 import { memo, useState } from 'react'
-import { FILTER_OPERATORS } from '@/components/results/definitions'
 import type { FilterBarProps } from '@/components/results/definitions'
+import { FILTER_OPERATORS } from '@/components/results/definitions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {

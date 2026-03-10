@@ -1,8 +1,8 @@
-import type { DatabaseConnector, ConnectionConfig } from './db/connector'
+import type { ConnectionConfig, DatabaseConnector } from './db/connector'
 import { MySqlConnector } from './db/mysql'
 import { PostgresConnector } from './db/postgres'
-import { Storage } from './storage'
 import { AppError } from './error'
+import { Storage } from './storage'
 
 export class AppState {
   private connections = new Map<string, DatabaseConnector>()

@@ -119,7 +119,9 @@
       "!**/.output",
       "!**/src/components/ui",
       "!**/src/game",
-      "!**/src-tauri/target"
+      "!**/src-tauri/target",
+      "!**/build",
+      "!**/artifacts"
     ]
   }
 }

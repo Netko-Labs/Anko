@@ -26,13 +26,17 @@ export function DataTabContent() {
     case 'table':
       return (
         <div className="h-full flex items-center justify-center p-4">
-          <p className="text-xs text-muted-foreground text-center">{RIGHT_SIDEBAR_VALUES.tableHint}</p>
+          <p className="text-xs text-muted-foreground text-center">
+            {RIGHT_SIDEBAR_VALUES.tableHint}
+          </p>
         </div>
       )
     default:
       return (
         <div className="h-full flex items-center justify-center p-4">
-          <p className="text-xs text-muted-foreground text-center">{RIGHT_SIDEBAR_VALUES.dataHint}</p>
+          <p className="text-xs text-muted-foreground text-center">
+            {RIGHT_SIDEBAR_VALUES.dataHint}
+          </p>
         </div>
       )
   }

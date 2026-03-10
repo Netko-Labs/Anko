@@ -1,9 +1,9 @@
-import { BrowserWindow } from 'electrobun/bun'
 import { dlopen, FFIType } from 'bun:ffi'
-import { join } from 'node:path'
 import { homedir } from 'node:os'
-import { AppState } from './state'
+import { join } from 'node:path'
+import { BrowserWindow } from 'electrobun/bun'
 import { createRpcHandler } from './rpc/handlers'
+import { AppState } from './state'
 
 // Initialize state
 const state = new AppState()

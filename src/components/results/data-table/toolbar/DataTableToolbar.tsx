@@ -1,3 +1,4 @@
+import type { Column } from '@tanstack/react-table'
 import { Columns } from 'lucide-react'
 import {
   DropdownMenu,
@@ -6,7 +7,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import type { DataTableToolbarProps } from '../definitions'
-import type { Column } from '@tanstack/react-table'
 
 export function DataTableToolbar({ table }: DataTableToolbarProps) {
   const hidableColumns = table.getAllColumns().filter((col) => col.getCanHide()) as Column<

@@ -139,10 +139,14 @@ export class QueryHistoryStorage {
 
   private cleanup() {
     this.db
-      .prepare(`DELETE FROM query_history WHERE executed_at < datetime('now', '-${HISTORY_RETENTION_DAYS} days')`)
+      .prepare(
+        `DELETE FROM query_history WHERE executed_at < datetime('now', '-${HISTORY_RETENTION_DAYS} days')`,
+      )
       .run()
 
-    const countResult = this.db.prepare('SELECT COUNT(*) as count FROM query_history').get() as { count: number }
+    const countResult = this.db.prepare('SELECT COUNT(*) as count FROM query_history').get() as {
+      count: number
+    }
     const count = countResult.count
 
     if (count >= MAX_HISTORY_ENTRIES) {

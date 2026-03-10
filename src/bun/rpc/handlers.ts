@@ -1,8 +1,8 @@
 import { BrowserView } from 'electrobun/bun'
 import type { AnkoRPC } from '../../shared/rpc-types'
-import type { AppState } from '../state'
 import { MySqlConnector } from '../db/mysql'
 import { PostgresConnector } from '../db/postgres'
+import type { AppState } from '../state'
 
 export function createRpcHandler(
   state: AppState,
@@ -172,7 +172,7 @@ export function createRpcHandler(
             return '0.0.0'
           }
         },
-        showSaveDialog: async ({ defaultPath, filters }) => {
+        showSaveDialog: async (_params) => {
           // Electrobun has openFileDialog but no native save dialog
           // Use a workaround: prompt for directory + use defaultPath filename
           // For now, return null to indicate no native save dialog

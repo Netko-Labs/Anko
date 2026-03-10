@@ -9,9 +9,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { type CloseAppDialogProps } from './definitions'
-import { CLOSE_APP_VALUES } from './definitions/values'
 import { setCloseAppPreference } from './close-app-preference/CloseAppPreference'
+import type { CloseAppDialogProps } from './definitions'
+import { CLOSE_APP_VALUES } from './definitions/values'
 
 export function CloseAppDialog({ open, onOpenChange, onConfirm, onCancel }: CloseAppDialogProps) {
   const [rememberChoice, setRememberChoice] = useState(false)
@@ -35,9 +35,7 @@ export function CloseAppDialog({ open, onOpenChange, onConfirm, onCancel }: Clos
       <DialogContent className="sm:max-w-100" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>{CLOSE_APP_VALUES.title}</DialogTitle>
-          <DialogDescription>
-            {CLOSE_APP_VALUES.description}
-          </DialogDescription>
+          <DialogDescription>{CLOSE_APP_VALUES.description}</DialogDescription>
         </DialogHeader>
 
         <div className="flex items-center space-x-2 py-2">

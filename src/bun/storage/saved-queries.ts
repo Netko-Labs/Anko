@@ -133,7 +133,15 @@ export class SavedQueriesStorage {
              connection_id = ?, database_name = ?, updated_at = CURRENT_TIMESTAMP
          WHERE id = ?`,
       )
-      .run(name, query, description ?? null, workspaceId ?? null, connectionId ?? null, databaseName ?? null, id)
+      .run(
+        name,
+        query,
+        description ?? null,
+        workspaceId ?? null,
+        connectionId ?? null,
+        databaseName ?? null,
+        id,
+      )
 
     const result = this.getById(id)
     if (!result) throw AppError.storage('Failed to retrieve updated saved query')

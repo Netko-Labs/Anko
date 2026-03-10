@@ -40,7 +40,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             {this.state.error && (
               <div className="bg-card border border-border rounded-lg p-4 text-left">
                 <p className="text-xs text-muted-foreground mb-1">Error details:</p>
-                <code className="text-xs text-destructive break-all">{this.state.error.message}</code>
+                <code className="text-xs text-destructive break-all">
+                  {this.state.error.message}
+                </code>
               </div>
             )}
 

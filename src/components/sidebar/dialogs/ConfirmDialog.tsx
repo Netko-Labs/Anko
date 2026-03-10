@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { type ConfirmDialogProps } from './definitions'
+import type { ConfirmDialogProps } from './definitions'
 
 export function ConfirmDialog({
   open,

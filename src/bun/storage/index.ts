@@ -2,9 +2,9 @@ import { Database } from 'bun:sqlite'
 import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { ConnectionStorage } from './connections'
-import { WorkspaceStorage } from './workspaces'
 import { QueryHistoryStorage } from './query-history'
 import { SavedQueriesStorage } from './saved-queries'
+import { WorkspaceStorage } from './workspaces'
 
 export class Storage {
   public readonly connections: ConnectionStorage
