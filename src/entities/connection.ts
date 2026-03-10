@@ -22,7 +22,7 @@ export interface ConnectionInfo {
 
 export interface ActiveConnection {
   id: string
-  connectionId: string // The runtime connection ID from Tauri
+  connectionId: string // The runtime connection ID from the backend
   info: ConnectionInfo
   selectedDatabase?: string
 }

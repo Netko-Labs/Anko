@@ -191,7 +191,7 @@ export function DevToolsDialog({ open, onOpenChange }: DevToolsDialogProps) {
               <div className="mt-3">
                 <p className="text-xs text-muted-foreground mb-2">Log Namespaces:</p>
                 <div className="flex gap-2">
-                  {['tauri', 'store', 'app'].map((ns) => (
+                  {['rpc', 'store', 'app'].map((ns) => (
                     <Button
                       key={ns}
                       variant={enabledNamespaces.has(ns) ? 'default' : 'outline'}

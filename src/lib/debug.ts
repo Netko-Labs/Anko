@@ -89,14 +89,14 @@ export class Logger {
 
 /**
  * Creates a namespaced logger instance.
- * @param namespace - The namespace for log messages (e.g., 'tauri', 'store', 'app')
+ * @param namespace - The namespace for log messages (e.g., 'rpc', 'store', 'app')
  */
 export function createLogger(namespace: string): Logger {
   return new Logger(namespace)
 }
 
 // Pre-configured loggers for common namespaces
-export const tauriLogger = createLogger('tauri')
+export const rpcLogger = createLogger('rpc')
 export const storeLogger = createLogger('store')
 export const appLogger = createLogger('app')
 

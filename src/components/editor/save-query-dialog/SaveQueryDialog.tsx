@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { editorLogger } from '@/lib/debug'
-import { createSavedQuery } from '@/lib/tauri'
+import { createSavedQuery } from '@/lib/rpc'
 import { useSavedQueriesStore } from '@/stores/saved-queries'
 import { type SaveQueryDialogProps } from './definitions'
 

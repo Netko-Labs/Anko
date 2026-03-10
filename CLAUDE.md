@@ -4,15 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Anko is a cross-platform SQL desktop client built with Tauri 2, Rust, React, and shadcn/ui. It currently supports MySQL with an architecture designed for adding additional database connectors.
+Anko is a cross-platform SQL desktop client built with Electrobun (Bun), React, and shadcn/ui. It supports MySQL and PostgreSQL with an architecture designed for adding additional database connectors.
 
 ## Tech Stack
 
 - **Frontend**: React 19 + TypeScript + Vite + shadcn/ui + Tailwind CSS v4
-- **Backend**: Rust (Tauri 2)
+- **Backend**: TypeScript (Bun via Electrobun)
 - **Package Manager**: Bun
-- **Database Drivers**: sqlx (async, compile-time queries)
-- **Local Storage**: SQLite (encrypted connection storage)
+- **Database Drivers**: Bun.SQL (built-in, MySQL + PostgreSQL)
+- **Local Storage**: bun:sqlite (encrypted connection storage)
 - **State Management**: Zustand
 
 ## Common Commands
@@ -21,23 +21,20 @@ Anko is a cross-platform SQL desktop client built with Tauri 2, Rust, React, and
 # Install dependencies
 bun install
 
-# Run in development mode (launches Tauri app with hot reload)
-bun run tauri:dev
+# Run in development mode (Vite dev server + Electrobun)
+bun run dev
 
-# Build for production
-bun run tauri:build
+# Start the Electrobun app (connects to running Vite dev server)
+bun start
+
+# Build frontend only
+bun run build
+
+# Build production app
+bun run build:app
 
 # Type check frontend only
 bun run tsc --noEmit
-
-# Build frontend only (for testing)
-bun run build
-
-# Check Rust code
-cd src-tauri && cargo check
-
-# Run Rust tests
-cd src-tauri && cargo test
 
 # Add shadcn/ui component
 bunx --bun shadcn@latest add <component-name>
@@ -49,61 +46,73 @@ bunx --bun shadcn@latest add <component-name>
 
 ```
 anko/
-├── src/                          # React frontend
+├── electrobun.config.ts              # Electrobun app configuration
+├── src/
+│   ├── bun/                          # Bun backend (main process)
+│   │   ├── index.ts                  # Main process entrypoint
+│   │   ├── state.ts                  # AppState management
+│   │   ├── error.ts                  # Error types
+│   │   ├── db/
+│   │   │   ├── connector.ts          # DatabaseConnector interface
+│   │   │   ├── mysql.ts              # MySQL connector (Bun.SQL)
+│   │   │   ├── postgres.ts           # PostgreSQL connector (Bun.SQL)
+│   │   │   └── query-utils.ts        # SQL parsing utils
+│   │   ├── storage/
+│   │   │   ├── index.ts              # Storage init
+│   │   │   ├── connections.ts        # Connection CRUD (bun:sqlite)
+│   │   │   ├── encryption.ts         # AES-256-GCM (node:crypto)
+│   │   │   ├── workspaces.ts         # Workspace management
+│   │   │   ├── query-history.ts      # Query history
+│   │   │   └── saved-queries.ts      # Saved queries
+│   │   └── rpc/
+│   │       ├── schema.ts             # RPC type re-export
+│   │       └── handlers.ts           # All RPC command handlers
+│   ├── shared/
+│   │   └── rpc-types.ts              # Shared RPC schema types
 │   ├── components/
-│   │   ├── ui/                   # shadcn/ui components
-│   │   ├── connection/           # Connection manager UI
-│   │   ├── editor/               # Query editor
-│   │   ├── schema/               # Schema browser (database tree)
-│   │   ├── results/              # Query results table
-│   │   └── layout/               # App layout components
-│   ├── stores/                   # Zustand state stores
-│   ├── types/                    # TypeScript interfaces
-│   ├── lib/                      # Utilities and Tauri invoke wrappers
+│   │   ├── ui/                       # shadcn/ui components
+│   │   ├── connection/               # Connection manager UI
+│   │   ├── editor/                   # Query editor
+│   │   ├── schema/                   # Schema browser (database tree)
+│   │   ├── results/                  # Query results table
+│   │   └── layout/                   # App layout components
+│   ├── stores/                       # Zustand state stores
+│   ├── entities/                     # TypeScript interfaces
+│   ├── lib/
+│   │   ├── rpc.ts                    # Electrobun RPC wrappers
+│   │   └── ...                       # Other utilities
 │   └── App.tsx
-├── src-tauri/                    # Rust backend
-│   ├── src/
-│   │   ├── lib.rs                # App entry, command registration
-│   │   ├── commands/             # Tauri commands (exposed to frontend)
-│   │   ├── db/                   # Database abstraction layer
-│   │   │   ├── connector.rs      # DatabaseConnector trait
-│   │   │   └── mysql.rs          # MySQL implementation
-│   │   ├── storage/              # Local SQLite for saved connections
-│   │   │   ├── connections.rs    # CRUD operations
-│   │   │   └── encryption.rs     # AES-GCM password encryption
-│   │   ├── state.rs              # AppState management
-│   │   └── error.rs              # Error types
-│   ├── Cargo.toml
-│   └── tauri.conf.json
 ```
 
 ### Frontend-Backend Communication
 
-The frontend communicates with Rust via Tauri commands using `invoke()`. Type-safe wrappers are in `src/lib/tauri.ts`:
+The frontend communicates with the Bun backend via Electrobun RPC. Type-safe wrappers are in `src/lib/rpc.ts`:
 
 ```typescript
 // Example: Execute a query
-import { executeQuery } from "@/lib/tauri";
+import { executeQuery } from "@/lib/rpc";
 const result = await executeQuery(connectionId, "SELECT * FROM users");
 ```
 
+RPC types are defined in `src/shared/rpc-types.ts` and shared between frontend and backend.
+
 ### Adding a New Database Connector
 
-1. Create a new file in `src-tauri/src/db/` (e.g., `postgres.rs`)
-2. Implement the `DatabaseConnector` trait from `connector.rs`
-3. Add the driver variant to `DatabaseDriver` enum in `connector.rs`
-4. Update connection logic in `state.rs` to handle the new driver
-5. Update frontend types in `src/types/index.ts`
+1. Create a new file in `src/bun/db/` (e.g., `sqlite.ts`)
+2. Implement the `DatabaseConnector` interface from `connector.ts`
+3. Add the driver variant to `DatabaseDriver` type in `connector.ts`
+4. Update connection logic in `state.ts` to handle the new driver
+5. Update frontend types in `src/entities/`
 
 ### State Management
 
-- **Rust side**: `AppState` in `state.rs` manages active connections (RwLock<HashMap>) and storage
-- **React side**: Zustand store in `stores/connection-store.ts` manages UI state (tabs, connections, query results)
+- **Bun side**: `AppState` in `state.ts` manages active connections (Map) and storage
+- **React side**: Zustand stores in `stores/` manage UI state (tabs, connections, query results)
 
 ### Key Patterns
 
-- All database operations are async using sqlx
-- Passwords are encrypted with AES-256-GCM before storage
+- All database operations use Bun.SQL (built-in async SQL driver)
+- Passwords are encrypted with AES-256-GCM before storage (node:crypto)
 - Each active connection has a UUID identifier for frontend reference
 - Query tabs are associated with connection IDs
 
@@ -181,7 +190,7 @@ Table editing uses a pending changes pattern:
 
 ## Configuration Files
 
-- `src-tauri/tauri.conf.json` - Tauri configuration (window size, app identifier)
+- `electrobun.config.ts` - Electrobun app configuration (window, build, release)
 - `components.json` - shadcn/ui configuration
 - `vite.config.ts` - Vite configuration with Tailwind and path aliases
 

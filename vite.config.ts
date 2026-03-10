@@ -7,19 +7,18 @@ import { defineConfig } from 'vitest/config'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  base: './',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
-  // Prevent vite from obscuring Rust errors
   clearScreen: false,
-  // Tauri expects a fixed port
   server: {
     port: 5173,
     strictPort: true,
     watch: {
-      ignored: ['**/src-tauri/**'],
+      ignored: ['**/src/bun/**'],
     },
   },
   test: {

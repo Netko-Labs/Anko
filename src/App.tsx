@@ -1,4 +1,4 @@
-import { getCurrentWindow } from '@tauri-apps/api/window'
+import { closeWindow } from '@/lib/rpc'
 import { useCallback, useEffect, useState } from 'react'
 import { ErrorBoundary } from '@/components/errors/ErrorBoundary'
 import { CloseAppDialog } from '@/components/layout/close-app-dialog/CloseAppDialog'
@@ -11,7 +11,7 @@ import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import { Toaster } from '@/components/ui/sonner'
 import { UpdateModal } from '@/components/update/UpdateModal'
 import { useUpdateChecker } from '@/hooks/useUpdateChecker'
-import { listConnections } from '@/lib/tauri'
+import { listConnections } from '@/lib/rpc'
 import { useConnectionStore } from '@/stores/connection'
 import { useLeftSidebarStore } from '@/stores/left-sidebar'
 import { useRightSidebarStore } from '@/stores/right-sidebar'
@@ -64,7 +64,7 @@ function App() {
         const preference = getCloseAppPreference()
 
         if (preference === 'always-close') {
-          getCurrentWindow().close()
+          closeWindow()
         } else if (preference === 'never-close') {
           // Do nothing
         } else {
@@ -147,7 +147,7 @@ function App() {
           onOpenChange={setShowCloseDialog}
           onConfirm={() => {
             setShowCloseDialog(false)
-            getCurrentWindow().close()
+            closeWindow()
           }}
           onCancel={() => setShowCloseDialog(false)}
         />

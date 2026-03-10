@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { formatErrorMessage } from '@/lib/error-utils'
-import { connect, deleteConnection, getConnectionConfig } from '@/lib/tauri'
+import { connect, deleteConnection, getConnectionConfig } from '@/lib/rpc'
 import { ensureMinimumToastDuration } from '@/lib/toast-utils'
 import { useConnectionStore } from '@/stores/connection'
 import type { ActiveConnection, ConnectionInfo } from '@/types'

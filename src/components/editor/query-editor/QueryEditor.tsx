@@ -12,7 +12,7 @@ import {
 import { useQueryExecution } from '@/hooks/useQueryExecution'
 import { createTimer, editorLogger } from '@/lib/debug'
 import { formatErrorMessage } from '@/lib/error-utils'
-import { getDatabases } from '@/lib/tauri'
+import { getDatabases } from '@/lib/rpc'
 import { useConnectionStore } from '@/stores/connection'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { QueryEditorTabProps } from '../definitions'

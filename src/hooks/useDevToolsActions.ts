@@ -1,4 +1,3 @@
-import { getVersion } from '@tauri-apps/api/app'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { TEST_DATABASES } from '@/components/sidebar/dialogs/devtools/test-databases'
@@ -7,10 +6,11 @@ import {
   addConnectionToWorkspace as addConnectionToWorkspaceBackend,
   clearAllData,
   deleteWorkspace,
+  getAppVersion,
   listConnections,
   listWorkspaces,
   saveConnection,
-} from '@/lib/tauri'
+} from '@/lib/rpc'
 import { fetchLatestChangelog } from '@/lib/updater'
 import { useConnectionStore } from '@/stores/connection'
 import { useUpdateStore } from '@/stores/update'
@@ -45,7 +45,7 @@ export function useDevToolsActions(onOpenChange: (open: boolean) => void) {
   const [enabledNamespaces, setEnabledNamespaces] = useState<Set<string>>(() => {
     const value = localStorage.getItem('anko-debug')
     if (!value || value === 'false') return new Set()
-    if (value === '*' || value === 'true') return new Set(['tauri', 'store', 'app'])
+    if (value === '*' || value === 'true') return new Set(['rpc', 'store', 'app'])
     return new Set(
       value
         .split(',')
@@ -153,7 +153,7 @@ export function useDevToolsActions(onOpenChange: (open: boolean) => void) {
       localStorage.removeItem('anko-debug')
       toast.success('Debug mode disabled')
     } else {
-      const allNamespaces = new Set(['tauri', 'store', 'app'])
+      const allNamespaces = new Set(['rpc', 'store', 'app'])
       setEnabledNamespaces(allNamespaces)
       localStorage.setItem('anko-debug', '*')
       toast.success('Debug mode enabled (all namespaces)')
@@ -246,7 +246,7 @@ export function useDevToolsActions(onOpenChange: (open: boolean) => void) {
         const data = JSON.parse(text)
         console.log('[DevTools] Import data:', data)
         toast.info('Import data logged to console', {
-          description: 'Manual import via Tauri commands required for security',
+          description: 'Manual import via RPC commands required for security',
         })
       } catch {
         toast.error('Failed to parse import file')
@@ -265,7 +265,7 @@ export function useDevToolsActions(onOpenChange: (open: boolean) => void) {
       const parsed = await fetchLatestChangelog()
       if (!parsed) throw new Error('Failed to fetch changelog')
 
-      const currentVersion = await getVersion()
+      const currentVersion = await getAppVersion()
 
       setUpdateAvailable(
         true,

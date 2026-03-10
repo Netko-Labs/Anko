@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import { createTimer, editorLogger } from '@/lib/debug'
 import { formatErrorMessage } from '@/lib/error-utils'
-import { addQueryHistory, executeQuery } from '@/lib/tauri'
+import { addQueryHistory, executeQuery } from '@/lib/rpc'
 import { useConnectionStore } from '@/stores/connection'
 import { useQueryHistoryStore } from '@/stores/query-history'
 
