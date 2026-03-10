@@ -24,6 +24,9 @@ export default {
       notarize: true,
     },
   },
+  scripts: {
+    postBuild: 'scripts/post-build.ts',
+  },
   release: {
     baseUrl: 'https://github.com/Netko-Labs/Anko/releases/latest/download',
   },
