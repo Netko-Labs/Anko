@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.3.0] - 2026-03-10
+
+### Highlights
+The big migration is here. Anko has moved from Tauri to Electrobun, bringing native macOS performance and a streamlined architecture. Plus, the auto-update system is now fully wired up.
+
+### New Features
+- **Electrobun Migration** — Complete rewrite of the backend runtime from Tauri/Rust to Electrobun/Bun for faster startup and native macOS integration
+- **Auto-Update System** — Check for updates from the settings menu with progress toasts, download with real-time progress tracking, and one-click restart to apply updates
+- **BSDIFF Patch Updates** — Incremental updates via Electrobun's patch chain system for smaller, faster downloads
+
+### Improvements
+- **Project Cleanup** — Removed duplicated icon assets (~4.5MB), fixed app title and favicon, cleaned up Vite scaffold remnants
+- **CI/CD Overhaul** — Updated build pipeline for Electrobun with macOS code signing and auto-update artifact publishing
+- **Component Architecture** — Reorganized component structure, extracted hooks and sub-components for better maintainability
+
+### Under the Hood
+- Added Husky pre-commit hooks with Biome lint/format
+- Suppressed false-positive Biome warnings on RPC schema types
+- Fixed commitlint regex to handle emoji variation selectors
+- Updated changelog URL to Netko-Labs organization
+
 ## [v0.2.3] - 2026-01-26
 
 ### Highlights
