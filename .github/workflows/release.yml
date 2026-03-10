@@ -239,15 +239,20 @@ jobs:
           ELECTROBUN_APPLEID: ${{ secrets.APPLE_ID }}
           ELECTROBUN_APPLEIDPASS: ${{ secrets.APPLE_PASSWORD }}
           ELECTROBUN_TEAMID: ${{ secrets.APPLE_TEAM_ID }}
-        run: bun run build:app
+        run: bunx electrobun build --env=stable
 
       - name: Upload artifacts to release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          for file in artifacts/*; do
-            [ -f "$file" ] && gh release upload ${{ needs.check-release.outputs.version }} "$file" --repo ${{ github.repository }} --clobber
-          done
+          if [ -d artifacts ] && ls artifacts/* 1>/dev/null 2>&1; then
+            for file in artifacts/*; do
+              [ -f "$file" ] && gh release upload ${{ needs.check-release.outputs.version }} "$file" --repo ${{ github.repository }} --clobber
+            done
+          else
+            echo "::error::No artifacts found in artifacts/ directory"
+            exit 1
+          fi
 
       - name: Cleanup keychain
         if: always()
