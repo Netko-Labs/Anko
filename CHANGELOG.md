@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.3.0] - 2026-03-10
 
 ### Highlights
+We've powered up Anko with a major engine swap—say hello to Electrobun! This release also brings automatic updates and a freshly reorganized codebase that's cleaner than a perfectly normalized database schema.
+
+### New Features ✨
+- **Check for Updates** – Anko now automatically notifies you when a new version is available (no more manually hunting for patches like you're grinding side quests)
+
+### Improvements ⚡
+- **Framework Migration** – Migrate from Tauri to Electrobun for better performance and reliability
+- **Code Architecture** – Refactored component structure and extracted hooks into smaller, more maintainable pieces (think of it as breaking down a monolithic query into efficient CTEs)
+- **Build & CI/CD** – Revamped the entire build pipeline with Electrobun support, including macOS code signing and auto-update configuration
+- **Code Quality** – Improved linting standards with Husky hooks and Biome formatting to keep everything tidy
+
+### Bug Fixes 🐛
+- **Commitlint Regex** – Fixed handling of emoji variation selectors so commit messages parse correctly every time
+
+## [v0.3.0] - 2026-03-10
+
+### Highlights
 The big migration is here. Anko has moved from Tauri to Electrobun, bringing native macOS performance and a streamlined architecture. Plus, the auto-update system is now fully wired up.
 
 ### New Features
