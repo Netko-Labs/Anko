@@ -1,32 +1,26 @@
 import { IconLayoutSidebar, IconLayoutSidebarRight } from '@tabler/icons-react'
-import { getVersion } from '@tauri-apps/api/app'
 import { useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { getAppVersion } from '@/lib/rpc'
 import { type TitleBarProps } from './definitions'
 
 export function TitleBar({ onToggleLeftSidebar, onToggleRightSidebar }: TitleBarProps) {
   const [version, setVersion] = useState<string>('')
 
   useEffect(() => {
-    getVersion()
+    getAppVersion()
       .then(setVersion)
       .catch(() => setVersion('unknown'))
   }, [])
 
   return (
-    <div
-      data-tauri-drag-region
-      className="fixed top-0 left-0 right-0 h-9 flex items-center bg-background border-b z-50 select-none"
-    >
-      {/* Left section - Space for traffic lights */}
-      <div data-tauri-drag-region className="flex items-center h-full pl-20 w-20" />
+    <div className="fixed top-0 left-0 right-0 h-9 flex items-center bg-background border-b z-50 select-none">
+      {/* Left section - Space for native traffic lights */}
+      <div className="flex items-center h-full pl-20 w-20" />
 
-      {/* Center section - App name with status */}
-      <div
-        data-tauri-drag-region
-        className="flex-1 flex items-center justify-center h-full gap-2 pointer-events-none"
-      >
+      {/* Center section - Draggable region (only this section triggers JS drag) */}
+      <div className="titlebar-drag flex-1 flex items-center justify-center h-full gap-2">
         <span className="text-xs text-muted-foreground">Anko</span>
         <Badge
           variant="outline"
@@ -36,7 +30,7 @@ export function TitleBar({ onToggleLeftSidebar, onToggleRightSidebar }: TitleBar
         </Badge>
       </div>
 
-      {/* Right section - Sidebar toggles */}
+      {/* Right section - Sidebar toggles (outside drag region) */}
       <div className="flex items-center h-full gap-0">
         <Button
           variant="ghost"

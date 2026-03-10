@@ -8,7 +8,7 @@ import {
   getSchemas as fetchSchemas,
   getTables as fetchTables,
   getDatabases,
-} from '@/lib/tauri'
+} from '@/lib/rpc'
 import { useConnectionStore } from '@/stores/connection'
 import type { TreeAction, TreeState } from '@/reducers/tree-reducer'
 

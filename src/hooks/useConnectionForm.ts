@@ -7,7 +7,7 @@ import {
   saveConnection,
   testConnection,
   updateConnection,
-} from '@/lib/tauri'
+} from '@/lib/rpc'
 import { ensureMinimumToastDuration } from '@/lib/toast-utils'
 import { useConnectionStore } from '@/stores/connection'
 import type { ConnectionConfig, ConnectionInfo, DatabaseDriver } from '@/types'

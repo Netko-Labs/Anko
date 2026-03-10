@@ -31,7 +31,7 @@ import {
   createSavedQuery,
   deleteQueryHistory,
   listQueryHistory,
-} from '@/lib/tauri'
+} from '@/lib/rpc'
 import { useConnectionStore } from '@/stores/connection'
 import { useQueryHistoryStore } from '@/stores/query-history'
 import { useSavedQueriesStore } from '@/stores/saved-queries'

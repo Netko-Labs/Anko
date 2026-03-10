@@ -3,7 +3,7 @@ import { toast } from 'sonner'
 import { createTimer, tableLogger } from '@/lib/debug'
 import { formatErrorMessage } from '@/lib/error-utils'
 import { generateCommitSQL } from '@/lib/sql-generator'
-import { executeQuery } from '@/lib/tauri'
+import { executeQuery } from '@/lib/rpc'
 import { useConnectionStore } from '@/stores/connection'
 import type { DatabaseDriver, PendingRowChange } from '@/types'
 

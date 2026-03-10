@@ -1,5 +1,3 @@
-import { save } from '@tauri-apps/plugin-dialog'
-import { writeTextFile } from '@tauri-apps/plugin-fs'
 import type { QueryResult } from '@/types'
 
 /**
@@ -18,6 +16,20 @@ function escapeCSVValue(value: unknown): string {
 }
 
 /**
+ * Triggers a browser download for the given content.
+ */
+function downloadFile(content: string, filename: string, mimeType: string): boolean {
+  const blob = new Blob([content], { type: mimeType })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+  return true
+}
+
+/**
  * Exports query results to CSV format and saves to file.
  */
 export async function exportToCSV(
@@ -33,17 +45,7 @@ export async function exportToCSV(
   const rows = result.rows.map((row) => row.map((cell) => escapeCSVValue(cell)).join(','))
   const csvContent = [headers, ...rows].join('\n')
 
-  // Open save dialog
-  const filePath = await save({
-    defaultPath: `${defaultFilename}.csv`,
-    filters: [{ name: 'CSV Files', extensions: ['csv'] }],
-  })
-
-  if (!filePath) return false // User cancelled
-
-  // Write file
-  await writeTextFile(filePath, csvContent)
-  return true
+  return downloadFile(csvContent, `${defaultFilename}.csv`, 'text/csv')
 }
 
 /**
@@ -68,17 +70,7 @@ export async function exportToJSON(
 
   const jsonContent = JSON.stringify(data, null, 2)
 
-  // Open save dialog
-  const filePath = await save({
-    defaultPath: `${defaultFilename}.json`,
-    filters: [{ name: 'JSON Files', extensions: ['json'] }],
-  })
-
-  if (!filePath) return false // User cancelled
-
-  // Write file
-  await writeTextFile(filePath, jsonContent)
-  return true
+  return downloadFile(jsonContent, `${defaultFilename}.json`, 'application/json')
 }
 
 /**
@@ -117,15 +109,5 @@ export async function exportToSQL(
 
   const sqlContent = insertStatements.join('\n')
 
-  // Open save dialog
-  const filePath = await save({
-    defaultPath: `${defaultFilename}.sql`,
-    filters: [{ name: 'SQL Files', extensions: ['sql'] }],
-  })
-
-  if (!filePath) return false // User cancelled
-
-  // Write file
-  await writeTextFile(filePath, sqlContent)
-  return true
+  return downloadFile(sqlContent, `${defaultFilename}.sql`, 'application/sql')
 }

@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { createWorkspace, updateWorkspace } from '@/lib/tauri'
+import { createWorkspace, updateWorkspace } from '@/lib/rpc'
 import { cn } from '@/lib/utils'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { WorkspaceConfig } from '@/types'
