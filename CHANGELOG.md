@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.3.3] - 2026-03-10
+
+### Highlights
+We're shipping a small but mighty update that fixes how Anko detects whether you're in the production zone. No more environment variable mix-ups—just pure, version-based confidence. It's like finally getting the right save file loaded! 🎮
+
+### Bug Fixes 🐛
+- **Production detection now uses version.json** – We switched from relying on environment variables to reading the channel directly from version.json. This means Anko now knows exactly where it stands, no guesswork required. Your production queries are safer than ever.
+
 ## [v0.3.2] - 2026-03-10
 
 ### Highlights
