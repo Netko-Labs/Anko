@@ -28,7 +28,7 @@ export default {
   parserPreset: {
     parserOpts: {
       headerPattern:
-        /^([\p{Emoji_Presentation}\p{Extended_Pictographic}]+\s\w+)(?:\((.+)\))?:\s(.+)$/u,
+        /^([\p{Emoji_Presentation}\p{Extended_Pictographic}\uFE0F]+\s\w+)(?:\((.+)\))?:\s(.+)$/u,
       headerCorrespondence: ['type', 'scope', 'subject'],
     },
   },
