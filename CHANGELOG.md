@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.3.2] - 2026-03-10
+
+### Highlights
+We've been grinding on the backend so Anko plays nice with macOS notarization. Think of it as getting our security clearance – no more sus vibes from Apple's gatekeeper! 🍎
+
+### Bug Fixes 🐛
+Fix macOS codesigning for libWindowDrag.dylib via postBuild hook to ensure proper notarization. Because apparently dragging windows requires proper documentation these days.
+
 ## [v0.3.1] - 2026-03-10
 
 ### Highlights
