@@ -11,7 +11,8 @@
         "useExhaustiveDependencies": "off"
       },
       "complexity": {
-        "noImportantStyles": "off"
+        "noImportantStyles": "off",
+        "noBannedTypes": "off"
       },
       "suspicious": {
         "noArrayIndexKey": "off",
