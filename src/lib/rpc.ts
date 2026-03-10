@@ -1,4 +1,5 @@
 import { Electroview } from 'electrobun/view'
+import type { AnkoRPC } from '@/shared/rpc-types'
 import type {
   AddQueryHistoryInput,
   ColumnDetail,
@@ -15,7 +16,6 @@ import type {
   WorkspaceConfig,
 } from '@/types'
 import { rpcLogger } from './debug'
-import type { AnkoRPC } from '@/shared/rpc-types'
 
 const rpc = Electroview.defineRPC<AnkoRPC>({
   maxRequestTime: 60_000,
@@ -220,18 +220,14 @@ export async function createSavedQuery(input: CreateSavedQueryInput): Promise<Sa
 }
 
 export async function listSavedQueries(workspaceId?: string): Promise<SavedQuery[]> {
-  return trackedRequest('listSavedQueries', () =>
-    rpc.request.listSavedQueries({ workspaceId }),
-  )
+  return trackedRequest('listSavedQueries', () => rpc.request.listSavedQueries({ workspaceId }))
 }
 
 export async function updateSavedQuery(
   id: string,
   input: UpdateSavedQueryInput,
 ): Promise<SavedQuery> {
-  return trackedRequest('updateSavedQuery', () =>
-    rpc.request.updateSavedQuery({ id, input }),
-  )
+  return trackedRequest('updateSavedQuery', () => rpc.request.updateSavedQuery({ id, input }))
 }
 
 export async function deleteSavedQuery(id: string): Promise<void> {
@@ -281,7 +277,12 @@ export async function isWindowMaximized(): Promise<boolean> {
   return trackedRequest('isWindowMaximized', () => rpc.request.isWindowMaximized({}))
 }
 
-export async function getWindowFrame(): Promise<{ x: number; y: number; width: number; height: number }> {
+export async function getWindowFrame(): Promise<{
+  x: number
+  y: number
+  width: number
+  height: number
+}> {
   return trackedRequest('getWindowFrame', () => rpc.request.getWindowFrame({}))
 }
 

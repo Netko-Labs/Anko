@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { getAppVersion } from '@/lib/rpc'
-import { type TitleBarProps } from './definitions'
+import type { TitleBarProps } from './definitions'
 
 export function TitleBar({ onToggleLeftSidebar, onToggleRightSidebar }: TitleBarProps) {
   const [version, setVersion] = useState<string>('')

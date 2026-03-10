@@ -1,5 +1,4 @@
-import type { ColumnInfo, FilterCondition, QueryResult } from '@/types'
-import type { PendingRowChange } from '@/types'
+import type { ColumnInfo, FilterCondition, PendingRowChange, QueryResult } from '@/types'
 
 export interface ResultsTableProps {
   result?: QueryResult

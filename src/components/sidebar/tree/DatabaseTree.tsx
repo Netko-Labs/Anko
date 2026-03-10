@@ -13,8 +13,8 @@ import { initialTreeState, treeReducer } from '@/reducers/tree-reducer'
 import { useConnectionStore } from '@/stores/connection'
 import type { DatabaseTreeProps } from '../definitions'
 import { DatabaseTypeIcon } from './database-icons'
-import { TreeNode } from './TreeNode'
 import { DatabaseNode } from './nodes'
+import { TreeNode } from './TreeNode'
 
 export function DatabaseTree({ connection, onEdit, onDelete, onInsertText }: DatabaseTreeProps) {
   const { connectionId, info } = connection

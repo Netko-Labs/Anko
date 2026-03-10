@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 import { DevToolsDialog } from '../dialogs/DevToolsDialog'
-import { type SettingsMenuProps } from './definitions'
+import type { SettingsMenuProps } from './definitions'
 
 export function SettingsMenu({ theme, onThemeChange }: SettingsMenuProps) {
   const [devToolsOpen, setDevToolsOpen] = useState(false)

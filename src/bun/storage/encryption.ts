@@ -1,5 +1,5 @@
-import { createCipheriv, createDecipheriv, pbkdf2Sync, randomBytes } from 'node:crypto'
 import { execSync } from 'node:child_process'
+import { createCipheriv, createDecipheriv, pbkdf2Sync, randomBytes } from 'node:crypto'
 import { AppError } from '../error'
 
 const KEY_SIZE = 32
@@ -11,10 +11,9 @@ const PBKDF2_ITERATIONS = 100_000
 function getMachineId(): string {
   try {
     if (process.platform === 'darwin') {
-      const output = execSync(
-        'ioreg -rd1 -c IOPlatformExpertDevice | grep IOPlatformUUID',
-        { encoding: 'utf-8' },
-      )
+      const output = execSync('ioreg -rd1 -c IOPlatformExpertDevice | grep IOPlatformUUID', {
+        encoding: 'utf-8',
+      })
       const match = output.match(/"IOPlatformUUID"\s*=\s*"([^"]+)"/)
       if (match) return match[1]
     } else if (process.platform === 'linux') {

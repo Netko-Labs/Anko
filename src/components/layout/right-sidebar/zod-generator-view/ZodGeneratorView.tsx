@@ -4,7 +4,7 @@ import ShikiHighlighter from 'react-shiki'
 import { toast } from 'sonner'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { generateZodSchema } from '@/lib/zod-generator'
-import { type ZodGeneratorViewProps } from './definitions'
+import type { ZodGeneratorViewProps } from './definitions'
 
 export function ZodGeneratorView({ tableName, columns }: ZodGeneratorViewProps) {
   const zodSchema = useMemo(() => generateZodSchema(tableName, columns), [tableName, columns])

@@ -8,7 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { type UnsavedChangesDialogProps, UNSAVED_CHANGES_VALUES } from '../definitions'
+import { UNSAVED_CHANGES_VALUES, type UnsavedChangesDialogProps } from '../definitions'
 
 export function UnsavedChangesDialog({
   open,
@@ -27,7 +27,9 @@ export function UnsavedChangesDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onCancel}>{UNSAVED_CHANGES_VALUES.cancelButton}</AlertDialogCancel>
+          <AlertDialogCancel onClick={onCancel}>
+            {UNSAVED_CHANGES_VALUES.cancelButton}
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={onDiscard}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"

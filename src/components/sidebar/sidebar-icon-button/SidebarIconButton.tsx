@@ -1,6 +1,6 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
-import { type SidebarIconButtonProps } from './definitions'
+import type { SidebarIconButtonProps } from './definitions'
 
 export function SidebarIconButton({
   icon: Icon,

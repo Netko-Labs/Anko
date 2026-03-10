@@ -16,7 +16,8 @@ import { cn } from '@/lib/utils'
  * Green: <100ms, Yellow: 100-500ms, Red: >500ms
  */
 function getPerformanceBadgeColor(ms: number): string {
-  if (ms < 100) return 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/25'
+  if (ms < 100)
+    return 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/25'
   if (ms < 500) return 'bg-amber-500/15 text-amber-700 dark:text-amber-300 hover:bg-amber-500/25'
   return 'bg-red-500/15 text-red-700 dark:text-red-300 hover:bg-red-500/25'
 }

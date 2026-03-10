@@ -17,8 +17,8 @@ import { useConnectionStore } from '@/stores/connection'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { QueryEditorTabProps } from '../definitions'
 import { SaveQueryDialog } from '../save-query-dialog/SaveQueryDialog'
-import { SQLEditor } from '../sql-editor/SQLEditor'
 import type { SchemaContext } from '../sql-autocomplete'
+import { SQLEditor } from '../sql-editor/SQLEditor'
 
 export function QueryEditor({ tabId }: QueryEditorTabProps) {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false)
@@ -162,7 +162,9 @@ export function QueryEditor({ tabId }: QueryEditorTabProps) {
               render={<button type="button" />}
             >
               <IconServer className="size-3.5 text-emerald-500" />
-              <span className={connection.info.name ? 'text-foreground/80' : 'text-muted-foreground/70'}>
+              <span
+                className={connection.info.name ? 'text-foreground/80' : 'text-muted-foreground/70'}
+              >
                 {connection.info.name || '—'}
               </span>
               {connection.info.host && (
@@ -203,7 +205,9 @@ export function QueryEditor({ tabId }: QueryEditorTabProps) {
               render={<button type="button" />}
             >
               <IconDatabase className="size-3.5 text-primary" />
-              <span className={selectedDatabase ? 'text-foreground/80' : 'text-muted-foreground/70'}>
+              <span
+                className={selectedDatabase ? 'text-foreground/80' : 'text-muted-foreground/70'}
+              >
                 {selectedDatabase || '—'}
               </span>
               <ChevronDown className="size-3 text-muted-foreground" />
@@ -264,10 +268,7 @@ export function QueryEditor({ tabId }: QueryEditorTabProps) {
               }
             />
             <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={handleExecute}
-                className="text-xs text-foreground/90"
-              >
+              <DropdownMenuItem onClick={handleExecute} className="text-xs text-foreground/90">
                 <PlayIcon className="size-3.5 mr-2" />
                 Run All
               </DropdownMenuItem>

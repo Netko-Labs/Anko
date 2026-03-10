@@ -11,7 +11,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { type SaveQueryDialogProps } from './definitions'
+import type { SaveQueryDialogProps } from './definitions'
 
 export function SaveQueryDialog({ open, onOpenChange, editQuery, onSave }: SaveQueryDialogProps) {
   const [name, setName] = useState('')

@@ -4,8 +4,8 @@ import { useRightSidebarStore } from '@/stores/right-sidebar'
 import type { TableInfo } from '@/stores/right-sidebar/definitions/types'
 import { DataTabContent } from '../data-tab-content/DataTabContent'
 import { RIGHT_SIDEBAR_VALUES, type TabId } from '../definitions'
-import { TableSchemaView } from '../table-schema-view/TableSchemaView'
 import { TabButton } from '../tab-button/TabButton'
+import { TableSchemaView } from '../table-schema-view/TableSchemaView'
 import { UtilitiesTabFallback } from '../utilities-tab-fallback/UtilitiesTabFallback'
 
 const ZodGeneratorView = lazy(() =>
@@ -43,10 +43,14 @@ export function RightSidebarContent() {
     return (
       <div className="flex flex-col h-full">
         <div className="flex items-center px-3 py-2 border-b">
-          <span className="text-xs font-medium text-foreground">{RIGHT_SIDEBAR_VALUES.detailsTitle}</span>
+          <span className="text-xs font-medium text-foreground">
+            {RIGHT_SIDEBAR_VALUES.detailsTitle}
+          </span>
         </div>
         <div className="flex-1 flex items-center justify-center p-4">
-          <p className="text-xs text-muted-foreground text-center">{RIGHT_SIDEBAR_VALUES.emptyState}</p>
+          <p className="text-xs text-muted-foreground text-center">
+            {RIGHT_SIDEBAR_VALUES.emptyState}
+          </p>
         </div>
       </div>
     )

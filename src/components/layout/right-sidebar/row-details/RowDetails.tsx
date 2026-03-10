@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { formatValue, isJsonLike, prettyPrintJson } from '@/lib/zod-generator'
-import { type FieldRowProps, type RowDetailsProps } from './definitions'
+import type { FieldRowProps, RowDetailsProps } from './definitions'
 
 export function RowDetails({ row, columns }: RowDetailsProps) {
   const handleCopyValue = (value: unknown) => {

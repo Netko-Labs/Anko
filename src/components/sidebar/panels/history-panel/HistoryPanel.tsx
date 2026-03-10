@@ -37,7 +37,7 @@ import { useQueryHistoryStore } from '@/stores/query-history'
 import { useSavedQueriesStore } from '@/stores/saved-queries'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { QueryHistoryEntry } from '@/types'
-import { type HistoryEntryProps } from './definitions'
+import type { HistoryEntryProps } from './definitions'
 
 export function HistoryPanel() {
   const [searchQuery, setSearchQuery] = useState('')

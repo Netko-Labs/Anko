@@ -55,14 +55,18 @@ export class WorkspaceStorage {
 
     if (!exists) {
       this.db
-        .prepare("INSERT INTO workspaces (id, name, icon, is_default) VALUES (?, 'Default', 'database', 1)")
+        .prepare(
+          "INSERT INTO workspaces (id, name, icon, is_default) VALUES (?, 'Default', 'database', 1)",
+        )
         .run(DEFAULT_WORKSPACE_ID)
     }
   }
 
   private getWorkspaceConnections(workspaceId: string): string[] {
     const rows = this.db
-      .prepare('SELECT connection_id FROM workspace_connections WHERE workspace_id = ? ORDER BY added_at ASC')
+      .prepare(
+        'SELECT connection_id FROM workspace_connections WHERE workspace_id = ? ORDER BY added_at ASC',
+      )
       .all(workspaceId) as Array<{ connection_id: string }>
 
     return rows.map((r) => r.connection_id)
@@ -82,7 +86,9 @@ export class WorkspaceStorage {
 
   update(id: string, config: WorkspaceConfig): Workspace {
     this.db
-      .prepare('UPDATE workspaces SET name = ?, icon = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+      .prepare(
+        'UPDATE workspaces SET name = ?, icon = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      )
       .run(config.name, config.icon, id)
 
     const workspace = this.getById(id)
@@ -101,7 +107,9 @@ export class WorkspaceStorage {
 
   list(): Workspace[] {
     const rows = this.db
-      .prepare('SELECT id, name, icon, is_default, created_at, updated_at FROM workspaces ORDER BY is_default DESC, name ASC')
+      .prepare(
+        'SELECT id, name, icon, is_default, created_at, updated_at FROM workspaces ORDER BY is_default DESC, name ASC',
+      )
       .all() as Array<{
       id: string
       name: string
@@ -124,7 +132,9 @@ export class WorkspaceStorage {
 
   getById(id: string): Workspace | null {
     const row = this.db
-      .prepare('SELECT id, name, icon, is_default, created_at, updated_at FROM workspaces WHERE id = ?')
+      .prepare(
+        'SELECT id, name, icon, is_default, created_at, updated_at FROM workspaces WHERE id = ?',
+      )
       .get(id) as {
       id: string
       name: string
@@ -149,10 +159,14 @@ export class WorkspaceStorage {
 
   addConnection(workspaceId: string, connectionId: string): void {
     this.db
-      .prepare('INSERT OR IGNORE INTO workspace_connections (workspace_id, connection_id) VALUES (?, ?)')
+      .prepare(
+        'INSERT OR IGNORE INTO workspace_connections (workspace_id, connection_id) VALUES (?, ?)',
+      )
       .run(workspaceId, connectionId)
 
-    this.db.prepare('UPDATE workspaces SET updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(workspaceId)
+    this.db
+      .prepare('UPDATE workspaces SET updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+      .run(workspaceId)
   }
 
   removeConnection(workspaceId: string, connectionId: string): void {
@@ -160,7 +174,9 @@ export class WorkspaceStorage {
       .prepare('DELETE FROM workspace_connections WHERE workspace_id = ? AND connection_id = ?')
       .run(workspaceId, connectionId)
 
-    this.db.prepare('UPDATE workspaces SET updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(workspaceId)
+    this.db
+      .prepare('UPDATE workspaces SET updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+      .run(workspaceId)
   }
 
   moveConnection(connectionId: string, fromWorkspaceId: string, toWorkspaceId: string): void {

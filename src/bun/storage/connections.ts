@@ -1,6 +1,6 @@
 import type { Database } from 'bun:sqlite'
-import { encrypt, decrypt } from './encryption'
 import { AppError } from '../error'
+import { decrypt, encrypt } from './encryption'
 
 type DatabaseDriver = 'mysql' | 'postgresql'
 
@@ -59,7 +59,16 @@ export class ConnectionStorage {
         `INSERT INTO connections (id, name, host, port, username, encrypted_password, database_name, driver)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       )
-      .run(id, config.name, config.host, config.port, config.username, encryptedPassword, config.database ?? null, config.driver)
+      .run(
+        id,
+        config.name,
+        config.host,
+        config.port,
+        config.username,
+        encryptedPassword,
+        config.database ?? null,
+        config.driver,
+      )
 
     return {
       id,
@@ -82,7 +91,16 @@ export class ConnectionStorage {
              database_name = ?, driver = ?, updated_at = CURRENT_TIMESTAMP
          WHERE id = ?`,
       )
-      .run(config.name, config.host, config.port, config.username, encryptedPassword, config.database ?? null, config.driver, id)
+      .run(
+        config.name,
+        config.host,
+        config.port,
+        config.username,
+        encryptedPassword,
+        config.database ?? null,
+        config.driver,
+        id,
+      )
   }
 
   list(): ConnectionInfo[] {

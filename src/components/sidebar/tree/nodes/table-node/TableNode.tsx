@@ -1,10 +1,4 @@
-import {
-  IconCopy,
-  IconEye,
-  IconPlayerPlay,
-  IconRefresh,
-  IconTable,
-} from '@tabler/icons-react'
+import { IconCopy, IconEye, IconPlayerPlay, IconRefresh, IconTable } from '@tabler/icons-react'
 import { memo } from 'react'
 import { toast } from 'sonner'
 import {

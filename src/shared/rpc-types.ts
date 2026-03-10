@@ -132,7 +132,7 @@ export type AnkoRPC = {
     requests: {
       // Connection commands
       connect: { params: { config: ConnectionConfig }; response: string }
-      disconnect: { params: { connectionId: string }; response: void }
+      disconnect: { params: { connectionId: string }; response: undefined }
       testConnection: { params: { config: ConnectionConfig }; response: boolean }
 
       // Query commands
@@ -144,7 +144,10 @@ export type AnkoRPC = {
       // Schema commands
       getDatabases: { params: { connectionId: string }; response: SchemaInfo[] }
       getSchemas: { params: { connectionId: string; database: string }; response: SchemaInfo[] }
-      getTables: { params: { connectionId: string; database: string; schema: string }; response: TableInfo[] }
+      getTables: {
+        params: { connectionId: string; database: string; schema: string }
+        response: TableInfo[]
+      }
       getColumns: {
         params: { connectionId: string; database: string; schema: string; table: string }
         response: ColumnDetail[]
@@ -152,50 +155,65 @@ export type AnkoRPC = {
 
       // Connection storage
       saveConnection: { params: { config: ConnectionConfig }; response: ConnectionInfo }
-      updateConnection: { params: { id: string; config: ConnectionConfig }; response: void }
+      updateConnection: { params: { id: string; config: ConnectionConfig }; response: undefined }
       listConnections: { params: {}; response: ConnectionInfo[] }
-      deleteConnection: { params: { id: string }; response: void }
+      deleteConnection: { params: { id: string }; response: undefined }
       getConnectionConfig: { params: { id: string }; response: ConnectionConfig }
 
       // Workspace commands
       listWorkspaces: { params: {}; response: Workspace[] }
       createWorkspace: { params: { config: WorkspaceConfig }; response: Workspace }
       updateWorkspace: { params: { id: string; config: WorkspaceConfig }; response: Workspace }
-      deleteWorkspace: { params: { id: string }; response: void }
-      addConnectionToWorkspace: { params: { workspaceId: string; connectionId: string }; response: void }
-      removeConnectionFromWorkspace: { params: { workspaceId: string; connectionId: string }; response: void }
+      deleteWorkspace: { params: { id: string }; response: undefined }
+      addConnectionToWorkspace: {
+        params: { workspaceId: string; connectionId: string }
+        response: undefined
+      }
+      removeConnectionFromWorkspace: {
+        params: { workspaceId: string; connectionId: string }
+        response: undefined
+      }
       moveConnectionBetweenWorkspaces: {
         params: { connectionId: string; fromWorkspaceId: string; toWorkspaceId: string }
-        response: void
+        response: undefined
       }
 
       // Query history
       addQueryHistory: { params: { input: AddQueryHistoryInput }; response: QueryHistoryEntry }
-      listQueryHistory: { params: { connectionId?: string; limit?: number }; response: QueryHistoryEntry[] }
-      deleteQueryHistory: { params: { id: string }; response: void }
-      clearQueryHistory: { params: {}; response: void }
+      listQueryHistory: {
+        params: { connectionId?: string; limit?: number }
+        response: QueryHistoryEntry[]
+      }
+      deleteQueryHistory: { params: { id: string }; response: undefined }
+      clearQueryHistory: { params: {}; response: undefined }
 
       // Saved queries
       createSavedQuery: { params: { input: CreateSavedQueryInput }; response: SavedQuery }
       listSavedQueries: { params: { workspaceId?: string }; response: SavedQuery[] }
-      updateSavedQuery: { params: { id: string; input: UpdateSavedQueryInput }; response: SavedQuery }
-      deleteSavedQuery: { params: { id: string }; response: void }
+      updateSavedQuery: {
+        params: { id: string; input: UpdateSavedQueryInput }
+        response: SavedQuery
+      }
+      deleteSavedQuery: { params: { id: string }; response: undefined }
 
       // Utility commands
-      clearAllData: { params: {}; response: void }
+      clearAllData: { params: {}; response: undefined }
       getAppVersion: { params: {}; response: string }
       showSaveDialog: {
         params: { defaultPath?: string; filters?: Array<{ name: string; extensions: string[] }> }
         response: string | null
       }
-      writeTextFile: { params: { path: string; content: string }; response: void }
-      closeWindow: { params: {}; response: void }
-      minimizeWindow: { params: {}; response: void }
-      maximizeWindow: { params: {}; response: void }
-      unmaximizeWindow: { params: {}; response: void }
+      writeTextFile: { params: { path: string; content: string }; response: undefined }
+      closeWindow: { params: {}; response: undefined }
+      minimizeWindow: { params: {}; response: undefined }
+      maximizeWindow: { params: {}; response: undefined }
+      unmaximizeWindow: { params: {}; response: undefined }
       isWindowMaximized: { params: {}; response: boolean }
-      getWindowFrame: { params: {}; response: { x: number; y: number; width: number; height: number } }
-      setWindowPosition: { params: { x: number; y: number }; response: void }
+      getWindowFrame: {
+        params: {}
+        response: { x: number; y: number; width: number; height: number }
+      }
+      setWindowPosition: { params: { x: number; y: number }; response: undefined }
     }
     messages: {}
   }>

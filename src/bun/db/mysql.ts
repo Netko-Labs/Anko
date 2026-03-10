@@ -1,7 +1,15 @@
 import { SQL } from 'bun'
-import type { ConnectionConfig, DatabaseConnector, QueryResult, SchemaInfo, TableInfo, ColumnDetail, ColumnInfo } from './connector'
-import { extractTableFromSelect } from './query-utils'
 import { AppError } from '../error'
+import type {
+  ColumnDetail,
+  ColumnInfo,
+  ConnectionConfig,
+  DatabaseConnector,
+  QueryResult,
+  SchemaInfo,
+  TableInfo,
+} from './connector'
+import { extractTableFromSelect } from './query-utils'
 
 const HIDDEN_DATABASES = ['information_schema', 'performance_schema']
 
@@ -30,11 +38,17 @@ export class MySqlConnector implements DatabaseConnector {
       return new MySqlConnector(sql)
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e)
-      throw AppError.database(`Failed to connect to MySQL at ${config.host}:${config.port} - ${msg}`)
+      throw AppError.database(
+        `Failed to connect to MySQL at ${config.host}:${config.port} - ${msg}`,
+      )
     }
   }
 
-  async executeWithContext(query: string, _database?: string, context?: string): Promise<QueryResult> {
+  async executeWithContext(
+    query: string,
+    _database?: string,
+    context?: string,
+  ): Promise<QueryResult> {
     let executedQuery: string
 
     if (context) {
@@ -70,7 +84,12 @@ export class MySqlConnector implements DatabaseConnector {
           rows.length > 0
             ? Object.keys(rows[0]).map((key) => ({
                 name: key,
-                data_type: typeof rows[0][key] === 'number' ? 'number' : typeof rows[0][key] === 'boolean' ? 'boolean' : 'string',
+                data_type:
+                  typeof rows[0][key] === 'number'
+                    ? 'number'
+                    : typeof rows[0][key] === 'boolean'
+                      ? 'boolean'
+                      : 'string',
                 nullable: true,
               }))
             : await this.getColumnsForEmptySelect(query)
@@ -79,7 +98,11 @@ export class MySqlConnector implements DatabaseConnector {
           columns.map((col) => {
             const val = row[col.name]
             if (val === null || val === undefined) return null
-            if (val instanceof Date) return val.toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, '')
+            if (val instanceof Date)
+              return val
+                .toISOString()
+                .replace('T', ' ')
+                .replace(/\.\d{3}Z$/, '')
             if (typeof val === 'bigint') return Number(val)
             if (Buffer.isBuffer(val)) {
               // Try to parse as string
@@ -201,8 +224,12 @@ export class MySqlConnector implements DatabaseConnector {
       name: String(row.COLUMN_NAME ?? row.column_name ?? ''),
       data_type: String(row.DATA_TYPE ?? row.data_type ?? ''),
       nullable: String(row.IS_NULLABLE ?? row.is_nullable ?? '') === 'YES',
-      key: row.COLUMN_KEY || row.column_key ? String(row.COLUMN_KEY ?? row.column_key) || undefined : undefined,
-      default_value: row.COLUMN_DEFAULT != null ? String(row.COLUMN_DEFAULT ?? row.column_default) : undefined,
+      key:
+        row.COLUMN_KEY || row.column_key
+          ? String(row.COLUMN_KEY ?? row.column_key) || undefined
+          : undefined,
+      default_value:
+        row.COLUMN_DEFAULT != null ? String(row.COLUMN_DEFAULT ?? row.column_default) : undefined,
       extra: row.EXTRA || row.extra ? String(row.EXTRA ?? row.extra) || undefined : undefined,
     }))
   }

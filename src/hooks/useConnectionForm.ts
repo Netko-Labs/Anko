@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { DEFAULT_PORTS, DEFAULT_USERS, type InputMode } from '@/components/connection/definitions'
 import { parseConnectionUrl } from '@/lib/connection-utils'
 import { formatErrorMessage } from '@/lib/error-utils'
 import {
@@ -11,7 +12,6 @@ import {
 import { ensureMinimumToastDuration } from '@/lib/toast-utils'
 import { useConnectionStore } from '@/stores/connection'
 import type { ConnectionConfig, ConnectionInfo, DatabaseDriver } from '@/types'
-import { DEFAULT_PORTS, DEFAULT_USERS, type InputMode } from '@/components/connection/definitions'
 
 type OperationState =
   | { type: 'idle' }

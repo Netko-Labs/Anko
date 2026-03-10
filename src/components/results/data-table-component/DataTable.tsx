@@ -28,11 +28,8 @@ import { useRowChangeTracking } from '@/hooks/useRowChangeTracking'
 import { tableLogger } from '@/lib/debug'
 import { cn } from '@/lib/utils'
 import type { PendingRowChange } from '@/types'
-import { createDynamicColumns } from '../data-table/columns'
 import { DataTableCell } from '../data-table/cell/DataTableCell'
-import { DataTableHeader } from '../data-table/header/DataTableHeader'
-import { DataTableToolbar } from '../data-table/toolbar/DataTableToolbar'
-import { EditableCell } from '../data-table/editable-cell/EditableCell'
+import { createDynamicColumns } from '../data-table/columns'
 import {
   CHANGE_ID_MARKER,
   DATA_TABLE_VALUES,
@@ -40,7 +37,10 @@ import {
   EMPTY_PK_COLUMNS,
   NEW_ROW_MARKER,
 } from '../data-table/definitions'
+import { EditableCell } from '../data-table/editable-cell/EditableCell'
+import { DataTableHeader } from '../data-table/header/DataTableHeader'
 import { RowActions } from '../data-table/row-actions/RowActions'
+import { DataTableToolbar } from '../data-table/toolbar/DataTableToolbar'
 import { convertRowsToObjects } from '../data-table/utils'
 import type { ColumnMeta, DataTableProps } from '../definitions'
 

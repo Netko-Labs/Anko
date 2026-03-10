@@ -23,7 +23,7 @@ import { ensureMinimumToastDuration } from '@/lib/toast-utils'
 import { useConnectionStore } from '@/stores/connection'
 import type { ActiveConnection, ConnectionInfo } from '@/types'
 import { DatabaseTree, DatabaseTypeIcon, TreeNode } from '../../tree'
-import { type DatabasesPanelProps, type DisconnectedConnectionProps } from './definitions'
+import type { DatabasesPanelProps, DisconnectedConnectionProps } from './definitions'
 
 export function DatabasesPanel({
   activeWorkspace,

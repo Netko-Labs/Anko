@@ -1,5 +1,5 @@
+import type { CloseAppPreference } from '../definitions'
 import { CLOSE_APP_PREFERENCE_KEY } from '../definitions'
-import { type CloseAppPreference } from '../definitions'
 
 export function getCloseAppPreference(): CloseAppPreference {
   const stored = localStorage.getItem(CLOSE_APP_PREFERENCE_KEY)

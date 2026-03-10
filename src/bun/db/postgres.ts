@@ -1,7 +1,15 @@
 import { SQL } from 'bun'
-import type { ConnectionConfig, DatabaseConnector, QueryResult, SchemaInfo, TableInfo, ColumnDetail, ColumnInfo } from './connector'
-import { extractTableFromSelect } from './query-utils'
 import { AppError } from '../error'
+import type {
+  ColumnDetail,
+  ColumnInfo,
+  ConnectionConfig,
+  DatabaseConnector,
+  QueryResult,
+  SchemaInfo,
+  TableInfo,
+} from './connector'
+import { extractTableFromSelect } from './query-utils'
 
 const POOL_TTL_MS = 5 * 60 * 1000 // 5 minutes
 const EVICTION_INTERVAL_MS = 60 * 1000 // 60 seconds
@@ -17,7 +25,11 @@ export class PostgresConnector implements DatabaseConnector {
   private defaultDatabase: string
   private evictionTimer: ReturnType<typeof setInterval> | null = null
 
-  private constructor(config: ConnectionConfig, defaultSql: InstanceType<typeof SQL>, defaultDatabase: string) {
+  private constructor(
+    config: ConnectionConfig,
+    defaultSql: InstanceType<typeof SQL>,
+    defaultDatabase: string,
+  ) {
     this.config = config
     this.defaultDatabase = defaultDatabase
     this.pools.set(defaultDatabase, { sql: defaultSql, lastUsed: Date.now() })
@@ -43,7 +55,9 @@ export class PostgresConnector implements DatabaseConnector {
       return new PostgresConnector(config, sql, defaultDatabase)
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e)
-      throw AppError.database(`Failed to connect to PostgreSQL at ${config.host}:${config.port} - ${msg}`)
+      throw AppError.database(
+        `Failed to connect to PostgreSQL at ${config.host}:${config.port} - ${msg}`,
+      )
     }
   }
 
@@ -86,7 +100,9 @@ export class PostgresConnector implements DatabaseConnector {
       return sql
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e)
-      throw AppError.database(`Failed to connect to PostgreSQL database '${database}' at ${this.config.host}:${this.config.port} - ${msg}`)
+      throw AppError.database(
+        `Failed to connect to PostgreSQL database '${database}' at ${this.config.host}:${this.config.port} - ${msg}`,
+      )
     }
   }
 
@@ -94,9 +110,13 @@ export class PostgresConnector implements DatabaseConnector {
     return this.getPool(this.defaultDatabase)
   }
 
-  async executeWithContext(query: string, database?: string, schema?: string): Promise<QueryResult> {
+  async executeWithContext(
+    query: string,
+    database?: string,
+    schema?: string,
+  ): Promise<QueryResult> {
     const pool = database ? await this.getPool(database) : await this.getDefaultPool()
-    const start = performance.now()
+    const _start = performance.now()
 
     // Set search_path if schema specified
     let executedQuery: string
@@ -131,7 +151,12 @@ export class PostgresConnector implements DatabaseConnector {
           rows.length > 0
             ? Object.keys(rows[0]).map((key) => ({
                 name: key,
-                data_type: typeof rows[0][key] === 'number' ? 'number' : typeof rows[0][key] === 'boolean' ? 'boolean' : 'string',
+                data_type:
+                  typeof rows[0][key] === 'number'
+                    ? 'number'
+                    : typeof rows[0][key] === 'boolean'
+                      ? 'boolean'
+                      : 'string',
                 nullable: true,
               }))
             : await this.getColumnsForEmptySelect(pool, query)
@@ -179,7 +204,10 @@ export class PostgresConnector implements DatabaseConnector {
     }
   }
 
-  private async getColumnsForEmptySelect(pool: InstanceType<typeof SQL>, query: string): Promise<ColumnInfo[]> {
+  private async getColumnsForEmptySelect(
+    pool: InstanceType<typeof SQL>,
+    query: string,
+  ): Promise<ColumnInfo[]> {
     const trimmed = query.trim().toUpperCase()
     if (!trimmed.startsWith('SELECT')) return []
 

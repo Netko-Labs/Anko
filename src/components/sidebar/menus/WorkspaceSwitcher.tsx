@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { type WorkspaceSwitcherProps } from './definitions'
+import type { WorkspaceSwitcherProps } from './definitions'
 import { WORKSPACE_SWITCHER_VALUES } from './definitions/values'
 import { WorkspaceIcon } from './workspace-icon/WorkspaceIcon'
 

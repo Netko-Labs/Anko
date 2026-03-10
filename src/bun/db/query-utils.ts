@@ -5,7 +5,19 @@ export function extractTableFromSelect(query: string): string | undefined {
 
   const afterFrom = query.slice(fromPos + 6).trimStart()
 
-  const endKeywords = [' WHERE ', ' ORDER ', ' LIMIT ', ' GROUP ', ' HAVING ', ' JOIN ', ' LEFT ', ' RIGHT ', ' INNER ', ' OUTER ', ';']
+  const endKeywords = [
+    ' WHERE ',
+    ' ORDER ',
+    ' LIMIT ',
+    ' GROUP ',
+    ' HAVING ',
+    ' JOIN ',
+    ' LEFT ',
+    ' RIGHT ',
+    ' INNER ',
+    ' OUTER ',
+    ';',
+  ]
   const upperAfter = afterFrom.toUpperCase()
 
   let endPos = afterFrom.length
