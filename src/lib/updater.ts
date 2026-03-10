@@ -1,3 +1,10 @@
+import {
+  applyUpdate as rpcApplyUpdate,
+  checkForUpdate as rpcCheckForUpdate,
+  downloadUpdate as rpcDownloadUpdate,
+  getUpdateStatus as rpcGetUpdateStatus,
+} from './rpc'
+
 const SKIPPED_VERSIONS_KEY = 'anko-skipped-versions'
 const REMIND_LATER_KEY = 'anko-remind-later'
 const REMIND_LATER_DURATION = 24 * 60 * 60 * 1000 // 24 hours
@@ -11,24 +18,65 @@ export interface UpdateInfo {
 
 export async function checkForUpdate(): Promise<{
   available: boolean
-  update: null
+  update: unknown | null
   info: UpdateInfo | null
 }> {
-  // Electrobun uses its own updater system (BSDIFF patches)
-  // For now, return no update available
-  // TODO: Integrate with Electrobun.Updater when configured
-  return { available: false, update: null, info: null }
+  try {
+    const result = await rpcCheckForUpdate()
+
+    if (result.updateAvailable) {
+      return {
+        available: true,
+        update: true,
+        info: {
+          version: result.version,
+          currentVersion: result.currentVersion,
+          body: undefined,
+          date: undefined,
+        },
+      }
+    }
+
+    return { available: false, update: null, info: null }
+  } catch {
+    return { available: false, update: null, info: null }
+  }
 }
 
 export async function downloadAndInstall(
   _update: unknown,
-  _onProgress?: (progress: number, total: number) => void,
+  onProgress?: (progress: number, total: number) => void,
 ): Promise<void> {
-  // TODO: Integrate with Electrobun.Updater.downloadUpdate() + applyUpdate()
+  // Start download (returns immediately, runs in background on bun side)
+  await rpcDownloadUpdate()
+
+  // Poll for progress
+  return new Promise<void>((resolve, reject) => {
+    const pollInterval = setInterval(async () => {
+      try {
+        const status = await rpcGetUpdateStatus()
+
+        if (status.bytesDownloaded != null && status.totalBytes != null) {
+          onProgress?.(status.bytesDownloaded, status.totalBytes)
+        }
+
+        if (status.isComplete) {
+          clearInterval(pollInterval)
+          resolve()
+        } else if (status.isError) {
+          clearInterval(pollInterval)
+          reject(new Error(status.errorMessage || 'Download failed'))
+        }
+      } catch (err) {
+        clearInterval(pollInterval)
+        reject(err)
+      }
+    }, 500)
+  })
 }
 
 export async function restartApp(): Promise<void> {
-  // TODO: Integrate with Electrobun.Updater.applyUpdate()
+  await rpcApplyUpdate()
 }
 
 export function skipVersion(version: string): void {
@@ -68,7 +116,7 @@ export function clearRemindLater(): void {
   localStorage.removeItem(REMIND_LATER_KEY)
 }
 
-const CHANGELOG_URL = 'https://raw.githubusercontent.com/Valkyrie-Resistance/Anko/main/CHANGELOG.md'
+const CHANGELOG_URL = 'https://raw.githubusercontent.com/Netko-Labs/Anko/main/CHANGELOG.md'
 
 /**
  * Fetch changelog content for a specific version from CHANGELOG.md
