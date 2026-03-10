@@ -4,7 +4,7 @@ export default {
   app: {
     name: 'Anko',
     identifier: 'com.anko.sql',
-    version: '0.3.2',
+    version: '0.3.3',
   },
   build: {
     bun: {

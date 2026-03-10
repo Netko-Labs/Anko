@@ -29,7 +29,15 @@ let mainWindow: BrowserWindow | null = null
 const rpc = createRpcHandler(state, () => mainWindow)
 
 // Determine URL based on environment
-const isDev = process.env.NODE_ENV !== 'production' && !process.env.ELECTROBUN_PRODUCTION
+// Read the build channel from version.json to detect production vs dev.
+// Electrobun writes this file into the app bundle during build with the --env flag value.
+let isDev = true
+try {
+  const versionInfo = await Bun.file('../Resources/version.json').json()
+  isDev = versionInfo.channel === 'dev'
+} catch {
+  // version.json doesn't exist — running outside an app bundle (raw dev)
+}
 const url = isDev ? 'http://localhost:5173' : 'views://mainview/index.html'
 
 // Create main window
