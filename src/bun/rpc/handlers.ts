@@ -1,5 +1,5 @@
-import { BrowserView } from 'electrobun/bun'
-import type { AnkoRPC } from '../../shared/rpc-types'
+import { BrowserView, Updater } from 'electrobun/bun'
+import type { AnkoRPC, UpdateDownloadStatus } from '../../shared/rpc-types'
 import { MySqlConnector } from '../db/mysql'
 import { PostgresConnector } from '../db/postgres'
 import type { AppState } from '../state'
@@ -16,6 +16,26 @@ export function createRpcHandler(
     setPosition: (x: number, y: number) => void
   } | null,
 ) {
+  let latestDownloadStatus: UpdateDownloadStatus = {
+    status: 'idle',
+    message: '',
+    isComplete: false,
+    isError: false,
+  }
+
+  Updater.onStatusChange((entry) => {
+    latestDownloadStatus = {
+      status: entry.status,
+      message: entry.message,
+      progress: entry.details?.progress,
+      bytesDownloaded: entry.details?.bytesDownloaded,
+      totalBytes: entry.details?.totalBytes,
+      isComplete: entry.status === 'download-complete',
+      isError: entry.status === 'error',
+      errorMessage: entry.details?.errorMessage,
+    }
+  })
+
   return BrowserView.defineRPC<AnkoRPC>({
     maxRequestTime: 60_000,
     handlers: {
@@ -153,6 +173,57 @@ export function createRpcHandler(
         deleteSavedQuery: ({ id }) => {
           const storage = state.getStorage()
           storage.savedQueries.delete(id)
+        },
+
+        // Update commands
+        checkForUpdate: async () => {
+          try {
+            const result = await Updater.checkForUpdate()
+            let currentVersion: string
+            try {
+              currentVersion = await Updater.localInfo.version()
+            } catch {
+              const pkg = require('../../../package.json')
+              currentVersion = pkg.version ?? '0.0.0'
+            }
+            return {
+              currentVersion,
+              version: result.version || '',
+              updateAvailable: result.updateAvailable || false,
+              error: result.error || '',
+            }
+          } catch {
+            const pkg = require('../../../package.json')
+            return {
+              currentVersion: pkg.version ?? '0.0.0',
+              version: '',
+              updateAvailable: false,
+              error: 'Failed to check for updates',
+            }
+          }
+        },
+        downloadUpdate: async () => {
+          latestDownloadStatus = {
+            status: 'downloading',
+            message: 'Starting download...',
+            isComplete: false,
+            isError: false,
+          }
+          Updater.downloadUpdate().catch((err: Error) => {
+            latestDownloadStatus = {
+              status: 'error',
+              message: err?.message || 'Download failed',
+              isComplete: false,
+              isError: true,
+              errorMessage: err?.message,
+            }
+          })
+        },
+        getUpdateStatus: () => {
+          return latestDownloadStatus
+        },
+        applyUpdate: async () => {
+          await Updater.applyUpdate()
         },
 
         // Utility commands

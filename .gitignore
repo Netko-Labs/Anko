@@ -29,4 +29,5 @@ dist-ssr
 
 # Electrobun build artifacts
 build/
+artifacts/
 *.electrobun

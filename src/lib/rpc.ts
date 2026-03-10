@@ -1,5 +1,6 @@
 import { Electroview } from 'electrobun/view'
 import type { AnkoRPC } from '@/shared/rpc-types'
+import type { UpdateCheckResult, UpdateDownloadStatus } from '@/shared/rpc-types'
 import type {
   AddQueryHistoryInput,
   ColumnDetail,
@@ -232,6 +233,23 @@ export async function updateSavedQuery(
 
 export async function deleteSavedQuery(id: string): Promise<void> {
   return trackedRequest('deleteSavedQuery', () => rpc.request.deleteSavedQuery({ id }))
+}
+
+// Update commands
+export async function checkForUpdate(): Promise<UpdateCheckResult> {
+  return trackedRequest('checkForUpdate', () => rpc.request.checkForUpdate({}))
+}
+
+export async function downloadUpdate(): Promise<void> {
+  return trackedRequest('downloadUpdate', () => rpc.request.downloadUpdate({}))
+}
+
+export async function getUpdateStatus(): Promise<UpdateDownloadStatus> {
+  return rpc.request.getUpdateStatus({})
+}
+
+export async function applyUpdate(): Promise<void> {
+  return trackedRequest('applyUpdate', () => rpc.request.applyUpdate({}))
 }
 
 // Dev tools commands

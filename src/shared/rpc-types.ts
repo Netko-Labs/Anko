@@ -127,6 +127,24 @@ export interface SavedQuery {
   updatedAt: string
 }
 
+export interface UpdateCheckResult {
+  currentVersion: string
+  version: string
+  updateAvailable: boolean
+  error: string
+}
+
+export interface UpdateDownloadStatus {
+  status: string
+  message: string
+  progress?: number
+  bytesDownloaded?: number
+  totalBytes?: number
+  isComplete: boolean
+  isError: boolean
+  errorMessage?: string
+}
+
 export type AnkoRPC = {
   bun: RPCSchema<{
     requests: {
@@ -195,6 +213,12 @@ export type AnkoRPC = {
         response: SavedQuery
       }
       deleteSavedQuery: { params: { id: string }; response: undefined }
+
+      // Update commands
+      checkForUpdate: { params: {}; response: UpdateCheckResult }
+      downloadUpdate: { params: {}; response: undefined }
+      getUpdateStatus: { params: {}; response: UpdateDownloadStatus }
+      applyUpdate: { params: {}; response: undefined }
 
       // Utility commands
       clearAllData: { params: {}; response: undefined }

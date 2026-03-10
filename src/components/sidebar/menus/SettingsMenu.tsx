@@ -6,7 +6,8 @@ import {
   IconSettings,
   IconSun,
 } from '@tabler/icons-react'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
+import { toast } from 'sonner'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,12 +18,55 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { checkForUpdate, fetchChangelogForVersion } from '@/lib/updater'
 import { cn } from '@/lib/utils'
+import { useUpdateStore } from '@/stores/update'
 import { DevToolsDialog } from '../dialogs/DevToolsDialog'
 import type { SettingsMenuProps } from './definitions'
 
 export function SettingsMenu({ theme, onThemeChange }: SettingsMenuProps) {
   const [devToolsOpen, setDevToolsOpen] = useState(false)
+  const setUpdateAvailable = useUpdateStore((s) => s.setUpdateAvailable)
+  const setModalOpen = useUpdateStore((s) => s.setModalOpen)
+
+  const handleCheckForUpdates = useCallback(async () => {
+    const toastId = toast.loading('Checking for updates...')
+
+    try {
+      const result = await checkForUpdate()
+
+      if (result.available && result.info) {
+        const changelogBody = await fetchChangelogForVersion(result.info.version)
+        const enrichedInfo = {
+          ...result.info,
+          body: changelogBody ?? result.info.body,
+        }
+
+        setUpdateAvailable(true, enrichedInfo, result.update)
+
+        toast.success('Update available!', {
+          id: toastId,
+          description: `Version ${result.info.version} is ready to download`,
+          duration: 10000,
+          action: {
+            label: 'View Details',
+            onClick: () => setModalOpen(true),
+          },
+        })
+      } else {
+        toast.success("You're up to date!", {
+          id: toastId,
+          description: 'No new updates available',
+          duration: 3000,
+        })
+      }
+    } catch {
+      toast.error('Failed to check for updates', {
+        id: toastId,
+        duration: 5000,
+      })
+    }
+  }, [setUpdateAvailable, setModalOpen])
 
   return (
     <>
@@ -82,7 +126,7 @@ export function SettingsMenu({ theme, onThemeChange }: SettingsMenuProps) {
               </>
             )}
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => console.log('Check for updates')}>
+            <DropdownMenuItem onClick={handleCheckForUpdates}>
               <IconRefresh className="size-4 mr-2" />
               Check for updates
             </DropdownMenuItem>
