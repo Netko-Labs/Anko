@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   check-release:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     outputs:
       should_release: ${{ steps.check.outputs.should_release }}
       version: ${{ steps.check.outputs.version }}
@@ -32,7 +32,7 @@ jobs:
   lint-and-typecheck:
     needs: check-release
     if: needs.check-release.outputs.should_release == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
 
@@ -53,7 +53,7 @@ jobs:
   generate-changelog:
     needs: [check-release, lint-and-typecheck]
     if: needs.check-release.outputs.should_release == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions:
       contents: write
     outputs:
@@ -168,7 +168,7 @@ jobs:
   create-release:
     needs: [check-release, generate-changelog]
     if: needs.check-release.outputs.should_release == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions:
       contents: write
     outputs:
@@ -261,7 +261,7 @@ jobs:
   publish-release:
     needs: [check-release, create-release, build]
     if: needs.check-release.outputs.should_release == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions:
       contents: write
     steps:
