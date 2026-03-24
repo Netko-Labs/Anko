@@ -8,7 +8,7 @@ jobs:
   fix-commit:
     # Skip if commit is from github-actions bot (to avoid infinite loops)
     if: github.actor != 'github-actions[bot]'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions:
       contents: write
     steps:
