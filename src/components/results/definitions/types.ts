@@ -30,6 +30,7 @@ export interface DataTableProps {
   onUndoRowDelete?: (changeId: string) => void
   onRemoveNewRow?: (changeId: string) => void
   onUpdateNewRowCell?: (changeId: string, columnName: string, newValue: unknown) => void
+  onTableReady?: (table: import('@tanstack/react-table').Table<Record<string, unknown>>) => void
 }
 
 export interface ColumnMeta {
@@ -55,4 +56,5 @@ export interface FilterBarProps {
   columns: ColumnInfo[]
   filters: FilterCondition[]
   onFiltersChange: (filters: FilterCondition[]) => void
+  startSlot?: React.ReactNode
 }

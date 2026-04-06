@@ -29,7 +29,7 @@ export class MySqlConnector implements DatabaseConnector {
         username: config.username,
         password: config.password,
         database,
-        dialect: 'mysql',
+        adapter: 'mysql',
       })
 
       // Test the connection
@@ -159,10 +159,12 @@ export class MySqlConnector implements DatabaseConnector {
     if (!tableName) return []
 
     try {
-      const rows = await this.sql.unsafe(
-        'SELECT COLUMN_NAME, DATA_TYPE FROM information_schema.COLUMNS WHERE TABLE_NAME = ? ORDER BY ORDINAL_POSITION',
-        [tableName],
-      )
+      const rows = await this.sql`
+        SELECT COLUMN_NAME, DATA_TYPE
+        FROM information_schema.COLUMNS
+        WHERE TABLE_NAME = ${tableName}
+        ORDER BY ORDINAL_POSITION
+      `
 
       if (!Array.isArray(rows)) return []
       return rows.map((row: Record<string, unknown>) => ({
@@ -176,7 +178,7 @@ export class MySqlConnector implements DatabaseConnector {
   }
 
   async getDatabases(): Promise<SchemaInfo[]> {
-    const rows = await this.sql.unsafe('SHOW DATABASES')
+    const rows = await this.sql`SHOW DATABASES`
     if (!Array.isArray(rows)) return []
 
     return rows
@@ -193,13 +195,12 @@ export class MySqlConnector implements DatabaseConnector {
   }
 
   async getTables(database: string, _schema: string): Promise<TableInfo[]> {
-    const rows = await this.sql.unsafe(
-      `SELECT TABLE_NAME, TABLE_SCHEMA, TABLE_TYPE, TABLE_ROWS
-       FROM information_schema.TABLES
-       WHERE TABLE_SCHEMA = ?
-       ORDER BY TABLE_NAME`,
-      [database],
-    )
+    const rows = await this.sql`
+      SELECT TABLE_NAME, TABLE_SCHEMA, TABLE_TYPE, TABLE_ROWS
+      FROM information_schema.TABLES
+      WHERE TABLE_SCHEMA = ${database}
+      ORDER BY TABLE_NAME
+    `
 
     if (!Array.isArray(rows)) return []
     return rows.map((row: Record<string, unknown>) => ({
@@ -211,13 +212,12 @@ export class MySqlConnector implements DatabaseConnector {
   }
 
   async getColumns(database: string, _schema: string, table: string): Promise<ColumnDetail[]> {
-    const rows = await this.sql.unsafe(
-      `SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_KEY, COLUMN_DEFAULT, EXTRA
-       FROM information_schema.COLUMNS
-       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?
-       ORDER BY ORDINAL_POSITION`,
-      [database, table],
-    )
+    const rows = await this.sql`
+      SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_KEY, COLUMN_DEFAULT, EXTRA
+      FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = ${database} AND TABLE_NAME = ${table}
+      ORDER BY ORDINAL_POSITION
+    `
 
     if (!Array.isArray(rows)) return []
     return rows.map((row: Record<string, unknown>) => ({

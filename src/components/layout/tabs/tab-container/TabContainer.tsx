@@ -220,16 +220,20 @@ export function TabContainer() {
                   'group relative flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-t-md border-t border-l border-r transition-all shrink-0 cursor-pointer select-none',
                   isActive
                     ? 'bg-background border-border text-foreground'
-                    : 'bg-muted/50 border-transparent text-muted-foreground hover:text-foreground hover:bg-muted',
+                    : 'bg-muted/50 border-transparent text-muted-foreground hover:text-foreground hover:bg-primary/10 [&:hover_svg]:text-primary',
                   isDragging && 'opacity-50 cursor-grabbing',
                   isDragOver && 'border-l-2 border-l-blue-500 bg-blue-500/10',
                   !isAnyDragging && !isEditing && 'cursor-grab',
                 )}
               >
+                {/* Active tab bottom indicator */}
+                {isActive && (
+                  <span className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-primary" />
+                )}
                 {isTableTab ? (
-                  <IconTable className={cn('size-3.5', isAnyDragging && 'pointer-events-none')} />
+                  <IconTable className={cn('size-3.5', isActive && 'text-primary', isAnyDragging && 'pointer-events-none')} />
                 ) : (
-                  <Code2 className={cn('size-3.5', isAnyDragging && 'pointer-events-none')} />
+                  <Code2 className={cn('size-3.5', isActive && 'text-primary', isAnyDragging && 'pointer-events-none')} />
                 )}
                 {isEditing ? (
                   <input
@@ -304,7 +308,7 @@ export function TabContainer() {
         {/* New Tab Button */}
         <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
           <DropdownMenuTrigger
-            className="flex items-center justify-center size-7 mx-1 rounded-md transition-colors shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted"
+            className="flex items-center justify-center size-7 mx-1 rounded-md transition-colors shrink-0 text-primary/70 hover:text-primary hover:bg-primary/10"
             render={<button type="button" />}
           >
             <Plus className="size-4" />

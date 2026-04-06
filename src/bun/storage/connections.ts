@@ -2,7 +2,7 @@ import type { Database } from 'bun:sqlite'
 import { AppError } from '../error'
 import { decrypt, encrypt } from './encryption'
 
-type DatabaseDriver = 'mysql' | 'postgresql'
+type DatabaseDriver = 'mysql' | 'postgresql' | 'sqlite'
 
 export interface ConnectionConfig {
   name: string
@@ -126,7 +126,7 @@ export class ConnectionStorage {
       port: row.port,
       username: row.username,
       database: row.database_name ?? undefined,
-      driver: (row.driver === 'postgresql' ? 'postgresql' : 'mysql') as DatabaseDriver,
+      driver: parseDriver(row.driver),
     }))
   }
 
@@ -156,7 +156,7 @@ export class ConnectionStorage {
       port: row.port,
       username: row.username,
       database: row.database_name ?? undefined,
-      driver: (row.driver === 'postgresql' ? 'postgresql' : 'mysql') as DatabaseDriver,
+      driver: parseDriver(row.driver),
       encrypted_password: Buffer.from(row.encrypted_password),
     }
   }
@@ -184,4 +184,10 @@ export class ConnectionStorage {
   clearAll(): void {
     this.db.prepare('DELETE FROM connections').run()
   }
+}
+
+function parseDriver(value: string): DatabaseDriver {
+  if (value === 'postgresql') return 'postgresql'
+  if (value === 'sqlite') return 'sqlite'
+  return 'mysql'
 }

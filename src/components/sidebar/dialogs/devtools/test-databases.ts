@@ -25,7 +25,7 @@ export const TEST_DATABASES: ConnectionConfig[] = [
     host: 'localhost',
     port: 3307,
     username: 'anko',
-    password: 'anko123',
+    password: ' ',
     database: 'testdb',
     driver: 'mysql' as DatabaseDriver,
   },
@@ -46,5 +46,13 @@ export const TEST_DATABASES: ConnectionConfig[] = [
     password: 'anko123',
     database: 'legacydb',
     driver: 'mysql' as DatabaseDriver,
+  },
+  {
+    name: 'SQLite Music DB',
+    host: './docker/sqlite/data/music.db',
+    port: 0,
+    username: '',
+    password: '',
+    driver: 'sqlite' as DatabaseDriver,
   },
 ]

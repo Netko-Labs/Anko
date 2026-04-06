@@ -12,7 +12,6 @@ export function CellDetails({ value, columnName, columnType }: CellDetailsProps)
 
     const strValue = formatValue(value)
 
-    // Pretty print JSON if it looks like JSON
     if (isJsonLike(strValue)) {
       return prettyPrintJson(strValue)
     }
@@ -30,27 +29,28 @@ export function CellDetails({ value, columnName, columnType }: CellDetailsProps)
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-3 py-2 border-b">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="text-xs font-medium text-foreground truncate">{columnName}</span>
-          <span className="text-[10px] text-muted-foreground/60">{columnType}</span>
+      {/* Header */}
+      <div className="flex items-center justify-between px-3 h-8 border-b border-border shrink-0">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="text-[11px] font-medium text-foreground truncate">{columnName}</span>
+          <span className="text-[10px] text-primary/60 font-mono shrink-0">{columnType}</span>
         </div>
         <button
           type="button"
           onClick={handleCopy}
-          className="p-1 rounded hover:bg-accent transition-colors"
+          className="size-5 rounded flex items-center justify-center text-primary/70 hover:text-primary transition-colors"
           title="Copy value"
         >
-          <IconClipboard className="size-3.5 text-muted-foreground" />
+          <IconClipboard className="size-3.5" />
         </button>
       </div>
+
+      {/* Value */}
       <ScrollArea className="flex-1">
         <div className="p-3">
           <div
-            className={`text-sm ${isNull ? 'text-muted-foreground italic' : 'text-foreground'} ${
-              isJson
-                ? 'font-mono text-xs whitespace-pre-wrap break-all'
-                : 'whitespace-pre-wrap break-words'
+            className={`text-xs font-mono leading-relaxed ${isNull ? 'text-primary/40 italic' : 'text-foreground/90'} ${
+              isJson ? 'text-[11px] whitespace-pre-wrap break-all' : 'whitespace-pre-wrap break-words'
             }`}
           >
             {formattedValue}

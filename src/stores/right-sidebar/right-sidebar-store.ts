@@ -9,6 +9,7 @@ const MAX_WIDTH = 500
 export const useRightSidebarStore = create<RightSidebarStore>((set, get) => ({
   open: false,
   width: DEFAULT_WIDTH,
+  activeTab: 'data',
   context: { type: 'none' },
   currentTableInfo: null,
 
@@ -16,11 +17,22 @@ export const useRightSidebarStore = create<RightSidebarStore>((set, get) => ({
 
   setWidth: (width) => set({ width: Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, width)) }),
 
+  setActiveTab: (tab) => set({ activeTab: tab, open: true }),
+
   toggle: () => set((state) => ({ open: !state.open })),
+
+  toggleTab: (tab) => {
+    const { open, activeTab } = get()
+    if (open && activeTab === tab) {
+      set({ open: false })
+    } else {
+      set({ activeTab: tab, open: true })
+    }
+  },
 
   setContext: (context) => {
     storeLogger.debug('setRightSidebarContext', { type: context.type })
-    set({ context, open: true })
+    set({ context, open: true, activeTab: 'data' })
   },
 
   clearContext: () => {

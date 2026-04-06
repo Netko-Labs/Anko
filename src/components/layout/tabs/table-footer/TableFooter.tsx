@@ -187,7 +187,7 @@ export function TableFooter({
                 variant="ghost"
                 size="sm"
                 onClick={onAddRow}
-                className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground hover:bg-accent"
+                className="h-6 w-6 p-0 text-primary/70 hover:text-primary hover:bg-primary/10"
                 title="Add new row"
               >
                 <Plus className="size-3.5" />

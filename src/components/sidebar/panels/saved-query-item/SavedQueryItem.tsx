@@ -41,7 +41,7 @@ export function SavedQueryItem({
           </div>
 
           {query.description && (
-            <div className="text-[10px] text-muted-foreground/60 truncate mt-0.5">
+            <div className="text-[10px] text-muted-foreground/80 truncate mt-0.5">
               {query.description}
             </div>
           )}

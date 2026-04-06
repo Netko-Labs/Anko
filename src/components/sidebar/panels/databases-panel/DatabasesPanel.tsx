@@ -15,7 +15,6 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from '@/components/ui/context-menu'
-import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { formatErrorMessage } from '@/lib/error-utils'
 import { connect, deleteConnection, getConnectionConfig } from '@/lib/rpc'
@@ -31,7 +30,6 @@ export function DatabasesPanel({
   onEditConnection,
   onConnectionSelect,
 }: DatabasesPanelProps) {
-  const [searchQuery, setSearchQuery] = useState('')
   const [connectingId, setConnectingId] = useState<string | null>(null)
   const [connectedExpanded, setConnectedExpanded] = useState(true)
   const [savedExpanded, setSavedExpanded] = useState(true)
@@ -46,24 +44,12 @@ export function DatabasesPanel({
     return savedConnections.filter((conn) => activeWorkspace.connection_ids.includes(conn.id))
   }, [savedConnections, activeWorkspace])
 
-  // Filter by search
-  const filteredConnections = useMemo(() => {
-    if (!searchQuery.trim()) return workspaceConnections
-    const query = searchQuery.toLowerCase()
-    return workspaceConnections.filter(
-      (conn) =>
-        conn.name.toLowerCase().includes(query) ||
-        conn.host.toLowerCase().includes(query) ||
-        conn.database?.toLowerCase().includes(query),
-    )
-  }, [workspaceConnections, searchQuery])
-
   // Separate connected and disconnected connections
   const { connectedList, disconnectedList } = useMemo(() => {
     const connected: { conn: ConnectionInfo; active: ActiveConnection }[] = []
     const disconnected: ConnectionInfo[] = []
 
-    for (const conn of filteredConnections) {
+    for (const conn of workspaceConnections) {
       const activeConn = activeConnections.find((c) => c.id === conn.id)
       if (activeConn) {
         connected.push({ conn, active: activeConn })
@@ -73,7 +59,7 @@ export function DatabasesPanel({
     }
 
     return { connectedList: connected, disconnectedList: disconnected }
-  }, [filteredConnections, activeConnections])
+  }, [workspaceConnections, activeConnections])
 
   // Handle connect
   const handleConnect = async (info: ConnectionInfo) => {
@@ -151,32 +137,24 @@ export function DatabasesPanel({
   return (
     <div className="flex flex-col h-full min-h-0">
       {/* Header */}
-      <div className="flex flex-col gap-2 border-b px-3 py-2.5">
-        <div className="flex w-full items-center justify-between">
-          <div className="text-foreground text-sm font-medium">Connections</div>
-          <button
-            type="button"
-            onClick={onNewConnection}
-            className="size-6 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center transition-colors"
-            title="New Connection"
-          >
-            <IconPlus className="size-3.5" />
-          </button>
-        </div>
-        <Input
-          placeholder="Search..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="h-7 text-xs"
-        />
+      <div className="group/header flex items-center justify-between border-b border-border px-3 h-8">
+        <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">Connections</span>
+        <button
+          type="button"
+          onClick={onNewConnection}
+          className="size-5 rounded flex items-center justify-center text-primary/70 hover:text-primary transition-colors"
+          title="New Connection"
+        >
+          <IconPlus className="size-3.5" />
+        </button>
       </div>
 
       {/* Tree content */}
       <ScrollArea className="flex-1 min-h-0">
         <div className="p-2 space-y-0.5">
-          {filteredConnections.length === 0 ? (
+          {workspaceConnections.length === 0 ? (
             <div className="p-4 text-center text-sm text-muted-foreground">
-              {searchQuery ? 'No connections found' : 'No connections yet'}
+              No connections yet
             </div>
           ) : (
             <>
@@ -218,7 +196,7 @@ export function DatabasesPanel({
                         savedExpanded ? 'rotate-90' : ''
                       }`}
                     />
-                    <span className="size-1.5 rounded-full bg-muted-foreground/30" />
+                    <span className="size-1.5 rounded-full bg-muted-foreground/50" />
                     <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">
                       Saved ({disconnectedList.length})
                     </span>
@@ -261,7 +239,7 @@ function DisconnectedConnection({
           icon={
             <DatabaseTypeIcon
               driver={connection.driver}
-              className="size-4 text-muted-foreground/50"
+              className="size-4 text-muted-foreground/70"
             />
           }
           isExpandable={false}
@@ -269,7 +247,7 @@ function DisconnectedConnection({
           onClick={onConnect}
           onDoubleClick={onConnect}
           level={0}
-          className="opacity-70 hover:opacity-100"
+          className="opacity-80 hover:opacity-100"
         />
       </ContextMenuTrigger>
       <ContextMenuContent>

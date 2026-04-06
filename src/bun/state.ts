@@ -1,6 +1,7 @@
 import type { ConnectionConfig, DatabaseConnector } from './db/connector'
 import { MySqlConnector } from './db/mysql'
 import { PostgresConnector } from './db/postgres'
+import { SqliteConnector } from './db/sqlite'
 import { AppError } from './error'
 import { Storage } from './storage'
 
@@ -21,6 +22,8 @@ export class AppState {
     let connector: DatabaseConnector
     if (config.driver === 'mysql') {
       connector = await MySqlConnector.connect(config)
+    } else if (config.driver === 'sqlite') {
+      connector = await SqliteConnector.connect(config)
     } else {
       connector = await PostgresConnector.connect(config)
     }

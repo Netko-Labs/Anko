@@ -55,35 +55,35 @@
 .dark {
   --background: oklch(0 0 0);
   --foreground: oklch(1 0 0);
-  --card: oklch(0.14 0 0);
+  --card: oklch(0.08 0 0);
   --card-foreground: oklch(1 0 0);
-  --popover: oklch(0.18 0 0);
+  --popover: oklch(0.12 0 0);
   --popover-foreground: oklch(1 0 0);
   --primary: oklch(0.66 0.21 354);
   --primary-foreground: oklch(0 0 0);
-  --secondary: oklch(0.25 0 0);
+  --secondary: oklch(0.16 0 0);
   --secondary-foreground: oklch(1 0 0);
-  --muted: oklch(0.23 0 0);
+  --muted: oklch(0.14 0 0);
   --muted-foreground: oklch(0.72 0 0);
-  --accent: oklch(0.32 0 0);
+  --accent: oklch(0.20 0 0);
   --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.69 0.2 23.91);
   --destructive-foreground: oklch(0 0 0);
-  --border: oklch(0.26 0 0);
-  --input: oklch(0.32 0 0);
+  --border: oklch(0.22 0 0);
+  --input: oklch(0.20 0 0);
   --ring: oklch(0.72 0 0);
   --chart-1: oklch(0.82 0.11 346);
   --chart-2: oklch(0.73 0.18 350);
   --chart-3: oklch(0.66 0.21 354);
   --chart-4: oklch(0.59 0.22 1);
   --chart-5: oklch(0.52 0.2 4);
-  --sidebar: oklch(0.18 0 0);
+  --sidebar: oklch(0.06 0 0);
   --sidebar-foreground: oklch(1 0 0);
   --sidebar-primary: oklch(0.73 0.18 350);
   --sidebar-primary-foreground: oklch(0 0 0);
-  --sidebar-accent: oklch(0.32 0 0);
+  --sidebar-accent: oklch(0.18 0 0);
   --sidebar-accent-foreground: oklch(1 0 0);
-  --sidebar-border: oklch(0.32 0 0);
+  --sidebar-border: oklch(0.20 0 0);
   --sidebar-ring: oklch(0.72 0 0);
 }
 
@@ -137,12 +137,43 @@
     @apply font-sans bg-background text-foreground;
     /* Disable bouncy scroll effect on macOS */
     overscroll-behavior: none;
+    /* Desktop app — disable text selection globally */
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  /* Re-enable selection for interactive content */
+  input, textarea, [contenteditable], .cm-editor, pre, code, [data-slot="dialog-content"] {
+    -webkit-user-select: text;
+    user-select: text;
   }
   html {
     @apply font-sans;
     /* Disable bouncy scroll effect on macOS */
     overscroll-behavior: none;
   }
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 /* Sonner Toast Styles */

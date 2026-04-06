@@ -11,7 +11,7 @@ export function DataTableHeader({ header }: DataTableHeaderProps) {
   const sortDirection = header.column.getIsSorted()
 
   if (meta?.isRowNumber) {
-    return <span className="text-muted-foreground">#</span>
+    return <span className="text-primary/80">#</span>
   }
 
   const handleKeyDown = canSort
@@ -38,15 +38,15 @@ export function DataTableHeader({ header }: DataTableHeaderProps) {
     >
       {meta?.isPrimaryKey && <IconKey className="size-3 text-primary shrink-0" />}
       <span>{header.column.columnDef.header as string}</span>
-      <span className="text-muted-foreground font-normal">
+      <span className="text-primary/70 font-normal">
         {getDisplayType(meta?.dataType || '')}
       </span>
       {canSort && (
         <span className="ml-1">
           {sortDirection === 'asc' ? (
-            <ArrowUp className="size-3" />
+            <ArrowUp className="size-3 text-primary" />
           ) : sortDirection === 'desc' ? (
-            <ArrowDown className="size-3" />
+            <ArrowDown className="size-3 text-primary" />
           ) : (
             <ArrowUpDown className="size-3 opacity-30" />
           )}

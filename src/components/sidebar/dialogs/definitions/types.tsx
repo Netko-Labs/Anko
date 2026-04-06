@@ -9,8 +9,3 @@ export interface ConfirmDialogProps {
   isLoading?: boolean
   variant?: 'default' | 'destructive'
 }
-
-export interface DevToolsDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}

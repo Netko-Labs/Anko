@@ -11,6 +11,7 @@ import {
   listWorkspaces,
   saveConnection,
 } from '@/lib/rpc'
+import { broadcastInvalidation } from '@/lib/data-bridge'
 import { fetchLatestChangelog } from '@/lib/updater'
 import { useConnectionStore } from '@/stores/connection'
 import { useUpdateStore } from '@/stores/update'
@@ -24,7 +25,7 @@ interface ConfirmDialogState {
   variant: 'default' | 'destructive'
 }
 
-export function useDevToolsActions(onOpenChange: (open: boolean) => void) {
+export function useDevToolsActions() {
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -95,6 +96,7 @@ export function useDevToolsActions(onOpenChange: (open: boolean) => void) {
       const defaultWorkspace = createDefaultWorkspace()
       setWorkspaces([defaultWorkspace])
       setActiveWorkspace(defaultWorkspace.id)
+      broadcastInvalidation('workspaces')
       toast.success('Workspaces reset', {
         description: 'All workspaces deleted, default workspace recreated',
       })
@@ -114,6 +116,7 @@ export function useDevToolsActions(onOpenChange: (open: boolean) => void) {
       await clearAllData()
       const connections = await listConnections()
       setSavedConnections(connections)
+      broadcastInvalidation('all')
       toast.success('All data cleared', {
         description: 'Connections and workspaces have been deleted',
       })
@@ -194,6 +197,7 @@ export function useDevToolsActions(onOpenChange: (open: boolean) => void) {
 
     const connections = await listConnections()
     setSavedConnections(connections)
+    broadcastInvalidation('connections', 'workspaces')
 
     setIsLoading(false)
 
@@ -278,7 +282,6 @@ export function useDevToolsActions(onOpenChange: (open: boolean) => void) {
         null,
       )
       setModalOpen(true)
-      onOpenChange(false)
 
       toast.success('Update modal opened', {
         description: `Testing with changelog v${parsed.version}`,

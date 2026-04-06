@@ -1,7 +1,6 @@
 import { IconPlus } from '@tabler/icons-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { createSavedQuery, deleteSavedQuery, listSavedQueries, updateSavedQuery } from '@/lib/rpc'
 import { useConnectionStore } from '@/stores/connection'
@@ -12,7 +11,6 @@ import { SaveQueryDialog } from '../save-query-dialog/SaveQueryDialog'
 import { SavedQueryItem } from '../saved-query-item/SavedQueryItem'
 
 export function SavedQueriesPanel() {
-  const [searchQuery, setSearchQuery] = useState('')
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingQuery, setEditingQuery] = useState<SavedQuery | null>(null)
 
@@ -45,26 +43,11 @@ export function SavedQueriesPanel() {
   }, [setQueries, setLoading])
 
   const filteredQueries = useMemo(() => {
-    let filtered = queries
-
-    if (activeWorkspaceId && activeWorkspaceId !== 'default') {
-      filtered = filtered.filter(
-        (q) => q.workspaceId === activeWorkspaceId || q.workspaceId === null,
-      )
-    }
-
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase()
-      filtered = filtered.filter(
-        (q) =>
-          q.name.toLowerCase().includes(query) ||
-          q.query.toLowerCase().includes(query) ||
-          q.description?.toLowerCase().includes(query),
-      )
-    }
-
-    return filtered
-  }, [queries, searchQuery, activeWorkspaceId])
+    if (!activeWorkspaceId || activeWorkspaceId === 'default') return queries
+    return queries.filter(
+      (q) => q.workspaceId === activeWorkspaceId || q.workspaceId === null,
+    )
+  }, [queries, activeWorkspaceId])
 
   const handleDelete = useCallback(
     async (id: string) => {
@@ -156,24 +139,16 @@ export function SavedQueriesPanel() {
   return (
     <>
       <div className="flex flex-col h-full min-h-0">
-        <div className="flex flex-col gap-2 border-b px-3 py-2.5">
-          <div className="flex w-full items-center justify-between">
-            <div className="text-foreground text-sm font-medium">Saved Queries</div>
-            <button
-              type="button"
-              onClick={handleNewQuery}
-              className="size-6 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center transition-colors"
-              title="New Saved Query"
-            >
-              <IconPlus className="size-3.5" />
-            </button>
-          </div>
-          <Input
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 text-xs"
-          />
+        <div className="group/header flex items-center justify-between border-b border-border px-3 h-8">
+          <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">Saved Queries</span>
+          <button
+            type="button"
+            onClick={handleNewQuery}
+            className="size-5 rounded flex items-center justify-center text-primary/70 hover:text-primary transition-colors"
+            title="New Saved Query"
+          >
+            <IconPlus className="size-3.5" />
+          </button>
         </div>
 
         <ScrollArea className="flex-1 min-h-0">
@@ -182,7 +157,7 @@ export function SavedQueriesPanel() {
               <div className="p-4 text-center text-sm text-muted-foreground">Loading...</div>
             ) : filteredQueries.length === 0 ? (
               <div className="p-4 text-center text-sm text-muted-foreground">
-                {searchQuery ? 'No matching queries' : 'No saved queries yet'}
+                No saved queries yet
               </div>
             ) : (
               filteredQueries.map((query) => (

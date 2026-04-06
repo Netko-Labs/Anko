@@ -7,7 +7,7 @@ import {
   useReactTable,
   type VisibilityState,
 } from '@tanstack/react-table'
-import { memo, useCallback, useMemo, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -40,14 +40,12 @@ import {
 import { EditableCell } from '../data-table/editable-cell/EditableCell'
 import { DataTableHeader } from '../data-table/header/DataTableHeader'
 import { RowActions } from '../data-table/row-actions/RowActions'
-import { DataTableToolbar } from '../data-table/toolbar/DataTableToolbar'
 import { convertRowsToObjects } from '../data-table/utils'
 import type { ColumnMeta, DataTableProps } from '../definitions'
 
 export const DataTable = memo(function DataTable({
   result,
   enableSorting = true,
-  enableColumnVisibility = true,
   isEditMode = false,
   pendingChanges = EMPTY_CHANGES,
   primaryKeyColumns = EMPTY_PK_COLUMNS,
@@ -56,6 +54,7 @@ export const DataTable = memo(function DataTable({
   onUndoRowDelete,
   onRemoveNewRow,
   onUpdateNewRowCell,
+  onTableReady,
 }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -129,6 +128,11 @@ export const DataTable = memo(function DataTable({
     },
   })
 
+  // Expose table instance to parent
+  useEffect(() => {
+    onTableReady?.(table)
+  }, [table, onTableReady])
+
   // Handle cell value change
   const handleCellValueChange = useCallback(
     (
@@ -164,9 +168,8 @@ export const DataTable = memo(function DataTable({
 
   return (
     <div className="h-full flex flex-col bg-background overflow-hidden">
-      {enableColumnVisibility && <DataTableToolbar table={table} />}
       <ContextMenu>
-        <ContextMenuTrigger>
+        <ContextMenuTrigger className="flex-1 flex flex-col min-h-0">
           <div className="flex-1 overflow-auto">
             <Table className="w-full text-xs border-collapse">
               <TableHeader className="sticky top-0 z-10">
@@ -198,7 +201,7 @@ export const DataTable = memo(function DataTable({
                               tabIndex={0}
                               onMouseDown={header.getResizeHandler()}
                               onTouchStart={header.getResizeHandler()}
-                              className="absolute right-0 top-0 h-full w-1 cursor-col-resize bg-border opacity-0 hover:opacity-100 focus:opacity-100"
+                              className="absolute right-0 top-0 h-full w-1 cursor-col-resize bg-primary opacity-0 hover:opacity-100 focus:opacity-100"
                             />
                           )}
                         </TableHead>
@@ -230,7 +233,7 @@ export const DataTable = memo(function DataTable({
                         key={row.id}
                         onClick={() => handleRowClick(rowData)}
                         className={cn(
-                          'border-b border-border/50 hover:bg-muted/40 transition-colors cursor-pointer',
+                          'border-b border-border/50 hover:bg-primary/10 transition-colors cursor-pointer',
                           rowIndex % 2 === 1 ? 'bg-muted/20' : 'bg-background',
                           isDeleted && 'bg-red-500/10 line-through opacity-60',
                           isNewRow && 'bg-emerald-500/10 border-l-2 border-l-emerald-500',
@@ -286,7 +289,7 @@ export const DataTable = memo(function DataTable({
                                 meta?.isRowNumber
                                   ? cn(
                                       'text-muted-foreground w-12',
-                                      rowIndex % 2 === 1 ? 'bg-muted/30' : 'bg-background',
+                                      rowIndex % 2 === 1 ? 'bg-muted' : 'bg-background',
                                     )
                                   : 'text-foreground max-w-xs truncate',
                                 isModified && 'bg-amber-500/10 border-l-2 border-l-amber-500',

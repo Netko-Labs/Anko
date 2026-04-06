@@ -1,6 +1,6 @@
 import type { ActiveConnection, ColumnDetail, SchemaInfo, TableInfo } from '@/types'
 
-export type NavItemId = 'connections' | 'saved-queries' | 'history'
+export type NavItemId = 'connections' | 'saved-queries' | 'history' | 'search'
 
 export interface NavItem {
   id: NavItemId

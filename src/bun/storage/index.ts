@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { ConnectionStorage } from './connections'
 import { QueryHistoryStorage } from './query-history'
 import { SavedQueriesStorage } from './saved-queries'
+import { WindowStateStorage } from './window-state'
 import { WorkspaceStorage } from './workspaces'
 
 export class Storage {
@@ -11,6 +12,7 @@ export class Storage {
   public readonly workspaces: WorkspaceStorage
   public readonly queryHistory: QueryHistoryStorage
   public readonly savedQueries: SavedQueriesStorage
+  public readonly windowState: WindowStateStorage
 
   constructor(appDataDir: string) {
     mkdirSync(appDataDir, { recursive: true })
@@ -24,5 +26,6 @@ export class Storage {
     this.workspaces = new WorkspaceStorage(db)
     this.queryHistory = new QueryHistoryStorage(db)
     this.savedQueries = new SavedQueriesStorage(db)
+    this.windowState = new WindowStateStorage(db)
   }
 }

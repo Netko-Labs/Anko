@@ -1,4 +1,4 @@
-export type DatabaseDriver = 'mysql' | 'postgresql'
+export type DatabaseDriver = 'mysql' | 'postgresql' | 'sqlite'
 
 export interface ColumnInfo {
   name: string
