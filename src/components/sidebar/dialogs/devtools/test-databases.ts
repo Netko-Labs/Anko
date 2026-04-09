@@ -25,7 +25,7 @@ export const TEST_DATABASES: ConnectionConfig[] = [
     host: 'localhost',
     port: 3307,
     username: 'anko',
-    password: ' ',
+    password: 'anko123',
     database: 'testdb',
     driver: 'mysql' as DatabaseDriver,
   },

@@ -187,7 +187,8 @@ export class ConnectionStorage {
 }
 
 function parseDriver(value: string): DatabaseDriver {
+  if (value === 'mysql') return 'mysql'
   if (value === 'postgresql') return 'postgresql'
   if (value === 'sqlite') return 'sqlite'
-  return 'mysql'
+  throw new AppError(`Unknown database driver: ${value}`, 'INVALID_DRIVER')
 }

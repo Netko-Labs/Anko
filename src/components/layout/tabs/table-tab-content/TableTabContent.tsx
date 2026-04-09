@@ -32,6 +32,9 @@ export function TableTabContent({ tabId }: TableTabContentProps) {
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false)
   const [pendingNavigation, setPendingNavigation] = useState<(() => void) | null>(null)
   const [tableInstance, setTableInstance] = useState<Table<Record<string, unknown>> | null>(null)
+  const onTableReady = useCallback((instance: Table<Record<string, unknown>>) => {
+    setTableInstance(instance)
+  }, [])
 
   // Data loading hook
   const tableData = useTableData(tabId, tab, connection)
@@ -227,7 +230,7 @@ export function TableTabContent({ tabId }: TableTabContentProps) {
             onUndoRowDelete={handleUndoRowDelete}
             onRemoveNewRow={handleRemoveNewRow}
             onUpdateNewRowCell={handleUpdateNewRowCell}
-            onTableReady={setTableInstance}
+            onTableReady={onTableReady}
           />
         ) : (
           <ResultsTable result={tabResult} error={tab?.error} isExecuting={!!tabIsExecuting} />

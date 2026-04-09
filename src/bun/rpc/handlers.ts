@@ -302,6 +302,7 @@ export function createRpcHandler(
           if (win) win.setPosition(x, y)
         },
         openDevToolsWindow: () => {
+          if (!baseUrl.startsWith('http://localhost')) return
           let devWindow: BrowserWindow | null = null
           const devRpc = createRpcHandler(state, () => devWindow, baseUrl)
           devWindow = new BrowserWindow({
@@ -317,6 +318,7 @@ export function createRpcHandler(
             url: `${baseUrl}#devtools`,
             rpc: devRpc,
           })
+          devWindow.setAlwaysOnTop(true)
         },
       },
       messages: {},

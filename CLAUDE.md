@@ -22,9 +22,6 @@ Anko is a cross-platform SQL desktop client built with Electrobun (Bun), React, 
 bun install
 
 # Run in development mode (Vite dev server + Electrobun)
-bun run dev
-
-# Start the Electrobun app (connects to running Vite dev server)
 bun start
 
 # Build frontend only
@@ -32,6 +29,9 @@ bun run build
 
 # Build production app
 bun run build:app
+
+# Run tests
+bun test
 
 # Type check frontend only
 bun run tsc --noEmit

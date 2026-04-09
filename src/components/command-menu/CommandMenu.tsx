@@ -16,6 +16,7 @@ import {
 } from '@tabler/icons-react'
 import { useCallback, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
+import { useTheme } from '@/components/theme/ThemeProvider'
 import {
   Command,
   CommandDialog,
@@ -27,7 +28,6 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from '@/components/ui/command'
-import { useTheme } from '@/components/theme/ThemeProvider'
 import { formatErrorMessage } from '@/lib/error-utils'
 import { connect, getConnectionConfig, listQueryHistory, listSavedQueries } from '@/lib/rpc'
 import { ensureMinimumToastDuration } from '@/lib/toast-utils'

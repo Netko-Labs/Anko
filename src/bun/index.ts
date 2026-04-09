@@ -65,7 +65,7 @@ if (savedWindowState.isMaximized) {
 console.log(`[Anko] Window created, loading: ${url}`)
 
 // Periodically save window state (every 2s, only when not maximized to preserve normal frame)
-setInterval(() => {
+const windowStateSaveInterval = setInterval(() => {
   if (!mainWindow) return
   try {
     const maximized = mainWindow.isMaximized()
@@ -83,6 +83,9 @@ setInterval(() => {
     // Window may be closing
   }
 }, 2000)
+
+// Clear window state interval on exit
+process.on('beforeExit', () => clearInterval(windowStateSaveInterval))
 
 // Set up application menu (delayed to ensure window is fully initialized)
 setTimeout(() => {

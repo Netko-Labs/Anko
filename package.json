@@ -13,6 +13,7 @@
     "lint:fix": "biome lint --write .",
     "format": "biome format --write .",
     "check": "biome check .",
+    "test": "bun test",
     "prepare": "husky"
   },
   "dependencies": {

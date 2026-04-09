@@ -198,7 +198,7 @@ function generateTypeBox(tableName: string, columns: ColumnDetail[]): string {
   const name = toPascalCase(tableName)
   const fields = columns.map((c) => {
     let t = typeboxType(classifySqlType(c.data_type))
-    if (c.nullable) t = `Type.Optional(${t})`
+    if (c.nullable) t = `Type.Union([${t}, Type.Null()])`
     const comment = c.key ? ` // ${c.key}` : ''
     return `  ${c.name}: ${t},${comment}`
   })
