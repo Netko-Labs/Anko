@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.4.0] - 2026-04-09
+
+### Highlights
+SQLite support has finally arrived—your favorite lightweight database is now ready to party! Plus, we've given the UI a fresh coat of paint and added some dev tools to make debugging feel less like a raid you're unprepared for.
+
+### New Features ✨
+- **SQLite Support** – Connect to SQLite databases and stop pretending your CSV files are a real data solution
+- **Developer Tools** – New debugging and inspection tools to help you peek under the hood
+- **UI Refactor** – Streamlined interface that's snappier than a well-timed dodge roll
+
+### Under the Hood 🔧
+- Migrated CI workflows to Blacksmith for smoother builds and faster iterations
+- Added Claude-powered PR reviews because even code needs a second opinion sometimes
+
 ## [v0.3.3] - 2026-03-10
 
 ### Highlights
