@@ -3,6 +3,7 @@ name: CI
 on:
   pull_request:
     branches: [main]
+    types: [opened, synchronize, ready_for_review, reopened]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -43,3 +44,37 @@ jobs:
 
       - name: Build frontend
         run: bun run build
+
+  review:
+    needs: [lint-and-typecheck, build]
+    if: github.event.pull_request.draft == false
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            Review this PR focusing on:
+            - Code quality and adherence to project conventions
+            - Security concerns (OWASP top 10, no secrets in code)
+            - Zustand selector best practices (no function calls during render, stable dependencies)
+            - Type safety (no `any`, no ts-ignore/ts-expect-error)
+            - Dependency changes (flag unnecessary new dependencies)
+            - React performance (proper useMemo/useCallback usage, stable references)
+
+            Keep feedback actionable and concise. Use inline comments for specific issues.
+            If the PR looks good overall, approve it with `gh pr review --approve`.
+            If there are significant issues, request changes with `gh pr review --request-changes`.
+          claude_args: |
+            --allowedTools "Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr review:*),Read,Glob,Grep"
