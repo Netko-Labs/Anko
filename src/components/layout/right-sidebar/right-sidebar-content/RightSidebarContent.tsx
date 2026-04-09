@@ -1,18 +1,12 @@
 import { IconBraces, IconDatabase, IconTable } from '@tabler/icons-react'
-import { lazy, Suspense, useMemo } from 'react'
+import { useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { useRightSidebarStore } from '@/stores/right-sidebar'
 import type { TabId, TableInfo } from '@/stores/right-sidebar/definitions/types'
 import { DataTabContent } from '../data-tab-content/DataTabContent'
 import { RIGHT_SIDEBAR_VALUES } from '../definitions'
 import { TableSchemaView } from '../table-schema-view/TableSchemaView'
-import { UtilitiesTabFallback } from '../utilities-tab-fallback/UtilitiesTabFallback'
-
-const ZodGeneratorView = lazy(() =>
-  import('../zod-generator-view/ZodGeneratorView').then((module) => ({
-    default: module.ZodGeneratorView,
-  })),
-)
+import { ZodGeneratorView } from '../zod-generator-view/ZodGeneratorView'
 
 const TABS: { id: TabId; icon: typeof IconDatabase; label: string }[] = [
   { id: 'data', icon: IconDatabase, label: 'Data' },
@@ -107,9 +101,7 @@ export function RightSidebarContent() {
           />
         )}
         {activeTab === 'utilities' && hasTableContent && tableInfo && (
-          <Suspense fallback={<UtilitiesTabFallback />}>
-            <ZodGeneratorView tableName={tableInfo.tableName} columns={tableInfo.columns} />
-          </Suspense>
+          <ZodGeneratorView tableName={tableInfo.tableName} columns={tableInfo.columns} />
         )}
       </div>
     </div>

@@ -20,7 +20,9 @@ describe('extractTableFromSelect', () => {
 
   test('extracts table with GROUP BY and HAVING', () => {
     expect(
-      extractTableFromSelect('SELECT status, COUNT(*) FROM orders GROUP BY status HAVING COUNT(*) > 1'),
+      extractTableFromSelect(
+        'SELECT status, COUNT(*) FROM orders GROUP BY status HAVING COUNT(*) > 1',
+      ),
     ).toBe('orders')
   })
 
@@ -45,9 +47,9 @@ describe('extractTableFromSelect', () => {
   })
 
   test('handles JOIN clauses', () => {
-    expect(extractTableFromSelect('SELECT * FROM users JOIN orders ON users.id = orders.user_id')).toBe(
-      'users',
-    )
+    expect(
+      extractTableFromSelect('SELECT * FROM users JOIN orders ON users.id = orders.user_id'),
+    ).toBe('users')
   })
 
   test('handles LEFT JOIN', () => {

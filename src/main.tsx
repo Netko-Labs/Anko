@@ -1,14 +1,11 @@
-import { StrictMode, lazy, Suspense } from 'react'
+import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
+import App from './App'
+import DevToolsView from './DevToolsView'
 
 const isDevTools = window.location.hash === '#devtools'
-const Root = lazy(() => (isDevTools ? import('./DevToolsView') : import('./App')))
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <Suspense>
-      <Root />
-    </Suspense>
-  </StrictMode>,
+  <StrictMode>{isDevTools ? <DevToolsView /> : <App />}</StrictMode>,
 )

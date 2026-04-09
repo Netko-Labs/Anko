@@ -4,7 +4,7 @@ export default {
   app: {
     name: 'Anko',
     identifier: 'dev.netko.anko',
-    version: '0.4.0',
+    version: '0.4.1',
   },
   build: {
     bun: {

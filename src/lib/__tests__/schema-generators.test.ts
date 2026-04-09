@@ -43,7 +43,9 @@ describe('generateSchema', () => {
       expect(result).toContain('import * as v from "valibot"')
       expect(result).toContain('id: v.pipe(v.number(), v.integer()), // PRI')
       expect(result).toContain('email: v.nullable(v.string()),')
-      expect(result).toContain('export type UserProfiles = v.InferOutput<typeof UserProfilesSchema>')
+      expect(result).toContain(
+        'export type UserProfiles = v.InferOutput<typeof UserProfilesSchema>',
+      )
     })
   })
 
