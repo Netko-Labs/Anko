@@ -10,7 +10,7 @@ export interface ConnectionConfig {
   username: string
   password: string
   database?: string
-  driver: 'mysql' | 'postgresql'
+  driver: 'mysql' | 'postgresql' | 'sqlite'
 }
 
 export interface ConnectionInfo {
@@ -20,7 +20,7 @@ export interface ConnectionInfo {
   port: number
   username: string
   database?: string
-  driver: 'mysql' | 'postgresql'
+  driver: 'mysql' | 'postgresql' | 'sqlite'
 }
 
 export interface SchemaInfo {
@@ -238,6 +238,7 @@ export type AnkoRPC = {
         response: { x: number; y: number; width: number; height: number }
       }
       setWindowPosition: { params: { x: number; y: number }; response: undefined }
+      openDevToolsWindow: { params: {}; response: undefined }
     }
     messages: {}
   }>

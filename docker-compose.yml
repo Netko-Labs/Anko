@@ -97,6 +97,19 @@ services:
       timeout: 5s
       retries: 10
 
+  # SQLite - Music Collection Database (one-shot init)
+  sqlite:
+    image: keinos/sqlite3:latest
+    container_name: anko-sqlite
+    entrypoint: ["sh", "-c", "sqlite3 /data/music.db < /init/init.sql && echo 'SQLite DB ready' && tail -f /dev/null"]
+    volumes:
+      - ./docker/sqlite/data:/data
+      - ./docker/sqlite/init.sql:/init/init.sql:ro
+    healthcheck:
+      test: ["CMD", "sqlite3", "/data/music.db", "SELECT 1"]
+      timeout: 5s
+      retries: 3
+
 volumes:
   mysql_data:
   postgres_data:

@@ -47,4 +47,12 @@ export const TEST_DATABASES: ConnectionConfig[] = [
     database: 'legacydb',
     driver: 'mysql' as DatabaseDriver,
   },
+  {
+    name: 'SQLite Music DB',
+    host: './docker/sqlite/data/music.db',
+    port: 0,
+    username: '',
+    password: '',
+    driver: 'sqlite' as DatabaseDriver,
+  },
 ]

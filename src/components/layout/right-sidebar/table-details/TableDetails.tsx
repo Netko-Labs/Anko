@@ -4,13 +4,13 @@ import { toast } from 'sonner'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
-import { generateZodSchema } from '@/lib/zod-generator'
+import { generateSchema } from '@/lib/schema-generators'
 import type { ColumnRowProps, TableDetailsProps } from './definitions'
 
 export function TableDetails({ tableName, columns, database, schema }: TableDetailsProps) {
   const [activeTab, setActiveTab] = useState('schema')
 
-  const zodSchema = useMemo(() => generateZodSchema(tableName, columns), [tableName, columns])
+  const zodSchema = useMemo(() => generateSchema('zod', tableName, columns), [tableName, columns])
 
   const handleCopySchema = () => {
     navigator.clipboard.writeText(zodSchema)

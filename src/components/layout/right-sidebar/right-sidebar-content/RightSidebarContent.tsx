@@ -1,10 +1,10 @@
 import { IconBraces, IconDatabase, IconTable } from '@tabler/icons-react'
-import { lazy, Suspense, useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo } from 'react'
+import { cn } from '@/lib/utils'
 import { useRightSidebarStore } from '@/stores/right-sidebar'
-import type { TableInfo } from '@/stores/right-sidebar/definitions/types'
+import type { TabId, TableInfo } from '@/stores/right-sidebar/definitions/types'
 import { DataTabContent } from '../data-tab-content/DataTabContent'
-import { RIGHT_SIDEBAR_VALUES, type TabId } from '../definitions'
-import { TabButton } from '../tab-button/TabButton'
+import { RIGHT_SIDEBAR_VALUES } from '../definitions'
 import { TableSchemaView } from '../table-schema-view/TableSchemaView'
 import { UtilitiesTabFallback } from '../utilities-tab-fallback/UtilitiesTabFallback'
 
@@ -14,12 +14,18 @@ const ZodGeneratorView = lazy(() =>
   })),
 )
 
+const TABS: { id: TabId; icon: typeof IconDatabase; label: string }[] = [
+  { id: 'data', icon: IconDatabase, label: 'Data' },
+  { id: 'table', icon: IconTable, label: 'Table' },
+  { id: 'utilities', icon: IconBraces, label: 'Utils' },
+]
+
 export function RightSidebarContent() {
   const context = useRightSidebarStore((s) => s.context)
   const currentTableInfo = useRightSidebarStore((s) => s.currentTableInfo)
-  const [activeTab, setActiveTab] = useState<TabId>('data')
+  const activeTab = useRightSidebarStore((s) => s.activeTab)
+  const setActiveTab = useRightSidebarStore((s) => s.setActiveTab)
 
-  // Get table info from context or current table info
   const tableInfo: TableInfo | null = useMemo(() => {
     if (context.type === 'table') {
       return {
@@ -35,15 +41,13 @@ export function RightSidebarContent() {
     return currentTableInfo
   }, [context, currentTableInfo])
 
-  // Table and Utils tabs are available if we have table info
   const hasTableContent = tableInfo !== null && tableInfo.tableName !== ''
 
-  // If no context, show empty state
   if (context.type === 'none') {
     return (
       <div className="flex flex-col h-full">
-        <div className="flex items-center px-3 py-2 border-b">
-          <span className="text-xs font-medium text-foreground">
+        <div className="flex items-center px-3 h-8 border-b border-border">
+          <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">
             {RIGHT_SIDEBAR_VALUES.detailsTitle}
           </span>
         </div>
@@ -58,33 +62,40 @@ export function RightSidebarContent() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* Custom Tab List */}
-      <div className="border-b px-2 pt-2 pb-2">
-        <div className="flex items-center bg-muted rounded-lg p-[3px]">
-          <TabButton active={activeTab === 'data'} onClick={() => setActiveTab('data')}>
-            <IconDatabase className="size-3.5" />
-            Data
-          </TabButton>
-          <TabButton
-            active={activeTab === 'table'}
-            onClick={() => setActiveTab('table')}
-            disabled={!hasTableContent}
-          >
-            <IconTable className="size-3.5" />
-            Table
-          </TabButton>
-          <TabButton
-            active={activeTab === 'utilities'}
-            onClick={() => setActiveTab('utilities')}
-            disabled={!hasTableContent}
-          >
-            <IconBraces className="size-3.5" />
-            Utils
-          </TabButton>
-        </div>
+      {/* Icon tab strip */}
+      <div className="relative flex items-center gap-0.5 px-2.5 pt-2 pb-1.5">
+        {TABS.map(({ id, icon: Icon }) => {
+          const isActive = activeTab === id
+          const isDisabled = id !== 'data' && !hasTableContent
+
+          return (
+            <button
+              key={id}
+              type="button"
+              title={id}
+              disabled={isDisabled}
+              onClick={() => setActiveTab(id)}
+              className={cn(
+                'relative h-7 w-7 flex items-center justify-center rounded-[5px] transition-all duration-150',
+                isActive
+                  ? 'text-primary'
+                  : 'text-sidebar-foreground/40 hover:text-sidebar-foreground/80',
+                isDisabled && 'opacity-35 cursor-not-allowed hover:text-sidebar-foreground/35',
+              )}
+            >
+              <Icon className="size-4" />
+              {isActive && (
+                <span className="absolute -bottom-1.5 left-1 right-1 h-0.5 rounded-full bg-primary" />
+              )}
+            </button>
+          )
+        })}
+
+        {/* Bottom rule */}
+        <div className="absolute bottom-0 left-2.5 right-2.5 h-px bg-border" />
       </div>
 
-      {/* Tab Content */}
+      {/* Tab content */}
       <div className="flex-1 overflow-hidden">
         {activeTab === 'data' && <DataTabContent />}
         {activeTab === 'table' && hasTableContent && tableInfo && (

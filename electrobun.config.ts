@@ -3,8 +3,8 @@ import type { ElectrobunConfig } from 'electrobun'
 export default {
   app: {
     name: 'Anko',
-    identifier: 'com.anko.sql',
-    version: '0.3.3',
+    identifier: 'dev.netko.anko',
+    version: '0.4.0',
   },
   build: {
     bun: {
@@ -20,8 +20,15 @@ export default {
       'src/native/libWindowDrag.dylib': 'native/libWindowDrag.dylib',
     },
     mac: {
+      bundleCEF: true,
       codesign: true,
       notarize: true,
+    },
+    win: {
+      bundleCEF: true,
+    },
+    linux: {
+      bundleCEF: true,
     },
   },
   scripts: {

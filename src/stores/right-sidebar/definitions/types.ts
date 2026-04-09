@@ -26,15 +26,20 @@ export type RightSidebarContext =
       schema?: string
     }
 
+export type TabId = 'data' | 'table' | 'utilities'
+
 export interface RightSidebarStore {
   open: boolean
   width: number
+  activeTab: TabId
   context: RightSidebarContext
   // Current table info - persists when selecting rows/cells
   currentTableInfo: TableInfo | null
   setOpen: (open: boolean) => void
   setWidth: (width: number) => void
+  setActiveTab: (tab: TabId) => void
   toggle: () => void
+  toggleTab: (tab: TabId) => void
   setContext: (context: RightSidebarContext) => void
   clearContext: () => void
   showRowDetails: (row: Record<string, unknown>, columns: ColumnDetail[]) => void

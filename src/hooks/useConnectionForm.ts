@@ -99,13 +99,21 @@ export function useConnectionForm({
   }
 
   const handleDriverChange = (driver: DatabaseDriver) => {
-    setFormData((prev) => ({
-      ...prev,
-      driver,
-      port: DEFAULT_PORTS[driver],
-      username:
-        prev.username === DEFAULT_USERS[prev.driver] ? DEFAULT_USERS[driver] : prev.username,
-    }))
+    setFormData((prev) => {
+      if (driver === 'sqlite') {
+        return { ...prev, driver, port: 0, username: '', password: '', host: '', database: '' }
+      }
+      return {
+        ...prev,
+        driver,
+        port: DEFAULT_PORTS[driver],
+        host: prev.driver === 'sqlite' ? 'localhost' : prev.host,
+        username:
+          prev.username === DEFAULT_USERS[prev.driver] || prev.driver === 'sqlite'
+            ? DEFAULT_USERS[driver]
+            : prev.username,
+      }
+    })
     setOperationState({ type: 'idle' })
   }
 

@@ -44,7 +44,9 @@ export function ConnectionDialog({
     handleSave,
   } = useConnectionForm({ open, editConnection, workspaceId, onOpenChange, onConnectionAdded })
 
-  const driverLabel = formData.driver === 'mysql' ? 'MySQL' : 'PostgreSQL'
+  const driverLabel =
+    formData.driver === 'mysql' ? 'MySQL' : formData.driver === 'sqlite' ? 'SQLite' : 'PostgreSQL'
+  const isSqlite = formData.driver === 'sqlite'
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -75,7 +77,7 @@ export function ConnectionDialog({
                 placeholder="mysql://user:password@localhost:3306/database"
               />
               <p className="text-xs text-muted-foreground">
-                Supported formats: mysql://, postgresql://, postgres://
+                Supported formats: mysql://, postgresql://, postgres://, sqlite://
               </p>
               {urlError && (
                 <div className="text-sm text-destructive bg-destructive/10 p-2 rounded">
@@ -103,6 +105,7 @@ export function ConnectionDialog({
                 <SelectContent>
                   <SelectItem value="mysql">MySQL</SelectItem>
                   <SelectItem value="postgresql">PostgreSQL</SelectItem>
+                  <SelectItem value="sqlite">SQLite</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -119,72 +122,91 @@ export function ConnectionDialog({
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              <div className="col-span-2 grid gap-2">
+            {isSqlite ? (
+              <div className="grid gap-2">
                 <label htmlFor="host" className="text-sm font-medium">
-                  Host
+                  File Path
                 </label>
                 <Input
                   id="host"
                   value={formData.host}
                   onChange={(e) => handleChange('host', e.target.value)}
-                  placeholder="localhost"
+                  placeholder="/path/to/database.db or :memory:"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Absolute path to a .db file, or <code>:memory:</code> for an in-memory database.
+                </p>
               </div>
-              <div className="grid gap-2">
-                <label htmlFor="port" className="text-sm font-medium">
-                  Port
-                </label>
-                <Input
-                  id="port"
-                  type="number"
-                  value={formData.port}
-                  onChange={(e) =>
-                    handleChange(
-                      'port',
-                      Number.parseInt(e.target.value, 10) || DEFAULT_PORTS[formData.driver],
-                    )
-                  }
-                />
-              </div>
-            </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="col-span-2 grid gap-2">
+                    <label htmlFor="host" className="text-sm font-medium">
+                      Host
+                    </label>
+                    <Input
+                      id="host"
+                      value={formData.host}
+                      onChange={(e) => handleChange('host', e.target.value)}
+                      placeholder="localhost"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <label htmlFor="port" className="text-sm font-medium">
+                      Port
+                    </label>
+                    <Input
+                      id="port"
+                      type="number"
+                      value={formData.port}
+                      onChange={(e) =>
+                        handleChange(
+                          'port',
+                          Number.parseInt(e.target.value, 10) || DEFAULT_PORTS[formData.driver],
+                        )
+                      }
+                    />
+                  </div>
+                </div>
 
-            <div className="grid gap-2">
-              <label htmlFor="username" className="text-sm font-medium">
-                Username
-              </label>
-              <Input
-                id="username"
-                value={formData.username}
-                onChange={(e) => handleChange('username', e.target.value)}
-                placeholder={DEFAULT_USERS[formData.driver]}
-              />
-            </div>
+                <div className="grid gap-2">
+                  <label htmlFor="username" className="text-sm font-medium">
+                    Username
+                  </label>
+                  <Input
+                    id="username"
+                    value={formData.username}
+                    onChange={(e) => handleChange('username', e.target.value)}
+                    placeholder={DEFAULT_USERS[formData.driver]}
+                  />
+                </div>
 
-            <div className="grid gap-2">
-              <label htmlFor="password" className="text-sm font-medium">
-                Password
-              </label>
-              <Input
-                id="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) => handleChange('password', e.target.value)}
-                placeholder="••••••••"
-              />
-            </div>
+                <div className="grid gap-2">
+                  <label htmlFor="password" className="text-sm font-medium">
+                    Password
+                  </label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => handleChange('password', e.target.value)}
+                    placeholder="••••••••"
+                  />
+                </div>
 
-            <div className="grid gap-2">
-              <label htmlFor="database" className="text-sm font-medium">
-                Database (optional)
-              </label>
-              <Input
-                id="database"
-                value={formData.database ?? ''}
-                onChange={(e) => handleChange('database', e.target.value)}
-                placeholder="mydb"
-              />
-            </div>
+                <div className="grid gap-2">
+                  <label htmlFor="database" className="text-sm font-medium">
+                    Database (optional)
+                  </label>
+                  <Input
+                    id="database"
+                    value={formData.database ?? ''}
+                    onChange={(e) => handleChange('database', e.target.value)}
+                    placeholder="mydb"
+                  />
+                </div>
+              </>
+            )}
 
             {(operationState.type === 'test_error' || operationState.type === 'save_error') && (
               <div className="text-sm text-destructive bg-destructive/10 p-2 rounded">

@@ -1,1 +1,1 @@
-export type DatabaseDriver = 'mysql' | 'postgresql'
+export type DatabaseDriver = 'mysql' | 'postgresql' | 'sqlite'

@@ -307,3 +307,7 @@ export async function getWindowFrame(): Promise<{
 export async function setWindowPosition(x: number, y: number): Promise<void> {
   return trackedRequest('setWindowPosition', () => rpc.request.setWindowPosition({ x, y }))
 }
+
+export async function openDevToolsWindow(): Promise<void> {
+  return trackedRequest('openDevToolsWindow', () => rpc.request.openDevToolsWindow({}))
+}

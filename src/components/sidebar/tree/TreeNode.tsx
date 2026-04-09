@@ -29,7 +29,7 @@ export function TreeNode({
         onContextMenu={onContextMenu}
         className={cn(
           'w-full flex items-center gap-1.5 py-0.5 pr-2 text-left text-xs rounded-sm transition-colors group',
-          'hover:bg-muted/50',
+          'hover:bg-primary/10 hover:text-foreground [&:hover_svg]:text-primary',
           isActive && 'bg-accent text-accent-foreground',
         )}
         style={{ paddingLeft }}
@@ -56,11 +56,16 @@ export function TreeNode({
         {icon && <span className="flex-shrink-0">{icon}</span>}
 
         {/* Label */}
-        <span className="flex-1 truncate">{label}</span>
+        <span className="flex-1 truncate" title={label}>
+          {label}
+        </span>
 
         {/* Secondary label */}
         {secondaryLabel && (
-          <span className="text-[10px] text-muted-foreground/70 tabular-nums">
+          <span
+            className="text-[10px] text-muted-foreground tabular-nums truncate max-w-24"
+            title={secondaryLabel}
+          >
             {secondaryLabel}
           </span>
         )}

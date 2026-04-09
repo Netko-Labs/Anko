@@ -4,7 +4,7 @@ import type { RowData } from './definitions'
 // Format cell value for display
 export function formatCellValue(value: unknown): React.ReactNode {
   if (value === null) {
-    return <span className="text-muted-foreground italic">NULL</span>
+    return <span className="text-primary/60 italic">NULL</span>
   }
   if (typeof value === 'boolean') {
     return value ? 'true' : 'false'

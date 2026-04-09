@@ -6,18 +6,19 @@ import type { ColumnRowProps, TableSchemaViewProps } from './definitions'
 export function TableSchemaView({ tableName, columns, database, schema }: TableSchemaViewProps) {
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center gap-2 px-3 py-2 border-b">
-        <IconTable className="size-4 text-primary" />
-        <div className="min-w-0">
-          <div className="text-xs font-medium text-foreground truncate">{tableName}</div>
-          <div className="text-[10px] text-muted-foreground truncate">
-            {database}
-            {schema && `.${schema}`}
-          </div>
-        </div>
+      {/* Header */}
+      <div className="flex items-center gap-2 px-3 h-8 border-b border-border shrink-0">
+        <IconTable className="size-3.5 text-primary" />
+        <span className="text-[11px] font-medium text-foreground truncate">{tableName}</span>
+        <span className="text-[10px] text-muted-foreground truncate ml-auto">
+          {database}
+          {schema && `.${schema}`}
+        </span>
       </div>
+
+      {/* Column list */}
       <ScrollArea className="flex-1">
-        <div className="p-2 space-y-0.5">
+        <div className="py-1">
           {columns.map((col) => (
             <ColumnRow key={col.name} column={col} />
           ))}
@@ -33,35 +34,32 @@ function ColumnRow({ column }: ColumnRowProps) {
   const isUniqueKey = column.key === 'UNI' || column.key === 'UNIQUE'
 
   return (
-    <div className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-accent/30 transition-colors">
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
-          {isPrimaryKey && <IconKey className="size-3 text-amber-500" />}
-          <span
-            className={cn(
-              'text-xs font-medium truncate',
-              isPrimaryKey && 'text-amber-500',
-              isForeignKey && 'text-blue-500',
-              isUniqueKey && 'text-purple-500',
-            )}
-          >
-            {column.name}
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-          <span>{column.data_type}</span>
-          {column.nullable && <span className="text-muted-foreground/60">nullable</span>}
-          {column.default_value && (
-            <span className="text-muted-foreground/60">= {column.default_value}</span>
+    <div className="flex items-start gap-2 px-3 py-1.5 hover:bg-primary/5 transition-colors">
+      {/* Column name + key icon */}
+      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+        {isPrimaryKey && <IconKey className="size-3 text-primary shrink-0" />}
+        <span
+          className={cn(
+            'text-xs font-medium truncate',
+            isPrimaryKey ? 'text-primary' : 'text-foreground',
+            isForeignKey && 'text-blue-400',
+            isUniqueKey && 'text-purple-400',
           )}
-          {column.extra && <span className="text-muted-foreground/60">{column.extra}</span>}
-        </div>
-      </div>
-      {column.key && !isPrimaryKey && (
-        <span className="text-[9px] px-1 py-0.5 rounded bg-muted text-muted-foreground">
-          {column.key}
+        >
+          {column.name}
         </span>
-      )}
+      </div>
+
+      {/* Type + metadata */}
+      <div className="flex items-center gap-1.5 shrink-0">
+        <span className="text-[10px] text-primary/60 font-mono">{column.data_type}</span>
+        {column.nullable && <span className="text-[9px] text-muted-foreground/50">null</span>}
+        {column.key && !isPrimaryKey && (
+          <span className="text-[9px] px-1 py-px rounded bg-primary/10 text-primary">
+            {column.key}
+          </span>
+        )}
+      </div>
     </div>
   )
 }

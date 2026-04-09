@@ -31,3 +31,6 @@ dist-ssr
 build/
 artifacts/
 *.electrobun
+
+# Docker-generated SQLite data
+docker/sqlite/data/

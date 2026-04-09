@@ -103,7 +103,7 @@ export function ResultsFooter({ result, isExecuting, tableName }: ResultsFooterP
             className={cn(
               'flex items-center gap-1 px-2 py-1 rounded transition-colors',
               hasData
-                ? 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                ? 'text-primary/70 hover:text-primary hover:bg-primary/10'
                 : 'text-muted-foreground/60 cursor-not-allowed',
             )}
             disabled={!hasData}

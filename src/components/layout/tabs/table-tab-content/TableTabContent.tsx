@@ -1,7 +1,15 @@
+import type { Table } from '@tanstack/react-table'
+import { Columns } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 import { DataTable } from '@/components/results/data-table-component/DataTable'
 import { FilterBar } from '@/components/results/filter-bar/FilterBar'
 import { ResultsTable } from '@/components/results/results-table/ResultsTable'
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { useTableCommit } from '@/hooks/useTableCommit'
 import { useTableData } from '@/hooks/useTableData'
 import { useTableEditing } from '@/hooks/useTableEditing'
@@ -23,6 +31,10 @@ export function TableTabContent({ tabId }: TableTabContentProps) {
 
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false)
   const [pendingNavigation, setPendingNavigation] = useState<(() => void) | null>(null)
+  const [tableInstance, setTableInstance] = useState<Table<Record<string, unknown>> | null>(null)
+  const onTableReady = useCallback((instance: Table<Record<string, unknown>>) => {
+    setTableInstance(instance)
+  }, [])
 
   // Data loading hook
   const tableData = useTableData(tabId, tab, connection)
@@ -157,18 +169,53 @@ export function TableTabContent({ tabId }: TableTabContentProps) {
     [guardedNavigate, loadPage, totalPages],
   )
 
+  const hasNextPage = (currentPage + 1) * PAGE_SIZE < totalRows
+  const hasPrevPage = currentPage > 0
+
+  const columnsDropdown = useMemo(() => {
+    if (!tableInstance) return null
+    const hidable = tableInstance.getAllColumns().filter((col) => col.getCanHide())
+    if (hidable.length === 0) return null
+
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          className="inline-flex items-center justify-center gap-1.5 h-7 px-2 text-xs text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors shrink-0"
+          render={<button type="button" />}
+        >
+          <Columns className="size-3" />
+          Columns
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-48">
+          {hidable.map((column) => (
+            <DropdownMenuCheckboxItem
+              key={column.id}
+              checked={column.getIsVisible()}
+              onCheckedChange={(value: boolean | string) => column.toggleVisibility(!!value)}
+              className="text-xs"
+            >
+              {column.id}
+            </DropdownMenuCheckboxItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    )
+  }, [tableInstance])
+
   // Early return if no tab or connection data
   if (!tableName || !runtimeConnectionId) {
     return null
   }
 
-  const hasNextPage = (currentPage + 1) * PAGE_SIZE < totalRows
-  const hasPrevPage = currentPage > 0
-
   return (
     <div className="flex flex-col h-full bg-background">
       {/* Filter Bar */}
-      <FilterBar columns={tabColumns} filters={filters} onFiltersChange={handleFiltersChange} />
+      <FilterBar
+        columns={tabColumns}
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        startSlot={isEditMode ? columnsDropdown : undefined}
+      />
 
       {/* Table Content */}
       <div className="flex-1 min-h-0">
@@ -183,6 +230,7 @@ export function TableTabContent({ tabId }: TableTabContentProps) {
             onUndoRowDelete={handleUndoRowDelete}
             onRemoveNewRow={handleRemoveNewRow}
             onUpdateNewRowCell={handleUpdateNewRowCell}
+            onTableReady={onTableReady}
           />
         ) : (
           <ResultsTable result={tabResult} error={tab?.error} isExecuting={!!tabIsExecuting} />

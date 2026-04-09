@@ -1,7 +1,8 @@
-import { BrowserView, Updater } from 'electrobun/bun'
+import { BrowserView, BrowserWindow, Updater } from 'electrobun/bun'
 import type { AnkoRPC, UpdateDownloadStatus } from '../../shared/rpc-types'
 import { MySqlConnector } from '../db/mysql'
 import { PostgresConnector } from '../db/postgres'
+import { SqliteConnector } from '../db/sqlite'
 import type { AppState } from '../state'
 
 export function createRpcHandler(
@@ -15,6 +16,7 @@ export function createRpcHandler(
     getFrame: () => { x: number; y: number; width: number; height: number }
     setPosition: (x: number, y: number) => void
   } | null,
+  baseUrl: string,
 ) {
   let latestDownloadStatus: UpdateDownloadStatus = {
     status: 'idle',
@@ -52,6 +54,8 @@ export function createRpcHandler(
             let connector: import('../db/connector').DatabaseConnector
             if (config.driver === 'mysql') {
               connector = await MySqlConnector.connect(config)
+            } else if (config.driver === 'sqlite') {
+              connector = await SqliteConnector.connect(config)
             } else {
               connector = await PostgresConnector.connect(config)
             }
@@ -255,7 +259,23 @@ export function createRpcHandler(
         },
         closeWindow: () => {
           const win = getWindow()
-          if (win) win.close()
+          if (win) {
+            // Persist window state before closing
+            try {
+              const ws = state.getStorage().windowState
+              const maximized = win.isMaximized()
+              if (!maximized) {
+                const frame = win.getFrame()
+                ws.save({ ...frame, isMaximized: false })
+              } else {
+                const current = ws.get()
+                ws.save({ ...current, isMaximized: true })
+              }
+            } catch {
+              // Ignore — storage may already be closed
+            }
+            win.close()
+          }
         },
         minimizeWindow: () => {
           const win = getWindow()
@@ -280,6 +300,25 @@ export function createRpcHandler(
         setWindowPosition: ({ x, y }) => {
           const win = getWindow()
           if (win) win.setPosition(x, y)
+        },
+        openDevToolsWindow: () => {
+          if (!baseUrl.startsWith('http://localhost')) return
+          let devWindow: BrowserWindow | null = null
+          const devRpc = createRpcHandler(state, () => devWindow, baseUrl)
+          devWindow = new BrowserWindow({
+            title: 'Anko Dev Tools',
+            titleBarStyle: 'hiddenInset',
+            frame: {
+              width: 560,
+              height: 700,
+              x: 300,
+              y: 250,
+            },
+            renderer: 'cef',
+            url: `${baseUrl}#devtools`,
+            rpc: devRpc,
+          })
+          devWindow.setAlwaysOnTop(true)
         },
       },
       messages: {},

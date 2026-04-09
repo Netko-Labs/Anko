@@ -2,21 +2,11 @@
 
 /**
  * Native window drag monitor using performWindowDragWithEvent:
- *
- * Installs an NSEvent local monitor that intercepts LeftMouseDown events
- * BEFORE they reach WKWebView. If the click is in the titlebar drag region,
- * it calls performWindowDragWithEvent: with the real NSEvent (no synthesized
- * events, no timing issues) and consumes the event so Electrobun's manual
- * setFrameOrigin-based drag never fires.
- *
- * This is the same approach Tauri/Chromium/Electron use — delegate the drag
- * to the macOS Window Server, which handles tiling, snapping, and the
- * proportional-restore-on-untile behavior automatically.
  */
 
-static const CGFloat kTitlebarHeight = 36.0;       // h-9 = 36px
-static const CGFloat kTrafficLightsWidth = 80.0;    // w-20 = 80px (left exclusion)
-static const CGFloat kSidebarButtonsWidth = 72.0;   // 2 × w-9 = 72px (right exclusion)
+static const CGFloat kTitlebarHeight = 36.0;
+static const CGFloat kLeftInteractiveWidth = 240.0;   // traffic lights + sidebar toggle + workspace switcher
+static const CGFloat kRightInteractiveWidth = 96.0;    // search + settings + right sidebar toggle
 
 static id mouseDownMonitor = nil;
 
@@ -27,32 +17,67 @@ void installNativeDragMonitor(void) {
         handler:^NSEvent *(NSEvent *event) {
             NSWindow *window = [event window];
             if (!window) return event;
-
-            // Only handle the app's main/key window
             if (window != [NSApp mainWindow] && window != [NSApp keyWindow]) return event;
 
             NSPoint loc = [event locationInWindow];
             NSRect frame = [window frame];
-            // AppKit coordinates: (0,0) is bottom-left
             CGFloat yFromTop = frame.size.height - loc.y;
 
-            // Outside titlebar region → pass through
             if (yFromTop > kTitlebarHeight) return event;
+            if (loc.x < kLeftInteractiveWidth) return event;
+            if (loc.x > frame.size.width - kRightInteractiveWidth) return event;
 
-            // In traffic lights area (left) → pass through to macOS
-            if (loc.x < kTrafficLightsWidth) return event;
-
-            // In sidebar buttons area (right) → pass through to React handlers
-            if (loc.x > frame.size.width - kSidebarButtonsWidth) return event;
-
-            // Double-click → toggle zoom (maximize/restore)
             if ([event clickCount] == 2) {
                 [window zoom:nil];
                 return nil;
             }
 
-            // Single click → start native Window Server drag
             [window performWindowDragWithEvent:event];
-            return nil; // consume event so Electrobun's preload doesn't fire
+            return nil;
         }];
+}
+
+/**
+ * Repositions traffic lights using Auto Layout constraints so macOS
+ * cannot override positions during fullscreen/resize animations.
+ */
+void repositionTrafficLights(void) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSWindow *window = [NSApp mainWindow];
+        if (!window) window = [NSApp keyWindow];
+        if (!window) return;
+
+        NSButton *closeBtn = [window standardWindowButton:NSWindowCloseButton];
+        NSButton *miniBtn = [window standardWindowButton:NSWindowMiniaturizeButton];
+        NSButton *zoomBtn = [window standardWindowButton:NSWindowZoomButton];
+        if (!closeBtn || !miniBtn || !zoomBtn) return;
+
+        NSView *titlebarView = [closeBtn superview];
+        if (!titlebarView) return;
+
+        CGFloat startX = 13.0;
+        CGFloat spacing = 20.0;
+        CGFloat topOffset = (kTitlebarHeight - closeBtn.frame.size.height) / 2.0;
+
+        NSArray *buttons = @[closeBtn, miniBtn, zoomBtn];
+        for (NSUInteger i = 0; i < buttons.count; i++) {
+            NSButton *btn = buttons[i];
+            btn.translatesAutoresizingMaskIntoConstraints = NO;
+
+            // Remove any existing constraints on this button from the superview
+            NSMutableArray *toRemove = [NSMutableArray array];
+            for (NSLayoutConstraint *c in titlebarView.constraints) {
+                if (c.firstItem == btn || c.secondItem == btn) {
+                    [toRemove addObject:c];
+                }
+            }
+            [titlebarView removeConstraints:toRemove];
+
+            // Pin: left edge, top edge from superview top
+            [NSLayoutConstraint activateConstraints:@[
+                [btn.leadingAnchor constraintEqualToAnchor:titlebarView.leadingAnchor constant:startX + spacing * i],
+                [btn.topAnchor constraintEqualToAnchor:titlebarView.topAnchor constant:topOffset],
+            ]];
+        }
+    });
 }

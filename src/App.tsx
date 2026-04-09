@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { ErrorBoundary } from '@/components/errors/ErrorBoundary'
 import { CloseAppDialog } from '@/components/layout/close-app-dialog/CloseAppDialog'
 import { getCloseAppPreference } from '@/components/layout/close-app-dialog/close-app-preference/CloseAppPreference'
-import { RightSidebar, RightSidebarContent } from '@/components/layout/right-sidebar'
+import { RightSidebar } from '@/components/layout/right-sidebar'
 import { TabContainer } from '@/components/layout/tabs'
 import { TitleBar } from '@/components/layout/title-bar/TitleBar'
 import { AppSidebar } from '@/components/sidebar/AppSidebar'
@@ -10,10 +10,13 @@ import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import { Toaster } from '@/components/ui/sonner'
 import { UpdateModal } from '@/components/update/UpdateModal'
 import { useUpdateChecker } from '@/hooks/useUpdateChecker'
-import { closeWindow, listConnections } from '@/lib/rpc'
+import { listenForInvalidation } from '@/lib/data-bridge'
+import { closeWindow, listConnections, listWorkspaces } from '@/lib/rpc'
+import { listenForRemoteToasts } from '@/lib/toast-bridge'
 import { useConnectionStore } from '@/stores/connection'
 import { useLeftSidebarStore } from '@/stores/left-sidebar'
 import { useRightSidebarStore } from '@/stores/right-sidebar'
+import { useWorkspaceStore } from '@/stores/workspace'
 import type { ActiveConnection } from '@/types'
 
 function App() {
@@ -32,6 +35,34 @@ function App() {
 
   // Check for updates on startup
   useUpdateChecker()
+
+  // Listen for toast messages from other windows (e.g. DevTools)
+  useEffect(() => {
+    return listenForRemoteToasts()
+  }, [])
+
+  // Listen for data invalidation from other windows (e.g. DevTools)
+  useEffect(() => {
+    return listenForInvalidation(async (targets) => {
+      const shouldRefreshAll = targets.includes('all')
+      if (shouldRefreshAll || targets.includes('connections')) {
+        try {
+          const connections = await listConnections()
+          useConnectionStore.getState().setSavedConnections(connections)
+        } catch (e) {
+          console.error('Failed to refresh connections:', e)
+        }
+      }
+      if (shouldRefreshAll || targets.includes('workspaces')) {
+        try {
+          const ws = await listWorkspaces()
+          useWorkspaceStore.getState().setWorkspaces(ws)
+        } catch (e) {
+          console.error('Failed to refresh workspaces:', e)
+        }
+      }
+    })
+  }, [])
 
   // Load saved connections on mount
   useEffect(() => {
@@ -135,9 +166,7 @@ function App() {
             <TabContainer />
           </main>
 
-          <RightSidebar>
-            <RightSidebarContent />
-          </RightSidebar>
+          <RightSidebar />
         </div>
 
         {/* Dialogs */}

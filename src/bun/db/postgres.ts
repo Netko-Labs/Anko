@@ -46,7 +46,7 @@ export class PostgresConnector implements DatabaseConnector {
         username: config.username,
         password: config.password,
         database: defaultDatabase,
-        dialect: 'postgres',
+        adapter: 'postgres',
       })
 
       // Test the connection
@@ -90,7 +90,7 @@ export class PostgresConnector implements DatabaseConnector {
         username: this.config.username,
         password: this.config.password,
         database,
-        dialect: 'postgres',
+        adapter: 'postgres',
       })
 
       await sql`SELECT 1`

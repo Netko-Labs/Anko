@@ -18,6 +18,7 @@ export const FilterBar = memo(function FilterBar({
   columns,
   filters,
   onFiltersChange,
+  startSlot,
 }: FilterBarProps) {
   const [selectedColumn, setSelectedColumn] = useState<string>('')
   const [selectedOperator, setSelectedOperator] = useState<FilterOperator>('equals')
@@ -70,9 +71,10 @@ export const FilterBar = memo(function FilterBar({
   }
 
   return (
-    <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-card">
-      {/* Add filter controls - takes remaining space */}
-      <div className="flex items-center gap-1 flex-1 min-w-0">
+    <div className="flex flex-col gap-1.5 px-3 py-2 border-b border-border bg-card">
+      {/* Add filter controls */}
+      <div className="flex items-center gap-1 min-w-0">
+        {startSlot}
         <Select value={selectedColumn} onValueChange={(v) => setSelectedColumn(v ?? '')}>
           <SelectTrigger className="h-7 w-32 text-xs shrink-0">
             <SelectValue />
@@ -117,19 +119,19 @@ export const FilterBar = memo(function FilterBar({
           size="sm"
           onClick={handleAddFilter}
           disabled={!selectedColumn || (!isNullOperator && !filterValue)}
-          className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-accent disabled:opacity-30 shrink-0"
+          className="h-7 w-7 p-0 text-primary/70 hover:text-primary hover:bg-primary/10 disabled:opacity-30 shrink-0"
         >
           <Plus className="size-3.5" />
         </Button>
       </div>
 
-      {/* Active filters */}
+      {/* Active filter chips */}
       {filters.length > 0 && (
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex flex-wrap items-center gap-1">
           {filters.map((filter, index) => (
             <div
               key={index}
-              className="flex items-center gap-1 px-2 py-1 bg-background border border-border rounded text-xs"
+              className="flex items-center gap-1 px-2 py-0.5 bg-background border border-border rounded text-xs"
             >
               <span className="text-foreground">{filter.column}</span>
               <span className="text-muted-foreground">{getOperatorLabel(filter.operator)}</span>

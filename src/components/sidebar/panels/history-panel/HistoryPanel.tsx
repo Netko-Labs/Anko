@@ -8,7 +8,7 @@ import {
   IconTrash,
   IconX,
 } from '@tabler/icons-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
 import {
   ContextMenu,
@@ -17,15 +17,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from '@/components/ui/context-menu'
-import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import {
   clearQueryHistory,
   createSavedQuery,
@@ -40,8 +32,6 @@ import type { QueryHistoryEntry } from '@/types'
 import type { HistoryEntryProps } from './definitions'
 
 export function HistoryPanel() {
-  const [searchQuery, setSearchQuery] = useState('')
-
   // Stores
   const entries = useQueryHistoryStore((s) => s.entries)
   const setEntries = useQueryHistoryStore((s) => s.setEntries)
@@ -49,10 +39,6 @@ export function HistoryPanel() {
   const clearEntries = useQueryHistoryStore((s) => s.clearEntries)
   const isLoading = useQueryHistoryStore((s) => s.isLoading)
   const setLoading = useQueryHistoryStore((s) => s.setLoading)
-  const filterConnectionId = useQueryHistoryStore((s) => s.filterConnectionId)
-  const setFilterConnectionId = useQueryHistoryStore((s) => s.setFilterConnectionId)
-
-  const savedConnections = useConnectionStore((s) => s.savedConnections)
   const addQueryTab = useConnectionStore((s) => s.addQueryTab)
   const activeConnections = useConnectionStore((s) => s.activeConnections)
 
@@ -64,7 +50,7 @@ export function HistoryPanel() {
     const loadHistory = async () => {
       setLoading(true)
       try {
-        const history = await listQueryHistory(filterConnectionId ?? undefined, 100)
+        const history = await listQueryHistory(undefined, 100)
         setEntries(history)
       } catch (e) {
         console.error('Failed to load query history:', e)
@@ -74,19 +60,7 @@ export function HistoryPanel() {
       }
     }
     loadHistory()
-  }, [filterConnectionId, setEntries, setLoading])
-
-  // Filter by search
-  const filteredEntries = useMemo(() => {
-    if (!searchQuery.trim()) return entries
-    const query = searchQuery.toLowerCase()
-    return entries.filter(
-      (entry) =>
-        entry.query.toLowerCase().includes(query) ||
-        entry.connectionName.toLowerCase().includes(query) ||
-        entry.databaseName?.toLowerCase().includes(query),
-    )
-  }, [entries, searchQuery])
+  }, [setEntries, setLoading])
 
   // Handle delete
   const handleDelete = useCallback(
@@ -179,44 +153,20 @@ export function HistoryPanel() {
   return (
     <div className="flex flex-col h-full min-h-0">
       {/* Header */}
-      <div className="flex flex-col gap-2 border-b px-3 py-2.5">
-        <div className="flex w-full items-center justify-between">
-          <div className="text-foreground text-sm font-medium">History</div>
-          {entries.length > 0 && (
-            <button
-              type="button"
-              onClick={handleClearAll}
-              className="size-6 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive flex items-center justify-center transition-colors"
-              title="Clear All History"
-            >
-              <IconTrash className="size-3.5" />
-            </button>
-          )}
-        </div>
-        <div className="flex gap-2">
-          <Input
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 text-xs flex-1"
-          />
-          <Select
-            value={filterConnectionId ?? 'all'}
-            onValueChange={(v) => setFilterConnectionId(v === 'all' ? null : v)}
+      <div className="group/header flex items-center justify-between border-b border-border px-3 h-8">
+        <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">
+          History
+        </span>
+        {entries.length > 0 && (
+          <button
+            type="button"
+            onClick={handleClearAll}
+            className="size-5 rounded flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors"
+            title="Clear All History"
           >
-            <SelectTrigger className="h-7 w-24 text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              {savedConnections.map((conn) => (
-                <SelectItem key={conn.id} value={conn.id}>
-                  {conn.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+            <IconTrash className="size-3.5" />
+          </button>
+        )}
       </div>
 
       {/* History list */}
@@ -224,12 +174,12 @@ export function HistoryPanel() {
         <div className="p-2 space-y-0.5">
           {isLoading ? (
             <div className="p-4 text-center text-sm text-muted-foreground">Loading...</div>
-          ) : filteredEntries.length === 0 ? (
+          ) : entries.length === 0 ? (
             <div className="p-4 text-center text-sm text-muted-foreground">
-              {searchQuery ? 'No matching history' : 'No query history yet'}
+              No query history yet
             </div>
           ) : (
-            filteredEntries.map((entry) => (
+            entries.map((entry) => (
               <HistoryEntry
                 key={entry.id}
                 entry={entry}
@@ -297,18 +247,18 @@ function HistoryEntry({
               {formattedTime}
             </span>
             {entry.executionTimeMs !== null && (
-              <span className="text-muted-foreground/60">{entry.executionTimeMs}ms</span>
+              <span className="text-muted-foreground/80">{entry.executionTimeMs}ms</span>
             )}
             {entry.rowCount !== null && entry.success && (
-              <span className="text-muted-foreground/60">{entry.rowCount} rows</span>
+              <span className="text-muted-foreground/80">{entry.rowCount} rows</span>
             )}
           </div>
 
           {/* Query preview */}
-          <div className="text-xs font-mono truncate text-foreground/80">{queryPreview}</div>
+          <div className="text-xs font-mono truncate text-foreground/90">{queryPreview}</div>
 
           {/* Connection info */}
-          <div className="flex items-center gap-1 text-[10px] text-muted-foreground/60 mt-0.5">
+          <div className="flex items-center gap-1 text-[10px] text-muted-foreground/80 mt-0.5">
             <IconDatabase className="size-2.5" />
             <span className="truncate">
               {entry.connectionName}
