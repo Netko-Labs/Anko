@@ -16,9 +16,7 @@ export function broadcastInvalidation(...targets: InvalidationTarget[]) {
  * Listen for data invalidation signals from other windows.
  * Returns a cleanup function.
  */
-export function listenForInvalidation(
-  onInvalidate: (targets: InvalidationTarget[]) => void,
-) {
+export function listenForInvalidation(onInvalidate: (targets: InvalidationTarget[]) => void) {
   const channel = new BroadcastChannel(CHANNEL_NAME)
   channel.onmessage = (event: MessageEvent<{ targets: InvalidationTarget[] }>) => {
     onInvalidate(event.data.targets)

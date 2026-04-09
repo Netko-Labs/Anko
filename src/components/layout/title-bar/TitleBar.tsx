@@ -112,7 +112,12 @@ export function TitleBar({ onToggleLeftSidebar, onToggleRightSidebar }: TitleBar
             {context.schema && (
               <>
                 <Chevron />
-                <span className="text-muted-foreground min-w-0 max-w-32 truncate" title={context.schema}>{context.schema}</span>
+                <span
+                  className="text-muted-foreground min-w-0 max-w-32 truncate"
+                  title={context.schema}
+                >
+                  {context.schema}
+                </span>
               </>
             )}
 
@@ -188,75 +193,75 @@ function TitleBarSettingsMenu() {
   }, [setUpdateAvailable, setModalOpen])
 
   return (
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          className={cn(
-            'h-7 w-7 inline-flex items-center justify-center rounded-md',
-            'text-muted-foreground hover:text-foreground/80',
-            'hover:bg-muted/60 active:bg-muted',
-            'transition-colors duration-100 outline-none',
-          )}
-        >
-          <IconSettings className="size-3.5" />
-        </DropdownMenuTrigger>
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        className={cn(
+          'h-7 w-7 inline-flex items-center justify-center rounded-md',
+          'text-muted-foreground hover:text-foreground/80',
+          'hover:bg-muted/60 active:bg-muted',
+          'transition-colors duration-100 outline-none',
+        )}
+      >
+        <IconSettings className="size-3.5" />
+      </DropdownMenuTrigger>
 
-        <DropdownMenuContent align="end" sideOffset={4} className="min-w-44 z-100">
-          <DropdownMenuItem onClick={() => toast.info('Settings coming soon')}>
-            <IconSettings className="size-4 mr-2" />
-            Settings
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              {theme === 'dark' ? (
-                <IconMoon className="size-4 mr-2" />
-              ) : theme === 'light' ? (
-                <IconSun className="size-4 mr-2" />
-              ) : (
-                <IconDeviceDesktop className="size-4 mr-2" />
+      <DropdownMenuContent align="end" sideOffset={4} className="min-w-44 z-100">
+        <DropdownMenuItem onClick={() => toast.info('Settings coming soon')}>
+          <IconSettings className="size-4 mr-2" />
+          Settings
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            {theme === 'dark' ? (
+              <IconMoon className="size-4 mr-2" />
+            ) : theme === 'light' ? (
+              <IconSun className="size-4 mr-2" />
+            ) : (
+              <IconDeviceDesktop className="size-4 mr-2" />
+            )}
+            Theme
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuItem onClick={() => setTheme('light')}>
+              <IconSun className="size-4 mr-2" />
+              Light
+              {theme === 'light' && (
+                <span className="ml-auto text-xs text-muted-foreground">Active</span>
               )}
-              Theme
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent>
-              <DropdownMenuItem onClick={() => setTheme('light')}>
-                <IconSun className="size-4 mr-2" />
-                Light
-                {theme === 'light' && (
-                  <span className="ml-auto text-xs text-muted-foreground">Active</span>
-                )}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme('dark')}>
-                <IconMoon className="size-4 mr-2" />
-                Dark
-                {theme === 'dark' && (
-                  <span className="ml-auto text-xs text-muted-foreground">Active</span>
-                )}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme('system')}>
-                <IconDeviceDesktop className="size-4 mr-2" />
-                System
-                {theme === 'system' && (
-                  <span className="ml-auto text-xs text-muted-foreground">Active</span>
-                )}
-              </DropdownMenuItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleCheckForUpdates}>
-            <IconRefresh className="size-4 mr-2" />
-            Check for updates
-          </DropdownMenuItem>
-          {import.meta.env.DEV && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => openDevToolsWindow()}>
-                <IconCode className="size-4 mr-2" />
-                Dev Tools
-              </DropdownMenuItem>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setTheme('dark')}>
+              <IconMoon className="size-4 mr-2" />
+              Dark
+              {theme === 'dark' && (
+                <span className="ml-auto text-xs text-muted-foreground">Active</span>
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setTheme('system')}>
+              <IconDeviceDesktop className="size-4 mr-2" />
+              System
+              {theme === 'system' && (
+                <span className="ml-auto text-xs text-muted-foreground">Active</span>
+              )}
+            </DropdownMenuItem>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleCheckForUpdates}>
+          <IconRefresh className="size-4 mr-2" />
+          Check for updates
+        </DropdownMenuItem>
+        {import.meta.env.DEV && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => openDevToolsWindow()}>
+              <IconCode className="size-4 mr-2" />
+              Dev Tools
+            </DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 

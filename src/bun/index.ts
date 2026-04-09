@@ -100,9 +100,7 @@ setTimeout(() => {
     },
     {
       label: 'File',
-      submenu: [
-        { role: 'close' },
-      ],
+      submenu: [{ role: 'close' }],
     },
     {
       label: 'Edit',
@@ -118,9 +116,7 @@ setTimeout(() => {
     },
     {
       label: 'View',
-      submenu: [
-        { role: 'toggleFullScreen' },
-      ],
+      submenu: [{ role: 'toggleFullScreen' }],
     },
     {
       label: 'Window',
@@ -133,9 +129,7 @@ setTimeout(() => {
     },
     {
       label: 'Help',
-      submenu: [
-        { role: 'showHelp' },
-      ],
+      submenu: [{ role: 'showHelp' }],
     },
   ])
   console.log('[Anko] Application menu set')

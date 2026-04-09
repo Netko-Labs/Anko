@@ -166,11 +166,6 @@ export function TableTabContent({ tabId }: TableTabContentProps) {
     [guardedNavigate, loadPage, totalPages],
   )
 
-  // Early return if no tab or connection data
-  if (!tableName || !runtimeConnectionId) {
-    return null
-  }
-
   const hasNextPage = (currentPage + 1) * PAGE_SIZE < totalRows
   const hasPrevPage = currentPage > 0
 
@@ -203,6 +198,11 @@ export function TableTabContent({ tabId }: TableTabContentProps) {
       </DropdownMenu>
     )
   }, [tableInstance])
+
+  // Early return if no tab or connection data
+  if (!tableName || !runtimeConnectionId) {
+    return null
+  }
 
   return (
     <div className="flex flex-col h-full bg-background">

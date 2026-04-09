@@ -56,11 +56,16 @@ export function TreeNode({
         {icon && <span className="flex-shrink-0">{icon}</span>}
 
         {/* Label */}
-        <span className="flex-1 truncate" title={label}>{label}</span>
+        <span className="flex-1 truncate" title={label}>
+          {label}
+        </span>
 
         {/* Secondary label */}
         {secondaryLabel && (
-          <span className="text-[10px] text-muted-foreground tabular-nums truncate max-w-24" title={secondaryLabel}>
+          <span
+            className="text-[10px] text-muted-foreground tabular-nums truncate max-w-24"
+            title={secondaryLabel}
+          >
             {secondaryLabel}
           </span>
         )}

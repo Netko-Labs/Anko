@@ -12,12 +12,20 @@ const children: Array<ReturnType<typeof Bun.spawn>> = []
 
 function cleanup() {
   for (const child of children) {
-    try { child.kill() } catch {}
+    try {
+      child.kill()
+    } catch {}
   }
 }
 
-process.on('SIGINT', () => { cleanup(); process.exit(0) })
-process.on('SIGTERM', () => { cleanup(); process.exit(0) })
+process.on('SIGINT', () => {
+  cleanup()
+  process.exit(0)
+})
+process.on('SIGTERM', () => {
+  cleanup()
+  process.exit(0)
+})
 
 // 1. Kill stale Vite process on port
 async function killPort(port: number) {
@@ -25,7 +33,9 @@ async function killPort(port: number) {
     const result = await $`lsof -ti:${port}`.text()
     const pids = result.trim().split('\n').filter(Boolean)
     for (const pid of pids) {
-      try { process.kill(Number(pid), 9) } catch {}
+      try {
+        process.kill(Number(pid), 9)
+      } catch {}
     }
     if (pids.length) console.log(`[dev] Killed stale process on port ${port}`)
   } catch {

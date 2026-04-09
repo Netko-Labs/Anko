@@ -50,7 +50,9 @@ export function CellDetails({ value, columnName, columnType }: CellDetailsProps)
         <div className="p-3">
           <div
             className={`text-xs font-mono leading-relaxed ${isNull ? 'text-primary/40 italic' : 'text-foreground/90'} ${
-              isJson ? 'text-[11px] whitespace-pre-wrap break-all' : 'whitespace-pre-wrap break-words'
+              isJson
+                ? 'text-[11px] whitespace-pre-wrap break-all'
+                : 'whitespace-pre-wrap break-words'
             }`}
           >
             {formattedValue}

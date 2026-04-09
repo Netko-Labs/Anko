@@ -154,7 +154,9 @@ export function HistoryPanel() {
     <div className="flex flex-col h-full min-h-0">
       {/* Header */}
       <div className="group/header flex items-center justify-between border-b border-border px-3 h-8">
-        <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">History</span>
+        <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">
+          History
+        </span>
         {entries.length > 0 && (
           <button
             type="button"

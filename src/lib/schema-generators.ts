@@ -35,14 +35,32 @@ function toPascalCase(str: string): string {
     .join('')
 }
 
-type SqlCategory = 'int' | 'number' | 'bool' | 'date' | 'json' | 'uuid' | 'binary' | 'array' | 'string'
+type SqlCategory =
+  | 'int'
+  | 'number'
+  | 'bool'
+  | 'date'
+  | 'json'
+  | 'uuid'
+  | 'binary'
+  | 'array'
+  | 'string'
 
 function classifySqlType(dataType: string): SqlCategory {
   const t = dataType.toLowerCase()
   if (t.includes('int') || t.includes('serial')) return 'int'
-  if (t.includes('decimal') || t.includes('numeric') || t.includes('float') || t.includes('double') || t.includes('real') || t.includes('money')) return 'number'
+  if (
+    t.includes('decimal') ||
+    t.includes('numeric') ||
+    t.includes('float') ||
+    t.includes('double') ||
+    t.includes('real') ||
+    t.includes('money')
+  )
+    return 'number'
   if (t.includes('bool') || t === 'bit') return 'bool'
-  if (t.includes('date') || t.includes('time') || t.includes('timestamp') || t.includes('year')) return 'date'
+  if (t.includes('date') || t.includes('time') || t.includes('timestamp') || t.includes('year'))
+    return 'date'
   if (t === 'json' || t === 'jsonb') return 'json'
   if (t === 'uuid') return 'uuid'
   if (t.includes('blob') || t.includes('binary') || t.includes('bytea')) return 'binary'

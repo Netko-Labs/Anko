@@ -21,8 +21,7 @@ export class SqliteConnector implements DatabaseConnector {
     try {
       // For SQLite, `host` holds the file path — resolve relative paths from CWD
       const raw = config.host || ':memory:'
-      const filename =
-        raw === ':memory:' || raw.startsWith('/') ? raw : `${process.cwd()}/${raw}`
+      const filename = raw === ':memory:' || raw.startsWith('/') ? raw : `${process.cwd()}/${raw}`
       const sql = new SQL({
         adapter: 'sqlite',
         filename,
@@ -135,11 +134,7 @@ export class SqliteConnector implements DatabaseConnector {
     }))
   }
 
-  async getColumns(
-    _database: string,
-    _schema: string,
-    table: string,
-  ): Promise<ColumnDetail[]> {
+  async getColumns(_database: string, _schema: string, table: string): Promise<ColumnDetail[]> {
     const rows = await this.sql.unsafe(`PRAGMA table_info("${table.replace(/"/g, '""')}")`)
 
     if (!Array.isArray(rows)) return []

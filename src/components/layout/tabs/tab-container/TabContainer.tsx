@@ -231,9 +231,21 @@ export function TabContainer() {
                   <span className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-primary" />
                 )}
                 {isTableTab ? (
-                  <IconTable className={cn('size-3.5', isActive && 'text-primary', isAnyDragging && 'pointer-events-none')} />
+                  <IconTable
+                    className={cn(
+                      'size-3.5',
+                      isActive && 'text-primary',
+                      isAnyDragging && 'pointer-events-none',
+                    )}
+                  />
                 ) : (
-                  <Code2 className={cn('size-3.5', isActive && 'text-primary', isAnyDragging && 'pointer-events-none')} />
+                  <Code2
+                    className={cn(
+                      'size-3.5',
+                      isActive && 'text-primary',
+                      isAnyDragging && 'pointer-events-none',
+                    )}
+                  />
                 )}
                 {isEditing ? (
                   <input

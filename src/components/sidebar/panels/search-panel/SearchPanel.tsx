@@ -36,10 +36,14 @@ export function SearchPanel() {
   // Lazy-load saved queries & history if stores are empty
   useEffect(() => {
     if (savedQueries.length === 0) {
-      listSavedQueries().then(setSavedQueries).catch(() => {})
+      listSavedQueries()
+        .then(setSavedQueries)
+        .catch(() => {})
     }
     if (historyEntries.length === 0) {
-      listQueryHistory(undefined, 100).then(setHistoryEntries).catch(() => {})
+      listQueryHistory(undefined, 100)
+        .then(setHistoryEntries)
+        .catch(() => {})
     }
   }, [savedQueries.length, historyEntries.length, setSavedQueries, setHistoryEntries])
 
@@ -50,15 +54,17 @@ export function SearchPanel() {
     if (!search) return []
     const activeIds = new Set(activeConnections.map((c) => c.id))
 
-    return savedConnections.filter(
-      (c) =>
-        c.name.toLowerCase().includes(search) ||
-        c.host.toLowerCase().includes(search) ||
-        c.database?.toLowerCase().includes(search),
-    ).map((c) => ({
-      ...c,
-      isActive: activeIds.has(c.id),
-    }))
+    return savedConnections
+      .filter(
+        (c) =>
+          c.name.toLowerCase().includes(search) ||
+          c.host.toLowerCase().includes(search) ||
+          c.database?.toLowerCase().includes(search),
+      )
+      .map((c) => ({
+        ...c,
+        isActive: activeIds.has(c.id),
+      }))
   }, [search, savedConnections, activeConnections])
 
   // Saved queries — high priority
@@ -92,7 +98,9 @@ export function SearchPanel() {
     <div className="flex flex-col h-full min-h-0">
       {/* Header */}
       <div className="flex items-center border-b border-border px-3 h-8">
-        <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">Search</span>
+        <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">
+          Search
+        </span>
       </div>
       {/* Search input */}
       <div className="border-b border-border px-3 py-2">
@@ -114,9 +122,7 @@ export function SearchPanel() {
           )}
 
           {search && !hasResults && (
-            <div className="p-4 text-center text-sm text-muted-foreground">
-              No results found
-            </div>
+            <div className="p-4 text-center text-sm text-muted-foreground">No results found</div>
           )}
 
           {/* Connections */}
@@ -135,8 +141,13 @@ export function SearchPanel() {
                   ) : (
                     <IconPlug className="size-3.5 text-muted-foreground shrink-0" />
                   )}
-                  <span className="truncate" title={conn.name}>{conn.name}</span>
-                  <span className="text-muted-foreground text-[10px] truncate ml-auto" title={`${conn.host}:${conn.port}`}>
+                  <span className="truncate" title={conn.name}>
+                    {conn.name}
+                  </span>
+                  <span
+                    className="text-muted-foreground text-[10px] truncate ml-auto"
+                    title={`${conn.host}:${conn.port}`}
+                  >
                     {conn.host}:{conn.port}
                   </span>
                 </div>
@@ -151,13 +162,12 @@ export function SearchPanel() {
                 Saved Queries ({savedQueryResults.length})
               </div>
               {savedQueryResults.map((q) => (
-                <div
-                  key={q.id}
-                  className="px-2 py-1.5 rounded-sm text-xs hover:bg-muted/60"
-                >
+                <div key={q.id} className="px-2 py-1.5 rounded-sm text-xs hover:bg-muted/60">
                   <div className="flex items-center gap-1.5">
                     <IconCode className="size-3.5 text-primary/70 shrink-0" />
-                    <span className="truncate font-medium" title={q.name}>{q.name}</span>
+                    <span className="truncate font-medium" title={q.name}>
+                      {q.name}
+                    </span>
                   </div>
                   <div className="text-[10px] font-mono text-muted-foreground truncate mt-0.5 pl-5">
                     {q.query.trim().replace(/\s+/g, ' ').slice(0, 80)}
@@ -171,13 +181,11 @@ export function SearchPanel() {
           {historyResults.length > 0 && (
             <div>
               <div className="px-2 py-1 text-[10px] text-primary/60 font-medium uppercase tracking-wide">
-                History ({historyResults.length}{historyResults.length === MAX_HISTORY_RESULTS ? '+' : ''})
+                History ({historyResults.length}
+                {historyResults.length === MAX_HISTORY_RESULTS ? '+' : ''})
               </div>
               {historyResults.map((entry) => (
-                <div
-                  key={entry.id}
-                  className="px-2 py-1.5 rounded-sm text-xs hover:bg-muted/60"
-                >
+                <div key={entry.id} className="px-2 py-1.5 rounded-sm text-xs hover:bg-muted/60">
                   <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
                     {entry.success ? (
                       <IconCheck className="size-3 text-green-500 shrink-0" />

@@ -38,9 +38,7 @@ export function DataTableHeader({ header }: DataTableHeaderProps) {
     >
       {meta?.isPrimaryKey && <IconKey className="size-3 text-primary shrink-0" />}
       <span>{header.column.columnDef.header as string}</span>
-      <span className="text-primary/70 font-normal">
-        {getDisplayType(meta?.dataType || '')}
-      </span>
+      <span className="text-primary/70 font-normal">{getDisplayType(meta?.dataType || '')}</span>
       {canSort && (
         <span className="ml-1">
           {sortDirection === 'asc' ? (

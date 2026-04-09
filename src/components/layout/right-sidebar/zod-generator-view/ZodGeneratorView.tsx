@@ -9,11 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  type ValidatorLib,
-  VALIDATOR_OPTIONS,
-  generateSchema,
-} from '@/lib/schema-generators'
+import { type ValidatorLib, VALIDATOR_OPTIONS, generateSchema } from '@/lib/schema-generators'
 import type { ZodGeneratorViewProps } from './definitions'
 
 export function ZodGeneratorView({ tableName, columns }: ZodGeneratorViewProps) {

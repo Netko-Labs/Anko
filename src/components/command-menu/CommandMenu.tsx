@@ -29,12 +29,7 @@ import {
 } from '@/components/ui/command'
 import { useTheme } from '@/components/theme/ThemeProvider'
 import { formatErrorMessage } from '@/lib/error-utils'
-import {
-  connect,
-  getConnectionConfig,
-  listQueryHistory,
-  listSavedQueries,
-} from '@/lib/rpc'
+import { connect, getConnectionConfig, listQueryHistory, listSavedQueries } from '@/lib/rpc'
 import { ensureMinimumToastDuration } from '@/lib/toast-utils'
 import { cn } from '@/lib/utils'
 import { useConnectionStore } from '@/stores/connection'
@@ -117,7 +112,9 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
   useEffect(() => {
     if (!open) return
     if (savedQueries.length === 0) {
-      listSavedQueries().then(setSavedQueries).catch(() => {})
+      listSavedQueries()
+        .then(setSavedQueries)
+        .catch(() => {})
     }
     if (historyEntries.length === 0) {
       listQueryHistory(undefined, MAX_HISTORY_ITEMS)
@@ -476,10 +473,7 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 
           {/* ── Actions ────────────────────────────────────── */}
           <CommandGroup heading="Actions">
-            <CommandItem
-              value="action:new query editor"
-              onSelect={handleNewQuery}
-            >
+            <CommandItem value="action:new query editor" onSelect={handleNewQuery}>
               <IconPlus className="size-4 text-muted-foreground" />
               New Query
             </CommandItem>

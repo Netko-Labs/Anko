@@ -53,9 +53,7 @@ function ColumnRow({ column }: ColumnRowProps) {
       {/* Type + metadata */}
       <div className="flex items-center gap-1.5 shrink-0">
         <span className="text-[10px] text-primary/60 font-mono">{column.data_type}</span>
-        {column.nullable && (
-          <span className="text-[9px] text-muted-foreground/50">null</span>
-        )}
+        {column.nullable && <span className="text-[9px] text-muted-foreground/50">null</span>}
         {column.key && !isPrimaryKey && (
           <span className="text-[9px] px-1 py-px rounded bg-primary/10 text-primary">
             {column.key}

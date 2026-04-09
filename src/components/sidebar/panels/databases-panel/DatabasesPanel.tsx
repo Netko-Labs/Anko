@@ -138,7 +138,9 @@ export function DatabasesPanel({
     <div className="flex flex-col h-full min-h-0">
       {/* Header */}
       <div className="group/header flex items-center justify-between border-b border-border px-3 h-8">
-        <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">Connections</span>
+        <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">
+          Connections
+        </span>
         <button
           type="button"
           onClick={onNewConnection}
@@ -153,9 +155,7 @@ export function DatabasesPanel({
       <ScrollArea className="flex-1 min-h-0">
         <div className="p-2 space-y-0.5">
           {workspaceConnections.length === 0 ? (
-            <div className="p-4 text-center text-sm text-muted-foreground">
-              No connections yet
-            </div>
+            <div className="p-4 text-center text-sm text-muted-foreground">No connections yet</div>
           ) : (
             <>
               {/* Connected section */}

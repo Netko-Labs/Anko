@@ -24,8 +24,9 @@ export function parseConnectionUrl(url: string): Partial<ConnectionConfig> | nul
     if (!urlMatch) return null
 
     const [, protocol, user, password, host, port, database] = urlMatch
-    const driver: DatabaseDriver =
-      protocol.toLowerCase().startsWith('mysql') ? 'mysql' : 'postgresql'
+    const driver: DatabaseDriver = protocol.toLowerCase().startsWith('mysql')
+      ? 'mysql'
+      : 'postgresql'
     const defaultPort = driver === 'mysql' ? 3306 : 5432
 
     return {

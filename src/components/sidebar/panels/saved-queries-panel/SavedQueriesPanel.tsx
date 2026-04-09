@@ -44,9 +44,7 @@ export function SavedQueriesPanel() {
 
   const filteredQueries = useMemo(() => {
     if (!activeWorkspaceId || activeWorkspaceId === 'default') return queries
-    return queries.filter(
-      (q) => q.workspaceId === activeWorkspaceId || q.workspaceId === null,
-    )
+    return queries.filter((q) => q.workspaceId === activeWorkspaceId || q.workspaceId === null)
   }, [queries, activeWorkspaceId])
 
   const handleDelete = useCallback(
@@ -140,7 +138,9 @@ export function SavedQueriesPanel() {
     <>
       <div className="flex flex-col h-full min-h-0">
         <div className="group/header flex items-center justify-between border-b border-border px-3 h-8">
-          <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">Saved Queries</span>
+          <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">
+            Saved Queries
+          </span>
           <button
             type="button"
             onClick={handleNewQuery}

@@ -19,7 +19,9 @@ export function RowDetails({ row, columns }: RowDetailsProps) {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="flex items-center justify-between px-3 h-8 border-b border-border shrink-0">
-        <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">Row Details</span>
+        <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">
+          Row Details
+        </span>
         <button
           type="button"
           onClick={handleCopyRow}
@@ -72,7 +74,9 @@ function FieldRow({ column, value, onCopy }: FieldRowProps) {
         <div className="flex items-center justify-between w-full px-3 py-1.5">
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
             <span className="text-xs font-medium text-foreground truncate">{column.name}</span>
-            <span className="text-[10px] text-primary/50 font-mono shrink-0">{column.data_type}</span>
+            <span className="text-[10px] text-primary/50 font-mono shrink-0">
+              {column.data_type}
+            </span>
             {column.key && (
               <span className="text-[9px] px-1 py-px rounded bg-primary/10 text-primary shrink-0">
                 {column.key}
@@ -88,7 +92,9 @@ function FieldRow({ column, value, onCopy }: FieldRowProps) {
             <IconClipboard className="size-3" />
           </button>
         </div>
-        <div className={`px-3 pb-1.5 text-xs font-mono ${isNull ? 'text-primary/40 italic' : 'text-foreground/80'}`}>
+        <div
+          className={`px-3 pb-1.5 text-xs font-mono ${isNull ? 'text-primary/40 italic' : 'text-foreground/80'}`}
+        >
           {formattedValue}
         </div>
       </div>
@@ -107,7 +113,9 @@ function FieldRow({ column, value, onCopy }: FieldRowProps) {
               <IconChevronRight className="size-3 text-muted-foreground shrink-0" />
             )}
             <span className="text-xs font-medium text-foreground truncate">{column.name}</span>
-            <span className="text-[10px] text-primary/50 font-mono shrink-0">{column.data_type}</span>
+            <span className="text-[10px] text-primary/50 font-mono shrink-0">
+              {column.data_type}
+            </span>
             {column.key && (
               <span className="text-[9px] px-1 py-px rounded bg-primary/10 text-primary shrink-0">
                 {column.key}
