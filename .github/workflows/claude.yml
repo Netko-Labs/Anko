@@ -1,5 +1,4 @@
-name: Claude Code
-
+name: Claude Assistant
 on:
   issue_comment:
     types: [created]
@@ -7,47 +6,43 @@ on:
     types: [created]
   issues:
     types: [opened, assigned]
-  pull_request_review:
-    types: [submitted]
 
 jobs:
   claude:
     if: |
-      (github.actor == 'PejeDev' || github.actor == 'VishKuit') &&
-      (
-        (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-        (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-        (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-        (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
-      )
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'issues' && github.event.action == 'assigned' && github.event.assignee.login == 'claude[bot]') ||
+      (github.event_name == 'issues' && github.event.action == 'opened' && contains(github.event.issue.body, '@claude'))
     runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions:
-      contents: read
-      pull-requests: read
-      issues: read
+      contents: write
+      pull-requests: write
+      issues: write
       id-token: write
-      actions: read # Required for Claude to read CI results on PRs
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - name: Run Claude Code
-        id: claude
-        uses: anthropics/claude-code-action@v1
+      - uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          use_sticky_comment: true
+          assignee_trigger: 'claude[bot]'
+          prompt: |
+            You are an interactive assistant on GitHub PRs and issues.
+            REPO: ${{ github.repository }}
+            PR/ISSUE NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
 
-          # This is an optional setting that allows Claude to read CI results on PRs
-          additional_permissions: |
-            actions: read
+            IMPORTANT: Always respond to the user. After completing the requested task,
+            post a summary comment using `gh pr comment` or `gh issue comment`.
 
-          # Optional: Give a custom prompt to Claude. If this is not specified, Claude will perform the instructions specified in the comment that tagged it.
-          # prompt: 'Update the pull request description to include a summary of changes.'
-
-          # Optional: Add claude_args to customize behavior and configuration
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://code.claude.com/docs/en/cli-reference for available options
-          # claude_args: '--allowed-tools Bash(gh pr:*)'
-
+            When asked to update or generate a PR description:
+            1. Read the PR diff with `gh pr diff ${{ github.event.issue.number || github.event.pull_request.number }}`
+            2. Read the template from .github/pull_request_template.md
+            3. Fill in the template based on the actual changes
+            4. Update the PR body with `gh pr edit ${{ github.event.issue.number || github.event.pull_request.number }} --body "..."`
+            5. Comment confirming what you did
+          claude_args: |
+            --allowedTools "Bash(gh pr:*),Bash(gh issue:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*),Read,Glob,Grep,Edit,Write"
