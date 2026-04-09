@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.4.1] - 2026-04-09
+
+### Highlights
+We're back with a hotfix that gets Anko running smooth as butter on Electrobun. Sometimes the best optimizations are knowing what *not* to do. ✨
+
+### Bug Fixes 🐛
+- **Build**: Remove lazy imports that were breaking the Electrobun CEF bundle – turns out lazy loading isn't always lazy in the best way. Now everything loads right the first time!
+
 ## [v0.4.0] - 2026-04-09
 
 ### Highlights
