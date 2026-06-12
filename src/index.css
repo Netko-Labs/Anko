@@ -23,7 +23,7 @@
 /* Safety net: anything interactive that lands inside a drag region opts out. */
 .titlebar-drag button,
 .titlebar-drag a,
-.titlebar-drag [role='button'] {
+.titlebar-drag [role="button"] {
   -webkit-app-region: no-drag;
 }
 

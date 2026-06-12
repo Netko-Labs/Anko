@@ -24,9 +24,6 @@ dist-ssr
 *.sw?
 .claude
 
-# Native build artifacts
-*.dylib
-
 # Docker-generated SQLite data
 docker/sqlite/data/
 
