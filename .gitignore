@@ -27,14 +27,10 @@ dist-ssr
 # Native build artifacts
 *.dylib
 
-# Electrobun build artifacts
-build/
-artifacts/
-*.electrobun
-
 # Docker-generated SQLite data
 docker/sqlite/data/
 
 # mirin dev/build output
 .mirin/
+build/
 *.bun-build
