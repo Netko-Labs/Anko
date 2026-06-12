@@ -268,9 +268,13 @@ export function createRouter(state: AppState) {
     unmaximizeWindow: rpc.mutation(() => {
       mainWindow()?.restore()
     }),
-    isWindowMaximized: rpc.query(() => false),
-    getWindowFrame: rpc.query(() => ({ x: 0, y: 0, width: 0, height: 0 })),
-    setWindowPosition: rpc.mutation((_args: { x: number; y: number }) => {}),
+    isWindowMaximized: rpc.query(() => mainWindow()?.isMaximized() ?? false),
+    getWindowFrame: rpc.query(
+      () => mainWindow()?.getFrame() ?? { x: 0, y: 0, width: 0, height: 0 },
+    ),
+    setWindowPosition: rpc.mutation(({ x, y }: { x: number; y: number }) => {
+      mainWindow()?.setPosition(x, y)
+    }),
     openDevToolsWindow: rpc.mutation(() => {}),
   })
 }

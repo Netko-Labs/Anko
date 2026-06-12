@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import { app, menu } from 'mirinjs'
 import { createRouter } from './rpc/router'
 import { AppState } from './state'
+import { getWindowState, saveWindowState } from './storage'
 
 // ---- App state + storage ----
 const state = new AppState()
@@ -22,7 +23,54 @@ console.log(`[Anko] Storage initialized at: ${appDataDir}`)
 // ---- RPC ----
 app.serve(createRouter(state))
 
-// The "main" window opens automatically from mirin.config.ts.
+// ---- Main window (manual open so we can restore the saved frame) ----
+app.on('ready', async () => {
+  const saved = getWindowState()
+
+  const win = await app.windows.open({
+    name: 'main',
+    url: 'app://ui/index.html',
+    title: 'Anko',
+    titleBarStyle: 'hiddenInset',
+    show: 'ready',
+    x: saved.x,
+    y: saved.y,
+    width: saved.width,
+    height: saved.height,
+  })
+  console.log(`[Anko] Main window opened at ${saved.x},${saved.y} ${saved.width}x${saved.height}`)
+
+  // Restore maximized state once the window has settled.
+  if (saved.isMaximized) {
+    setTimeout(() => void win.maximize(), 150)
+  }
+
+  // Persist the frame periodically. While maximized, keep the last normal frame
+  // and only flip the flag, so un-maximizing returns to a sensible size.
+  const saveInterval = setInterval(() => {
+    try {
+      if (win.isMaximized()) {
+        const current = getWindowState()
+        if (!current.isMaximized) saveWindowState({ ...current, isMaximized: true })
+        return
+      }
+      const frame = win.getFrame()
+      if (frame.width > 0 && frame.height > 0) {
+        saveWindowState({
+          x: Math.round(frame.x),
+          y: Math.round(frame.y),
+          width: Math.round(frame.width),
+          height: Math.round(frame.height),
+          isMaximized: false,
+        })
+      }
+    } catch {
+      // Window may be closing; ignore.
+    }
+  }, 2000)
+
+  win.on('closed', () => clearInterval(saveInterval))
+})
 
 // ---- Application menu ----
 app.on('ready', () => {

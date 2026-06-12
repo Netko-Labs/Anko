@@ -6,6 +6,7 @@ export default defineConfig({
   main: 'src/bun/index.ts',
 
   windows: {
+    // Opened manually from src/bun/index.ts so we can restore the saved frame.
     main: {
       title: 'Anko',
       width: 1280,
@@ -13,6 +14,7 @@ export default defineConfig({
       titleBarStyle: 'hiddenInset',
       url: 'app://ui/index.html',
       show: 'ready',
+      open: 'manual',
     },
   },
 })
