@@ -32,6 +32,8 @@ app.on('ready', async () => {
     url: 'app://ui/index.html',
     title: 'Anko',
     titleBarStyle: 'hiddenInset',
+    // Center the traffic lights in Anko's 36px (h-9) title bar.
+    trafficLightPosition: { x: 13, y: 13 },
     show: 'ready',
     x: saved.x,
     y: saved.y,
