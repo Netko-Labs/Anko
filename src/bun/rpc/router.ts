@@ -275,7 +275,34 @@ export function createRouter(state: AppState) {
     setWindowPosition: rpc.mutation(({ x, y }: { x: number; y: number }) => {
       mainWindow()?.setPosition(x, y)
     }),
-    openDevToolsWindow: rpc.mutation(() => {}),
+    // Open (or focus) the in-app DevTools panel — the same UI bundle loaded at
+    // the `#devtools` route (see src/main.tsx) in a separate floating window.
+    openDevToolsWindow: rpc.mutation(async () => {
+      const existing = (() => {
+        try {
+          return app.windows.get('devtools')
+        } catch {
+          return null
+        }
+      })()
+      if (existing) {
+        await existing.focus()
+        return
+      }
+      const win = await app.windows.open({
+        name: 'devtools',
+        title: 'Anko Dev Tools',
+        titleBarStyle: 'hiddenInset',
+        url: 'app://ui/index.html#devtools',
+        width: 560,
+        height: 700,
+        x: 300,
+        y: 250,
+        alwaysOnTop: true,
+        show: 'ready',
+      })
+      await win.setAlwaysOnTop(true)
+    }),
   })
 }
 
