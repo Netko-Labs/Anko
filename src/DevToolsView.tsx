@@ -21,8 +21,13 @@ import { Separator } from '@/components/ui/separator'
 import { useDevToolsActions } from '@/hooks/useDevToolsActions'
 import { setupToastRelay } from '@/lib/toast-bridge'
 
-// Relay toasts to the main window via BroadcastChannel
-setupToastRelay()
+// Relay toasts to the main window via BroadcastChannel — but ONLY when this is
+// actually the DevTools window. main.tsx imports this module in the main window
+// too (to route on the hash), so an unconditional call here would monkey-patch
+// `toast.*` in the main window and swallow its toasts.
+if (typeof window !== 'undefined' && window.location.hash === '#devtools') {
+  setupToastRelay()
+}
 
 function DevToolsTitleBar() {
   return (
