@@ -1,4 +1,4 @@
-import { app } from 'mirinjs'
+import { app, dialog } from 'mirinjs'
 import { rpc } from 'mirinjs/rpc'
 import pkg from '../../../package.json'
 import type {
@@ -242,10 +242,14 @@ export function createRouter(state: AppState) {
     }),
     getAppVersion: rpc.query(() => APP_VERSION),
     showSaveDialog: rpc.mutation(
-      async (_args: {
+      async ({
+        defaultPath,
+      }: {
         defaultPath?: string
         filters?: Array<{ name: string; extensions: string[] }>
-      }): Promise<string | null> => null,
+      }): Promise<string | null> => {
+        return dialog.saveFile({ defaultName: defaultPath?.split('/').pop() })
+      },
     ),
     writeTextFile: rpc.mutation(async ({ path, content }: { path: string; content: string }) => {
       await Bun.write(path, content)
