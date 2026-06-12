@@ -4,11 +4,7 @@ import { getDb } from '../client'
 import { queryHistoryTable } from '../schema'
 
 export function getQueryHistoryEntry(id: string): QueryHistoryEntry | null {
-  const [row] = getDb()
-    .select()
-    .from(queryHistoryTable)
-    .where(eq(queryHistoryTable.id, id))
-    .all()
+  const [row] = getDb().select().from(queryHistoryTable).where(eq(queryHistoryTable.id, id)).all()
 
   if (!row) return null
 

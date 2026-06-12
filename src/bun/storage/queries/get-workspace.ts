@@ -5,11 +5,7 @@ import { workspaceTable } from '../schema'
 import { getWorkspaceConnections } from './get-workspace-connections'
 
 export function getWorkspaceById(id: string): Workspace | null {
-  const [row] = getDb()
-    .select()
-    .from(workspaceTable)
-    .where(eq(workspaceTable.id, id))
-    .all()
+  const [row] = getDb().select().from(workspaceTable).where(eq(workspaceTable.id, id)).all()
 
   if (!row) return null
 

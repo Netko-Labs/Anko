@@ -12,11 +12,7 @@ const DEFAULT_STATE: WindowState = {
 }
 
 export function getWindowState(): WindowState {
-  const [row] = getDb()
-    .select()
-    .from(windowStateTable)
-    .where(eq(windowStateTable.id, 1))
-    .all()
+  const [row] = getDb().select().from(windowStateTable).where(eq(windowStateTable.id, 1)).all()
 
   if (!row) return DEFAULT_STATE
 

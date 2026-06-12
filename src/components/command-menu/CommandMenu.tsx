@@ -427,7 +427,9 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
       <Command filter={priorityFilter}>
         <CommandInput
           ref={inputRef}
-          placeholder={page === 'new-tab' ? 'Search databases and tables...' : 'Type a command or search...'}
+          placeholder={
+            page === 'new-tab' ? 'Search databases and tables...' : 'Type a command or search...'
+          }
         />
         <CommandList className="max-h-96">
           <CommandEmpty>No results found.</CommandEmpty>
@@ -472,12 +474,46 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
 // ── Main Page ──────────────────────────────────────────────────
 
 interface MainPageProps {
-  tabItems: { id: string; label: string; isTable: boolean; connectionName: string; database?: string; isActive: boolean; value: string }[]
+  tabItems: {
+    id: string
+    label: string
+    isTable: boolean
+    connectionName: string
+    database?: string
+    isActive: boolean
+    value: string
+  }[]
   activeItems: (ActiveConnection & { value: string })[]
   disconnectedItems: (ConnectionInfo & { value: string })[]
-  tableItems: { key: string; connectionId: string; runtimeConnectionId: string; connectionName: string; database: string; schema?: string; tableName: string; value: string }[]
-  savedQueryItems: { id: string; name: string; query: string; connectionId: string | null; preview: string; value: string }[]
-  historyItems: { id: string; query: string; connectionId: string; connectionName: string; databaseName: string | null; executionTimeMs: number | null; success: boolean; preview: string; value: string }[]
+  tableItems: {
+    key: string
+    connectionId: string
+    runtimeConnectionId: string
+    connectionName: string
+    database: string
+    schema?: string
+    tableName: string
+    value: string
+  }[]
+  savedQueryItems: {
+    id: string
+    name: string
+    query: string
+    connectionId: string | null
+    preview: string
+    value: string
+  }[]
+  historyItems: {
+    id: string
+    query: string
+    connectionId: string
+    connectionName: string
+    databaseName: string | null
+    executionTimeMs: number | null
+    success: boolean
+    preview: string
+    value: string
+  }[]
   theme: string
   setTheme: (theme: 'light' | 'dark' | 'system') => void
   setActiveTabId: (id: string) => void
@@ -487,15 +523,36 @@ interface MainPageProps {
   onOpenChange: (open: boolean) => void
   onConnect: (info: ConnectionInfo) => void
   onOpenQuery: (query: string, label: string, connectionId?: string | null) => void
-  onOpenTable: (item: { key: string; connectionId: string; runtimeConnectionId: string; connectionName: string; database: string; schema?: string; tableName: string; value: string }) => void
+  onOpenTable: (item: {
+    key: string
+    connectionId: string
+    runtimeConnectionId: string
+    connectionName: string
+    database: string
+    schema?: string
+    tableName: string
+    value: string
+  }) => void
   onNavigateNewTab: () => void
 }
 
 function MainPage({
-  tabItems, activeItems, disconnectedItems, tableItems,
-  savedQueryItems, historyItems, theme, setTheme,
-  setActiveTabId, toggleLeftSidebar, toggleRightSidebar,
-  runAndClose, onOpenChange, onConnect, onOpenQuery, onOpenTable,
+  tabItems,
+  activeItems,
+  disconnectedItems,
+  tableItems,
+  savedQueryItems,
+  historyItems,
+  theme,
+  setTheme,
+  setActiveTabId,
+  toggleLeftSidebar,
+  toggleRightSidebar,
+  runAndClose,
+  onOpenChange,
+  onConnect,
+  onOpenQuery,
+  onOpenTable,
   onNavigateNewTab,
 }: MainPageProps) {
   return (
@@ -530,11 +587,7 @@ function MainPage({
           <CommandSeparator />
           <CommandGroup heading="Connections">
             {activeItems.map((conn) => (
-              <CommandItem
-                key={conn.id}
-                value={conn.value}
-                onSelect={() => onOpenChange(false)}
-              >
+              <CommandItem key={conn.id} value={conn.value} onSelect={() => onOpenChange(false)}>
                 <IconPlugConnected className="size-4 text-green-500" />
                 <span>{conn.info.name}</span>
                 <span className="text-muted-foreground truncate">
@@ -544,11 +597,7 @@ function MainPage({
               </CommandItem>
             ))}
             {disconnectedItems.map((conn) => (
-              <CommandItem
-                key={conn.id}
-                value={conn.value}
-                onSelect={() => onConnect(conn)}
-              >
+              <CommandItem key={conn.id} value={conn.value} onSelect={() => onConnect(conn)}>
                 <IconPlug className="size-4 text-muted-foreground" />
                 <span>{conn.name}</span>
                 <span className="text-muted-foreground truncate">
@@ -567,11 +616,7 @@ function MainPage({
           <CommandSeparator />
           <CommandGroup heading="Tables">
             {tableItems.map((item) => (
-              <CommandItem
-                key={item.key}
-                value={item.value}
-                onSelect={() => onOpenTable(item)}
-              >
+              <CommandItem key={item.key} value={item.value} onSelect={() => onOpenTable(item)}>
                 <IconTable className="size-4 text-muted-foreground" />
                 <span>{item.tableName}</span>
                 <span className="text-muted-foreground truncate">
@@ -617,9 +662,7 @@ function MainPage({
               <CommandItem
                 key={entry.id}
                 value={entry.value}
-                onSelect={() =>
-                  onOpenQuery(entry.query, 'History query', entry.connectionId)
-                }
+                onSelect={() => onOpenQuery(entry.query, 'History query', entry.connectionId)}
               >
                 {entry.success ? (
                   <IconCheck className="size-4 text-green-500" />
@@ -704,14 +747,40 @@ function MainPage({
 // ── New Tab Page ───────────────────────────────────────────────
 
 interface NewTabPageProps {
-  databaseItems: { key: string; connectionId: string; runtimeConnectionId: string; connectionName: string; database: string; value: string }[]
-  tableItems: { key: string; connectionId: string; runtimeConnectionId: string; connectionName: string; database: string; schema?: string; tableName: string; value: string }[]
+  databaseItems: {
+    key: string
+    connectionId: string
+    runtimeConnectionId: string
+    connectionName: string
+    database: string
+    value: string
+  }[]
+  tableItems: {
+    key: string
+    connectionId: string
+    runtimeConnectionId: string
+    connectionName: string
+    database: string
+    schema?: string
+    tableName: string
+    value: string
+  }[]
   onBack: () => void
   onNewQuery: (item: NewTabPageProps['databaseItems'][number]) => void
-  onOpenTable: (dbItem: NewTabPageProps['databaseItems'][number], tableName: string, schema?: string) => void
+  onOpenTable: (
+    dbItem: NewTabPageProps['databaseItems'][number],
+    tableName: string,
+    schema?: string,
+  ) => void
 }
 
-function NewTabPage({ databaseItems, tableItems, onBack, onNewQuery, onOpenTable }: NewTabPageProps) {
+function NewTabPage({
+  databaseItems,
+  tableItems,
+  onBack,
+  onNewQuery,
+  onOpenTable,
+}: NewTabPageProps) {
   return (
     <>
       <CommandGroup heading="New Tab">
@@ -733,11 +802,7 @@ function NewTabPage({ databaseItems, tableItems, onBack, onNewQuery, onOpenTable
           <CommandSeparator />
           <CommandGroup heading="New Query">
             {databaseItems.map((item) => (
-              <CommandItem
-                key={item.key}
-                value={item.value}
-                onSelect={() => onNewQuery(item)}
-              >
+              <CommandItem key={item.key} value={item.value} onSelect={() => onNewQuery(item)}>
                 <IconCode className="size-4 text-muted-foreground" />
                 <span>{item.database}</span>
                 <span className="text-muted-foreground truncate">{item.connectionName}</span>

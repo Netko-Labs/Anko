@@ -1,13 +1,5 @@
 import { sql } from 'drizzle-orm'
-import {
-  blob,
-  check,
-  index,
-  integer,
-  primaryKey,
-  sqliteTable,
-  text,
-} from 'drizzle-orm/sqlite-core'
+import { blob, check, index, integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 export const connectionTable = sqliteTable('connections', {
   id: text('id').primaryKey(),

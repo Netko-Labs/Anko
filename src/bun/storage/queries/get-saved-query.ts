@@ -4,11 +4,7 @@ import { getDb } from '../client'
 import { savedQueryTable } from '../schema'
 
 export function getSavedQueryById(id: string): SavedQuery | null {
-  const [row] = getDb()
-    .select()
-    .from(savedQueryTable)
-    .where(eq(savedQueryTable.id, id))
-    .all()
+  const [row] = getDb().select().from(savedQueryTable).where(eq(savedQueryTable.id, id)).all()
 
   if (!row) return null
 

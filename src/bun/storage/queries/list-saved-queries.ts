@@ -8,7 +8,9 @@ export function listSavedQueries(workspaceId?: string): SavedQuery[] {
     ? getDb()
         .select()
         .from(savedQueryTable)
-        .where(or(eq(savedQueryTable.workspaceId, workspaceId), isNull(savedQueryTable.workspaceId)))
+        .where(
+          or(eq(savedQueryTable.workspaceId, workspaceId), isNull(savedQueryTable.workspaceId)),
+        )
         .orderBy(asc(savedQueryTable.name))
     : getDb().select().from(savedQueryTable).orderBy(asc(savedQueryTable.name))
 
