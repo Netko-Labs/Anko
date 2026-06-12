@@ -122,7 +122,8 @@
       "!**/src/game",
       "!**/src-tauri/target",
       "!**/build",
-      "!**/artifacts"
+      "!**/artifacts",
+      "!**/.mirin"
     ]
   }
 }

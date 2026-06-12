@@ -34,3 +34,7 @@ artifacts/
 
 # Docker-generated SQLite data
 docker/sqlite/data/
+
+# mirin dev/build output
+.mirin/
+*.bun-build
