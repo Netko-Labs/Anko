@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { TEST_DATABASES } from '@/components/sidebar/dialogs/devtools/test-databases'
+import { broadcastInvalidation } from '@/lib/data-bridge'
 import { formatErrorMessage } from '@/lib/error-utils'
 import {
   addConnectionToWorkspace as addConnectionToWorkspaceBackend,
@@ -11,7 +12,6 @@ import {
   listWorkspaces,
   saveConnection,
 } from '@/lib/rpc'
-import { broadcastInvalidation } from '@/lib/data-bridge'
 import { fetchLatestChangelog } from '@/lib/updater'
 import { useConnectionStore } from '@/stores/connection'
 import { useUpdateStore } from '@/stores/update'

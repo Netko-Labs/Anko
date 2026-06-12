@@ -77,20 +77,33 @@ function App() {
     loadConnections()
   }, [setSavedConnections])
 
-  // Handle Cmd/Ctrl+W keyboard shortcut
+  // Global keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Check for Cmd+W (Mac) or Ctrl+W (Windows/Linux)
-      if ((e.metaKey || e.ctrlKey) && e.key === 'w') {
+      const mod = e.metaKey || e.ctrlKey
+
+      // Cmd/Ctrl+Shift+B — Toggle right sidebar
+      if (mod && e.shiftKey && e.key === 'b') {
+        e.preventDefault()
+        toggleRightSidebar()
+        return
+      }
+
+      // Cmd/Ctrl+T — New tab (prevent browser default, CommandMenu handles it)
+      if (mod && !e.shiftKey && e.key === 't') {
+        e.preventDefault()
+        return
+      }
+
+      // Cmd/Ctrl+W — Close active tab or app
+      if (mod && e.key === 'w') {
         e.preventDefault()
 
-        // If there are open tabs, close the active tab
         if (queryTabs.length > 0 && activeTabId) {
           removeQueryTab(activeTabId)
           return
         }
 
-        // No tabs open - check preference for closing app
         const preference = getCloseAppPreference()
 
         if (preference === 'always-close') {
@@ -98,7 +111,6 @@ function App() {
         } else if (preference === 'never-close') {
           // Do nothing
         } else {
-          // Show confirmation dialog
           setShowCloseDialog(true)
         }
       }
@@ -106,7 +118,7 @@ function App() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [queryTabs.length, activeTabId, removeQueryTab])
+  }, [queryTabs.length, activeTabId, removeQueryTab, toggleRightSidebar])
 
   // Disable right-click and browser reload shortcuts in production
   useEffect(() => {

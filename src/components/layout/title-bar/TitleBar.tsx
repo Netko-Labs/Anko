@@ -15,6 +15,7 @@ import {
 } from '@tabler/icons-react'
 import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { resolveToast } from '@/lib/toast-utils'
 import { CommandMenu } from '@/components/command-menu/CommandMenu'
 import { WorkspaceIcon } from '@/components/sidebar/menus/workspace-icon/WorkspaceIcon'
 import { useTheme } from '@/components/theme/ThemeProvider'
@@ -168,8 +169,7 @@ function TitleBarSettingsMenu() {
 
         setUpdateAvailable(true, enrichedInfo, result.update)
 
-        toast.success('Update available!', {
-          id: toastId,
+        resolveToast.success(toastId, 'Update available!', {
           description: `Version ${result.info.version} is ready to download`,
           duration: 10000,
           action: {
@@ -178,15 +178,13 @@ function TitleBarSettingsMenu() {
           },
         })
       } else {
-        toast.success("You're up to date!", {
-          id: toastId,
+        resolveToast.success(toastId, "You're up to date!", {
           description: 'No new updates available',
           duration: 3000,
         })
       }
     } catch {
-      toast.error('Failed to check for updates', {
-        id: toastId,
+      resolveToast.error(toastId, 'Failed to check for updates', {
         duration: 5000,
       })
     }

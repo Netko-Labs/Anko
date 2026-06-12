@@ -3,19 +3,19 @@ import { MySqlConnector } from './db/mysql'
 import { PostgresConnector } from './db/postgres'
 import { SqliteConnector } from './db/sqlite'
 import { AppError } from './error'
-import { Storage } from './storage'
+import { initializeDb } from './storage'
 
 export class AppState {
   private connections = new Map<string, DatabaseConnector>()
-  public storage: Storage | null = null
+  private storageReady = false
 
   initializeStorage(appDataDir: string) {
-    this.storage = new Storage(appDataDir)
+    initializeDb(appDataDir)
+    this.storageReady = true
   }
 
-  getStorage(): Storage {
-    if (!this.storage) throw AppError.storage('Storage not initialized')
-    return this.storage
+  ensureStorageReady() {
+    if (!this.storageReady) throw AppError.storage('Storage not initialized')
   }
 
   async connect(config: ConnectionConfig): Promise<string> {

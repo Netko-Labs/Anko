@@ -11,7 +11,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { formatErrorMessage } from '@/lib/error-utils'
 import { connect, deleteConnection, getConnectionConfig } from '@/lib/rpc'
-import { ensureMinimumToastDuration } from '@/lib/toast-utils'
+import { ensureMinimumToastDuration, resolveToast } from '@/lib/toast-utils'
 import { useConnectionStore } from '@/stores/connection'
 import type { ActiveConnection, ConnectionInfo } from '@/types'
 import { ConnectionDialog } from '../connection-dialog/ConnectionDialog'
@@ -51,16 +51,14 @@ export function ConnectionList({ onConnectionSelect }: ConnectionListProps) {
 
       // Ensure minimum toast display time before showing success
       await ensureMinimumToastDuration(startTime)
-      toast.success('Connected', {
-        id: toastId,
+      resolveToast.success(toastId, 'Connected', {
         description: `Connected to "${info.name}"`,
       })
     } catch (e) {
       console.error('Failed to connect:', e)
 
       // Show error immediately (no delay needed for errors)
-      toast.error('Connection failed', {
-        id: toastId,
+      resolveToast.error(toastId, 'Connection failed', {
         description: formatErrorMessage(e),
       })
     } finally {
@@ -87,16 +85,14 @@ export function ConnectionList({ onConnectionSelect }: ConnectionListProps) {
 
       // Ensure minimum toast display time before showing success
       await ensureMinimumToastDuration(startTime)
-      toast.success('Connection deleted', {
-        id: toastId,
+      resolveToast.success(toastId, 'Connection deleted', {
         description: conn ? `"${conn.name}" has been removed` : 'Connection removed',
       })
     } catch (e) {
       console.error('Failed to delete:', e)
 
       // Show error immediately (no delay needed for errors)
-      toast.error('Failed to delete connection', {
-        id: toastId,
+      resolveToast.error(toastId, 'Failed to delete connection', {
         description: formatErrorMessage(e),
       })
     }

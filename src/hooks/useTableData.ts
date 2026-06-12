@@ -5,7 +5,7 @@ import { formatErrorMessage } from '@/lib/error-utils'
 import { executeQuery, getColumns } from '@/lib/rpc'
 import { quoteIdentifier } from '@/lib/sql-generator'
 import { buildWhereClause } from '@/lib/sql-utils'
-import { ensureMinimumToastDuration } from '@/lib/toast-utils'
+import { ensureMinimumToastDuration, resolveToast } from '@/lib/toast-utils'
 import { useConnectionStore } from '@/stores/connection'
 import { useRightSidebarStore } from '@/stores/right-sidebar'
 import type { ActiveConnection, DatabaseDriver, FilterCondition, QueryTab } from '@/types'
@@ -173,11 +173,10 @@ export function useTableData(
 
       await ensureMinimumToastDuration(startTime)
       timer.end()
-      toast.success('Table refreshed', { id: toastId })
+      resolveToast.success(toastId, 'Table refreshed')
     } catch (e) {
       timer.fail(e)
-      toast.error('Failed to refresh table', {
-        id: toastId,
+      resolveToast.error(toastId, 'Failed to refresh table', {
         description: formatErrorMessage(e),
       })
     } finally {

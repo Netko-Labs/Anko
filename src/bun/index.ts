@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { ApplicationMenu, BrowserWindow } from 'electrobun/bun'
 import { createRpcHandler } from './rpc/handlers'
 import { AppState } from './state'
+import { getWindowState, saveWindowState } from './storage'
 
 // Initialize state
 const state = new AppState()
@@ -36,8 +37,7 @@ const url = isDev ? 'http://localhost:5173' : 'views://mainview/index.html'
 let mainWindow: BrowserWindow | null = null
 
 // Restore saved window state
-const storage = state.getStorage()
-const savedWindowState = storage.windowState.get()
+const savedWindowState = getWindowState()
 
 // Create RPC handler
 const rpc = createRpcHandler(state, () => mainWindow, url)
@@ -71,12 +71,12 @@ const windowStateSaveInterval = setInterval(() => {
     const maximized = mainWindow.isMaximized()
     if (!maximized) {
       const frame = mainWindow.getFrame()
-      storage.windowState.save({ ...frame, isMaximized: false })
+      saveWindowState({ ...frame, isMaximized: false })
     } else {
       // Only update the maximized flag, keep the last normal frame
-      const current = storage.windowState.get()
+      const current = getWindowState()
       if (!current.isMaximized) {
-        storage.windowState.save({ ...current, isMaximized: true })
+        saveWindowState({ ...current, isMaximized: true })
       }
     }
   } catch {
@@ -98,7 +98,7 @@ setTimeout(() => {
         { role: 'hideOthers' },
         { role: 'showAll' },
         { type: 'separator' },
-        { role: 'quit' },
+        { role: 'quit', accelerator: 'CmdOrCtrl+Q' },
       ],
     },
     {

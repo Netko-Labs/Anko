@@ -116,7 +116,6 @@ export class PostgresConnector implements DatabaseConnector {
     schema?: string,
   ): Promise<QueryResult> {
     const pool = database ? await this.getPool(database) : await this.getDefaultPool()
-    const _start = performance.now()
 
     // Set search_path if schema specified
     let executedQuery: string

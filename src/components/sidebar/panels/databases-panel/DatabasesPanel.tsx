@@ -18,7 +18,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { formatErrorMessage } from '@/lib/error-utils'
 import { connect, deleteConnection, getConnectionConfig } from '@/lib/rpc'
-import { ensureMinimumToastDuration } from '@/lib/toast-utils'
+import { ensureMinimumToastDuration, resolveToast } from '@/lib/toast-utils'
 import { useConnectionStore } from '@/stores/connection'
 import type { ActiveConnection, ConnectionInfo } from '@/types'
 import { DatabaseTree, DatabaseTypeIcon, TreeNode } from '../../tree'
@@ -90,15 +90,13 @@ export function DatabasesPanel({
       // Ensure toast displays for minimum duration
       await ensureMinimumToastDuration(startTime)
 
-      toast.success('Connected', {
-        id: toastId,
+      resolveToast.success(toastId, 'Connected', {
         description: `Successfully connected to "${info.name}"`,
       })
     } catch (e) {
       console.error('Failed to connect:', e)
 
-      toast.error('Connection failed', {
-        id: toastId,
+      resolveToast.error(toastId, 'Connection failed', {
         description: formatErrorMessage(e),
       })
     } finally {

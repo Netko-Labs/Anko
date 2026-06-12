@@ -1,31 +1,41 @@
-import { Database } from 'bun:sqlite'
-import { mkdirSync } from 'node:fs'
-import { join } from 'node:path'
-import { ConnectionStorage } from './connections'
-import { QueryHistoryStorage } from './query-history'
-import { SavedQueriesStorage } from './saved-queries'
-import { WindowStateStorage } from './window-state'
-import { WorkspaceStorage } from './workspaces'
+// Database initialization
+export { initializeDb } from './client'
 
-export class Storage {
-  public readonly connections: ConnectionStorage
-  public readonly workspaces: WorkspaceStorage
-  public readonly queryHistory: QueryHistoryStorage
-  public readonly savedQueries: SavedQueriesStorage
-  public readonly windowState: WindowStateStorage
+// Schema & entities
+export type { DrizzleDB } from './client'
+export * from './entities'
 
-  constructor(appDataDir: string) {
-    mkdirSync(appDataDir, { recursive: true })
+// Queries
+export { getConnection } from './queries/get-connection'
+export { getConnectionConfig } from './queries/get-connection-config'
+export { listConnections } from './queries/list-connections'
+export { getWorkspaceById } from './queries/get-workspace'
+export { getWorkspaceConnections } from './queries/get-workspace-connections'
+export { listWorkspaces } from './queries/list-workspaces'
+export { getQueryHistoryEntry } from './queries/get-query-history-entry'
+export { listQueryHistory } from './queries/list-query-history'
+export { getSavedQueryById } from './queries/get-saved-query'
+export { listSavedQueries } from './queries/list-saved-queries'
+export { getWindowState } from './queries/get-window-state'
 
-    const dbPath = join(appDataDir, 'connections.db')
-    const db = new Database(dbPath, { create: true })
-    db.exec('PRAGMA journal_mode = WAL')
-    db.exec('PRAGMA foreign_keys = ON')
-
-    this.connections = new ConnectionStorage(db)
-    this.workspaces = new WorkspaceStorage(db)
-    this.queryHistory = new QueryHistoryStorage(db)
-    this.savedQueries = new SavedQueriesStorage(db)
-    this.windowState = new WindowStateStorage(db)
-  }
-}
+// Mutations
+export { saveConnection } from './mutations/save-connection'
+export { updateConnection } from './mutations/update-connection'
+export { deleteConnection } from './mutations/delete-connection'
+export { clearConnections } from './mutations/clear-connections'
+export { createWorkspace } from './mutations/create-workspace'
+export { updateWorkspace } from './mutations/update-workspace'
+export { deleteWorkspace } from './mutations/delete-workspace'
+export { addWorkspaceConnection } from './mutations/add-workspace-connection'
+export { removeWorkspaceConnection } from './mutations/remove-workspace-connection'
+export { moveWorkspaceConnection } from './mutations/move-workspace-connection'
+export { removeConnectionFromAllWorkspaces } from './mutations/remove-connection-from-all-workspaces'
+export { clearWorkspaces } from './mutations/clear-workspaces'
+export { addQueryHistory } from './mutations/add-query-history'
+export { deleteQueryHistory } from './mutations/delete-query-history'
+export { clearQueryHistory } from './mutations/clear-query-history'
+export { createSavedQuery } from './mutations/create-saved-query'
+export { updateSavedQuery } from './mutations/update-saved-query'
+export { deleteSavedQuery } from './mutations/delete-saved-query'
+export { clearSavedQueries } from './mutations/clear-saved-queries'
+export { saveWindowState } from './mutations/save-window-state'

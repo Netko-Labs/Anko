@@ -1,4 +1,5 @@
 import {
+  IconArrowLeft,
   IconCheck,
   IconClock,
   IconCode,
@@ -14,7 +15,7 @@ import {
   IconTable,
   IconX,
 } from '@tabler/icons-react'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useTheme } from '@/components/theme/ThemeProvider'
 import {
@@ -30,7 +31,7 @@ import {
 } from '@/components/ui/command'
 import { formatErrorMessage } from '@/lib/error-utils'
 import { connect, getConnectionConfig, listQueryHistory, listSavedQueries } from '@/lib/rpc'
-import { ensureMinimumToastDuration } from '@/lib/toast-utils'
+import { ensureMinimumToastDuration, resolveToast } from '@/lib/toast-utils'
 import { cn } from '@/lib/utils'
 import { useConnectionStore } from '@/stores/connection'
 import { useLeftSidebarStore } from '@/stores/left-sidebar'
@@ -50,7 +51,7 @@ interface CommandMenuProps {
  * assign higher scores to more relevant categories.
  *
  * Priority (highest first):
- *   tab=4, table=3, conn=3, action=3, saved=2, theme=2, history=1
+ *   tab=4, table=3, conn=3, action=3, saved=2, theme=2, history=1, newtab=3
  */
 function priorityFilter(value: string, search: string): number {
   const colonIdx = value.indexOf(':')
@@ -64,6 +65,7 @@ function priorityFilter(value: string, search: string): number {
     table: 3,
     conn: 3,
     action: 3,
+    newtab: 3,
     saved: 2,
     theme: 2,
     history: 1,
@@ -73,8 +75,12 @@ function priorityFilter(value: string, search: string): number {
 
 const MAX_HISTORY_ITEMS = 10
 
+type Page = 'main' | 'new-tab'
+
 export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
   const { theme, setTheme } = useTheme()
+  const [page, setPage] = useState<Page>('main')
+  const inputRef = useRef<HTMLInputElement>(null)
 
   // Connection store
   const savedConnections = useConnectionStore((s) => s.savedConnections)
@@ -96,21 +102,36 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
   const toggleLeftSidebar = useLeftSidebarStore((s) => s.toggle)
   const toggleRightSidebar = useRightSidebarStore((s) => s.toggle)
 
-  // Keyboard shortcut: Cmd+K / Ctrl+K
+  // Reset page when dialog closes
+  useEffect(() => {
+    if (!open) setPage('main')
+  }, [open])
+
+  // Keyboard shortcuts: Cmd+K (main), Cmd+T (new-tab)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault()
-        onOpenChange(!open)
+        if (open) {
+          onOpenChange(false)
+        } else {
+          setPage('main')
+          onOpenChange(true)
+        }
+      }
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key === 't') {
+        e.preventDefault()
+        setPage('new-tab')
+        onOpenChange(true)
       }
     }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [open, onOpenChange])
 
-  // Lazy-load saved queries & history when the palette opens
+  // Lazy-load saved queries & history when the palette opens on main page
   useEffect(() => {
-    if (!open) return
+    if (!open || page !== 'main') return
     if (savedQueries.length === 0) {
       listSavedQueries()
         .then(setSavedQueries)
@@ -121,7 +142,7 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
         .then(setHistoryEntries)
         .catch(() => {})
     }
-  }, [open, savedQueries.length, historyEntries.length, setSavedQueries, setHistoryEntries])
+  }, [open, page, savedQueries.length, historyEntries.length, setSavedQueries, setHistoryEntries])
 
   const runAndClose = useCallback(
     (fn: () => void) => {
@@ -131,13 +152,11 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
     [onOpenChange],
   )
 
-  // ── Derive current connection from active tab ──────────────
-  const currentConnection = useMemo(() => {
-    if (!activeTabId) return activeConnections[0] ?? null
-    const tab = queryTabs.find((t) => t.id === activeTabId)
-    if (!tab) return activeConnections[0] ?? null
-    return activeConnections.find((c) => c.id === tab.connectionId) ?? activeConnections[0] ?? null
-  }, [activeTabId, queryTabs, activeConnections])
+  const navigateToPage = useCallback((target: Page) => {
+    setPage(target)
+    // Reset input when navigating
+    setTimeout(() => inputRef.current?.focus(), 0)
+  }, [])
 
   // ── Tab items ──────────────────────────────────────────────
   const tabItems = useMemo(() => {
@@ -215,6 +234,36 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
     return items
   }, [activeConnections, schemaCache])
 
+  // ── New Tab: database items from schema cache ──────────────
+  const newTabDatabaseItems = useMemo(() => {
+    const items: {
+      key: string
+      connectionId: string
+      runtimeConnectionId: string
+      connectionName: string
+      database: string
+      value: string
+    }[] = []
+
+    for (const conn of activeConnections) {
+      const cache = schemaCache[conn.connectionId]
+      if (!cache) continue
+
+      for (const db of cache.databases) {
+        items.push({
+          key: `newtab-${conn.id}-${db.name}`,
+          connectionId: conn.id,
+          runtimeConnectionId: conn.connectionId,
+          connectionName: conn.info.name,
+          database: db.name,
+          value: `newtab:${db.name} ${conn.info.name} query`,
+        })
+      }
+    }
+
+    return items
+  }, [activeConnections, schemaCache])
+
   // ── Saved query items ──────────────────────────────────────
   const savedQueryItems = useMemo(() => {
     return savedQueries.map((q) => ({
@@ -252,13 +301,11 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
         }
         useConnectionStore.getState().addActiveConnection(active)
         await ensureMinimumToastDuration(startTime)
-        toast.success('Connected', {
-          id: toastId,
+        resolveToast.success(toastId, 'Connected', {
           description: `Successfully connected to "${info.name}"`,
         })
       } catch (e) {
-        toast.error('Connection failed', {
-          id: toastId,
+        resolveToast.error(toastId, 'Connection failed', {
           description: formatErrorMessage(e),
         })
       }
@@ -291,22 +338,6 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
     [activeConnections, addQueryTab, onOpenChange],
   )
 
-  const handleNewQuery = useCallback(() => {
-    if (currentConnection) {
-      addQueryTab({
-        id: `query-${Date.now()}`,
-        connectionId: currentConnection.id,
-        query: '',
-        isExecuting: false,
-      })
-    } else {
-      toast.info('No active connection', {
-        description: 'Connect to a database first.',
-      })
-    }
-    onOpenChange(false)
-  }, [currentConnection, addQueryTab, onOpenChange])
-
   const handleOpenTable = useCallback(
     (item: (typeof tableItems)[number]) => {
       addTableTab(
@@ -321,211 +352,436 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
     [addTableTab, onOpenChange],
   )
 
+  const handleNewTabQuery = useCallback(
+    (item: (typeof newTabDatabaseItems)[number]) => {
+      useConnectionStore.getState().setSelectedDatabase(item.connectionId, item.database)
+      addQueryTab({
+        id: `query-${Date.now()}`,
+        connectionId: item.connectionId,
+        query: '',
+        isExecuting: false,
+      })
+      onOpenChange(false)
+    },
+    [addQueryTab, onOpenChange],
+  )
+
+  const handleNewTabTable = useCallback(
+    (dbItem: (typeof newTabDatabaseItems)[number], tableName: string, schema?: string) => {
+      addTableTab(
+        dbItem.connectionId,
+        dbItem.runtimeConnectionId,
+        dbItem.database,
+        schema,
+        tableName,
+      )
+      onOpenChange(false)
+    },
+    [addTableTab, onOpenChange],
+  )
+
+  // ── New Tab page: tables for each database ─────────────────
+  const newTabTableItems = useMemo(() => {
+    const items: {
+      key: string
+      connectionId: string
+      runtimeConnectionId: string
+      connectionName: string
+      database: string
+      schema: string | undefined
+      tableName: string
+      value: string
+    }[] = []
+
+    for (const conn of activeConnections) {
+      const cache = schemaCache[conn.connectionId]
+      if (!cache) continue
+
+      for (const [cacheKey, tables] of Object.entries(cache.tables)) {
+        const dotIdx = cacheKey.indexOf('.')
+        const database = dotIdx >= 0 ? cacheKey.slice(0, dotIdx) : cacheKey
+        const schemaFromKey = dotIdx >= 0 ? cacheKey.slice(dotIdx + 1) : undefined
+
+        for (const table of tables) {
+          const schema = table.schema || schemaFromKey
+          items.push({
+            key: `newtab-table-${conn.id}-${cacheKey}-${table.name}`,
+            connectionId: conn.id,
+            runtimeConnectionId: conn.connectionId,
+            connectionName: conn.info.name,
+            database,
+            schema,
+            tableName: table.name,
+            value: `newtab:${table.name} ${database} ${schema ?? ''} ${conn.info.name} table`,
+          })
+        }
+      }
+    }
+
+    return items
+  }, [activeConnections, schemaCache])
+
+  // ── Render ─────────────────────────────────────────────────
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange} className="sm:max-w-xl">
       <Command filter={priorityFilter}>
-        <CommandInput placeholder="Type a command or search..." />
+        <CommandInput
+          ref={inputRef}
+          placeholder={page === 'new-tab' ? 'Search databases and tables...' : 'Type a command or search...'}
+        />
         <CommandList className="max-h-96">
           <CommandEmpty>No results found.</CommandEmpty>
 
-          {/* ── Open Tabs ─────────────────────────────────── */}
-          {tabItems.length > 0 && (
-            <CommandGroup heading="Open Tabs">
-              {tabItems.map((tab) => (
-                <CommandItem
-                  key={tab.id}
-                  value={tab.value}
-                  onSelect={() => runAndClose(() => setActiveTabId(tab.id))}
-                >
-                  {tab.isTable ? (
-                    <IconTable className="size-4 text-muted-foreground" />
-                  ) : (
-                    <IconDatabase className="size-4 text-muted-foreground" />
-                  )}
-                  <span className={cn(tab.isActive && 'font-medium')}>{tab.label}</span>
-                  <span className="text-muted-foreground truncate">
-                    {tab.connectionName}
-                    {tab.database && ` / ${tab.database}`}
-                  </span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
+          {page === 'main' && (
+            <MainPage
+              tabItems={tabItems}
+              activeItems={activeItems}
+              disconnectedItems={disconnectedItems}
+              tableItems={tableItems}
+              savedQueryItems={savedQueryItems}
+              historyItems={historyItems}
+              theme={theme}
+              setTheme={setTheme}
+              setActiveTabId={setActiveTabId}
+              toggleLeftSidebar={toggleLeftSidebar}
+              toggleRightSidebar={toggleRightSidebar}
+              runAndClose={runAndClose}
+              onOpenChange={onOpenChange}
+              onConnect={handleConnect}
+              onOpenQuery={handleOpenQuery}
+              onOpenTable={handleOpenTable}
+              onNavigateNewTab={() => navigateToPage('new-tab')}
+            />
           )}
 
-          {/* ── Connections ────────────────────────────────── */}
-          {(activeItems.length > 0 || disconnectedItems.length > 0) && (
-            <>
-              <CommandSeparator />
-              <CommandGroup heading="Connections">
-                {activeItems.map((conn) => (
-                  <CommandItem
-                    key={conn.id}
-                    value={conn.value}
-                    onSelect={() => onOpenChange(false)}
-                  >
-                    <IconPlugConnected className="size-4 text-green-500" />
-                    <span>{conn.info.name}</span>
-                    <span className="text-muted-foreground truncate">
-                      {conn.info.host}:{conn.info.port}
-                    </span>
-                    <CommandShortcut className="text-green-500/80">Connected</CommandShortcut>
-                  </CommandItem>
-                ))}
-                {disconnectedItems.map((conn) => (
-                  <CommandItem
-                    key={conn.id}
-                    value={conn.value}
-                    onSelect={() => handleConnect(conn)}
-                  >
-                    <IconPlug className="size-4 text-muted-foreground" />
-                    <span>{conn.name}</span>
-                    <span className="text-muted-foreground truncate">
-                      {conn.host}:{conn.port}
-                    </span>
-                    <CommandShortcut>Connect</CommandShortcut>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </>
+          {page === 'new-tab' && (
+            <NewTabPage
+              databaseItems={newTabDatabaseItems}
+              tableItems={newTabTableItems}
+              onBack={() => navigateToPage('main')}
+              onNewQuery={handleNewTabQuery}
+              onOpenTable={handleNewTabTable}
+            />
           )}
-
-          {/* ── Tables ─────────────────────────────────────── */}
-          {tableItems.length > 0 && (
-            <>
-              <CommandSeparator />
-              <CommandGroup heading="Tables">
-                {tableItems.map((item) => (
-                  <CommandItem
-                    key={item.key}
-                    value={item.value}
-                    onSelect={() => handleOpenTable(item)}
-                  >
-                    <IconTable className="size-4 text-muted-foreground" />
-                    <span>{item.tableName}</span>
-                    <span className="text-muted-foreground truncate">
-                      {item.connectionName} / {item.database}
-                      {item.schema && ` / ${item.schema}`}
-                    </span>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </>
-          )}
-
-          {/* ── Saved Queries ──────────────────────────────── */}
-          {savedQueryItems.length > 0 && (
-            <>
-              <CommandSeparator />
-              <CommandGroup heading="Saved Queries">
-                {savedQueryItems.map((q) => (
-                  <CommandItem
-                    key={q.id}
-                    value={q.value}
-                    onSelect={() => handleOpenQuery(q.query, q.name, q.connectionId)}
-                  >
-                    <IconCode className="size-4 text-primary/70" />
-                    <div className="flex flex-col min-w-0">
-                      <span className="truncate">{q.name}</span>
-                      <span className="text-[10px] text-muted-foreground font-mono truncate">
-                        {q.preview}
-                      </span>
-                    </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </>
-          )}
-
-          {/* ── History ────────────────────────────────────── */}
-          {historyItems.length > 0 && (
-            <>
-              <CommandSeparator />
-              <CommandGroup heading="Recent History">
-                {historyItems.map((entry) => (
-                  <CommandItem
-                    key={entry.id}
-                    value={entry.value}
-                    onSelect={() =>
-                      handleOpenQuery(entry.query, 'History query', entry.connectionId)
-                    }
-                  >
-                    {entry.success ? (
-                      <IconCheck className="size-4 text-green-500" />
-                    ) : (
-                      <IconX className="size-4 text-destructive" />
-                    )}
-                    <div className="flex flex-col min-w-0">
-                      <span className="font-mono truncate text-[11px]">{entry.preview}</span>
-                      <span className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                        <IconClock className="size-2.5" />
-                        {entry.connectionName}
-                        {entry.databaseName && ` / ${entry.databaseName}`}
-                        {entry.executionTimeMs != null && ` · ${entry.executionTimeMs}ms`}
-                      </span>
-                    </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </>
-          )}
-
-          <CommandSeparator />
-
-          {/* ── Actions ────────────────────────────────────── */}
-          <CommandGroup heading="Actions">
-            <CommandItem value="action:new query editor" onSelect={handleNewQuery}>
-              <IconPlus className="size-4 text-muted-foreground" />
-              New Query
-            </CommandItem>
-            <CommandItem
-              value="action:toggle left sidebar"
-              onSelect={() => runAndClose(toggleLeftSidebar)}
-            >
-              <IconLayoutSidebar className="size-4 text-muted-foreground" />
-              Toggle Left Sidebar
-              <CommandShortcut>⌘B</CommandShortcut>
-            </CommandItem>
-            <CommandItem
-              value="action:toggle right sidebar inspector"
-              onSelect={() => runAndClose(toggleRightSidebar)}
-            >
-              <IconLayoutSidebarRight className="size-4 text-muted-foreground" />
-              Toggle Right Sidebar
-            </CommandItem>
-          </CommandGroup>
-
-          <CommandSeparator />
-
-          {/* ── Theme ──────────────────────────────────────── */}
-          <CommandGroup heading="Theme">
-            <CommandItem
-              value="theme:light"
-              data-checked={theme === 'light' || undefined}
-              onSelect={() => runAndClose(() => setTheme('light'))}
-            >
-              <IconSun className="size-4 text-muted-foreground" />
-              Light
-            </CommandItem>
-            <CommandItem
-              value="theme:dark"
-              data-checked={theme === 'dark' || undefined}
-              onSelect={() => runAndClose(() => setTheme('dark'))}
-            >
-              <IconMoon className="size-4 text-muted-foreground" />
-              Dark
-            </CommandItem>
-            <CommandItem
-              value="theme:system auto"
-              data-checked={theme === 'system' || undefined}
-              onSelect={() => runAndClose(() => setTheme('system'))}
-            >
-              <IconDeviceDesktop className="size-4 text-muted-foreground" />
-              System
-            </CommandItem>
-          </CommandGroup>
         </CommandList>
       </Command>
     </CommandDialog>
+  )
+}
+
+// ── Main Page ──────────────────────────────────────────────────
+
+interface MainPageProps {
+  tabItems: { id: string; label: string; isTable: boolean; connectionName: string; database?: string; isActive: boolean; value: string }[]
+  activeItems: (ActiveConnection & { value: string })[]
+  disconnectedItems: (ConnectionInfo & { value: string })[]
+  tableItems: { key: string; connectionId: string; runtimeConnectionId: string; connectionName: string; database: string; schema?: string; tableName: string; value: string }[]
+  savedQueryItems: { id: string; name: string; query: string; connectionId: string | null; preview: string; value: string }[]
+  historyItems: { id: string; query: string; connectionId: string; connectionName: string; databaseName: string | null; executionTimeMs: number | null; success: boolean; preview: string; value: string }[]
+  theme: string
+  setTheme: (theme: 'light' | 'dark' | 'system') => void
+  setActiveTabId: (id: string) => void
+  toggleLeftSidebar: () => void
+  toggleRightSidebar: () => void
+  runAndClose: (fn: () => void) => void
+  onOpenChange: (open: boolean) => void
+  onConnect: (info: ConnectionInfo) => void
+  onOpenQuery: (query: string, label: string, connectionId?: string | null) => void
+  onOpenTable: (item: { key: string; connectionId: string; runtimeConnectionId: string; connectionName: string; database: string; schema?: string; tableName: string; value: string }) => void
+  onNavigateNewTab: () => void
+}
+
+function MainPage({
+  tabItems, activeItems, disconnectedItems, tableItems,
+  savedQueryItems, historyItems, theme, setTheme,
+  setActiveTabId, toggleLeftSidebar, toggleRightSidebar,
+  runAndClose, onOpenChange, onConnect, onOpenQuery, onOpenTable,
+  onNavigateNewTab,
+}: MainPageProps) {
+  return (
+    <>
+      {/* ── Open Tabs ─────────────────────────────────── */}
+      {tabItems.length > 0 && (
+        <CommandGroup heading="Open Tabs">
+          {tabItems.map((tab) => (
+            <CommandItem
+              key={tab.id}
+              value={tab.value}
+              onSelect={() => runAndClose(() => setActiveTabId(tab.id))}
+            >
+              {tab.isTable ? (
+                <IconTable className="size-4 text-muted-foreground" />
+              ) : (
+                <IconDatabase className="size-4 text-muted-foreground" />
+              )}
+              <span className={cn(tab.isActive && 'font-medium')}>{tab.label}</span>
+              <span className="text-muted-foreground truncate">
+                {tab.connectionName}
+                {tab.database && ` / ${tab.database}`}
+              </span>
+            </CommandItem>
+          ))}
+        </CommandGroup>
+      )}
+
+      {/* ── Connections ────────────────────────────────── */}
+      {(activeItems.length > 0 || disconnectedItems.length > 0) && (
+        <>
+          <CommandSeparator />
+          <CommandGroup heading="Connections">
+            {activeItems.map((conn) => (
+              <CommandItem
+                key={conn.id}
+                value={conn.value}
+                onSelect={() => onOpenChange(false)}
+              >
+                <IconPlugConnected className="size-4 text-green-500" />
+                <span>{conn.info.name}</span>
+                <span className="text-muted-foreground truncate">
+                  {conn.info.host}:{conn.info.port}
+                </span>
+                <CommandShortcut className="text-green-500/80">Connected</CommandShortcut>
+              </CommandItem>
+            ))}
+            {disconnectedItems.map((conn) => (
+              <CommandItem
+                key={conn.id}
+                value={conn.value}
+                onSelect={() => onConnect(conn)}
+              >
+                <IconPlug className="size-4 text-muted-foreground" />
+                <span>{conn.name}</span>
+                <span className="text-muted-foreground truncate">
+                  {conn.host}:{conn.port}
+                </span>
+                <CommandShortcut>Connect</CommandShortcut>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </>
+      )}
+
+      {/* ── Tables ─────────────────────────────────────── */}
+      {tableItems.length > 0 && (
+        <>
+          <CommandSeparator />
+          <CommandGroup heading="Tables">
+            {tableItems.map((item) => (
+              <CommandItem
+                key={item.key}
+                value={item.value}
+                onSelect={() => onOpenTable(item)}
+              >
+                <IconTable className="size-4 text-muted-foreground" />
+                <span>{item.tableName}</span>
+                <span className="text-muted-foreground truncate">
+                  {item.connectionName} / {item.database}
+                  {item.schema && ` / ${item.schema}`}
+                </span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </>
+      )}
+
+      {/* ── Saved Queries ──────────────────────────────── */}
+      {savedQueryItems.length > 0 && (
+        <>
+          <CommandSeparator />
+          <CommandGroup heading="Saved Queries">
+            {savedQueryItems.map((q) => (
+              <CommandItem
+                key={q.id}
+                value={q.value}
+                onSelect={() => onOpenQuery(q.query, q.name, q.connectionId)}
+              >
+                <IconCode className="size-4 text-primary/70" />
+                <div className="flex flex-col min-w-0">
+                  <span className="truncate">{q.name}</span>
+                  <span className="text-[10px] text-muted-foreground font-mono truncate">
+                    {q.preview}
+                  </span>
+                </div>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </>
+      )}
+
+      {/* ── History ────────────────────────────────────── */}
+      {historyItems.length > 0 && (
+        <>
+          <CommandSeparator />
+          <CommandGroup heading="Recent History">
+            {historyItems.map((entry) => (
+              <CommandItem
+                key={entry.id}
+                value={entry.value}
+                onSelect={() =>
+                  onOpenQuery(entry.query, 'History query', entry.connectionId)
+                }
+              >
+                {entry.success ? (
+                  <IconCheck className="size-4 text-green-500" />
+                ) : (
+                  <IconX className="size-4 text-destructive" />
+                )}
+                <div className="flex flex-col min-w-0">
+                  <span className="font-mono truncate text-[11px]">{entry.preview}</span>
+                  <span className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                    <IconClock className="size-2.5" />
+                    {entry.connectionName}
+                    {entry.databaseName && ` / ${entry.databaseName}`}
+                    {entry.executionTimeMs != null && ` · ${entry.executionTimeMs}ms`}
+                  </span>
+                </div>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </>
+      )}
+
+      <CommandSeparator />
+
+      {/* ── Actions ────────────────────────────────────── */}
+      <CommandGroup heading="Actions">
+        <CommandItem value="action:new tab query table" onSelect={onNavigateNewTab}>
+          <IconPlus className="size-4 text-muted-foreground" />
+          New Tab
+          <CommandShortcut>⌘T</CommandShortcut>
+        </CommandItem>
+        <CommandItem
+          value="action:toggle left sidebar"
+          onSelect={() => runAndClose(toggleLeftSidebar)}
+        >
+          <IconLayoutSidebar className="size-4 text-muted-foreground" />
+          Toggle Left Sidebar
+          <CommandShortcut>⌘B</CommandShortcut>
+        </CommandItem>
+        <CommandItem
+          value="action:toggle right sidebar inspector"
+          onSelect={() => runAndClose(toggleRightSidebar)}
+        >
+          <IconLayoutSidebarRight className="size-4 text-muted-foreground" />
+          Toggle Right Sidebar
+          <CommandShortcut>⌘⇧B</CommandShortcut>
+        </CommandItem>
+      </CommandGroup>
+
+      <CommandSeparator />
+
+      {/* ── Theme ──────────────────────────────────────── */}
+      <CommandGroup heading="Theme">
+        <CommandItem
+          value="theme:light"
+          data-checked={theme === 'light' || undefined}
+          onSelect={() => runAndClose(() => setTheme('light'))}
+        >
+          <IconSun className="size-4 text-muted-foreground" />
+          Light
+        </CommandItem>
+        <CommandItem
+          value="theme:dark"
+          data-checked={theme === 'dark' || undefined}
+          onSelect={() => runAndClose(() => setTheme('dark'))}
+        >
+          <IconMoon className="size-4 text-muted-foreground" />
+          Dark
+        </CommandItem>
+        <CommandItem
+          value="theme:system auto"
+          data-checked={theme === 'system' || undefined}
+          onSelect={() => runAndClose(() => setTheme('system'))}
+        >
+          <IconDeviceDesktop className="size-4 text-muted-foreground" />
+          System
+        </CommandItem>
+      </CommandGroup>
+    </>
+  )
+}
+
+// ── New Tab Page ───────────────────────────────────────────────
+
+interface NewTabPageProps {
+  databaseItems: { key: string; connectionId: string; runtimeConnectionId: string; connectionName: string; database: string; value: string }[]
+  tableItems: { key: string; connectionId: string; runtimeConnectionId: string; connectionName: string; database: string; schema?: string; tableName: string; value: string }[]
+  onBack: () => void
+  onNewQuery: (item: NewTabPageProps['databaseItems'][number]) => void
+  onOpenTable: (dbItem: NewTabPageProps['databaseItems'][number], tableName: string, schema?: string) => void
+}
+
+function NewTabPage({ databaseItems, tableItems, onBack, onNewQuery, onOpenTable }: NewTabPageProps) {
+  return (
+    <>
+      <CommandGroup heading="New Tab">
+        <CommandItem value="newtab:back go back" onSelect={onBack}>
+          <IconArrowLeft className="size-4 text-muted-foreground" />
+          Back
+        </CommandItem>
+      </CommandGroup>
+
+      {databaseItems.length === 0 && tableItems.length === 0 && (
+        <div className="px-4 py-6 text-center text-sm text-muted-foreground">
+          No databases loaded. Connect and expand a connection in the sidebar first.
+        </div>
+      )}
+
+      {/* ── New Query (per database) ──────────────────── */}
+      {databaseItems.length > 0 && (
+        <>
+          <CommandSeparator />
+          <CommandGroup heading="New Query">
+            {databaseItems.map((item) => (
+              <CommandItem
+                key={item.key}
+                value={item.value}
+                onSelect={() => onNewQuery(item)}
+              >
+                <IconCode className="size-4 text-muted-foreground" />
+                <span>{item.database}</span>
+                <span className="text-muted-foreground truncate">{item.connectionName}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </>
+      )}
+
+      {/* ── Open Table ────────────────────────────────── */}
+      {tableItems.length > 0 && (
+        <>
+          <CommandSeparator />
+          <CommandGroup heading="Open Table">
+            {tableItems.map((item) => {
+              const dbItem = databaseItems.find(
+                (d) => d.connectionId === item.connectionId && d.database === item.database,
+              ) ?? {
+                key: item.key,
+                connectionId: item.connectionId,
+                runtimeConnectionId: item.runtimeConnectionId,
+                connectionName: item.connectionName,
+                database: item.database,
+                value: '',
+              }
+              return (
+                <CommandItem
+                  key={item.key}
+                  value={item.value}
+                  onSelect={() => onOpenTable(dbItem, item.tableName, item.schema)}
+                >
+                  <IconTable className="size-4 text-muted-foreground" />
+                  <span>{item.tableName}</span>
+                  <span className="text-muted-foreground truncate">
+                    {item.connectionName} / {item.database}
+                    {item.schema && ` / ${item.schema}`}
+                  </span>
+                </CommandItem>
+              )
+            })}
+          </CommandGroup>
+        </>
+      )}
+    </>
   )
 }
 

@@ -4,6 +4,36 @@ import { MySqlConnector } from '../db/mysql'
 import { PostgresConnector } from '../db/postgres'
 import { SqliteConnector } from '../db/sqlite'
 import type { AppState } from '../state'
+import {
+  // Queries
+  getConnectionConfig,
+  getWindowState,
+  listConnections,
+  listQueryHistory,
+  listSavedQueries,
+  listWorkspaces,
+  // Mutations
+  addQueryHistory,
+  addWorkspaceConnection,
+  clearConnections,
+  clearQueryHistory,
+  clearSavedQueries,
+  clearWorkspaces,
+  createSavedQuery,
+  createWorkspace,
+  deleteConnection,
+  deleteQueryHistory,
+  deleteSavedQuery,
+  deleteWorkspace,
+  moveWorkspaceConnection,
+  removeConnectionFromAllWorkspaces,
+  removeWorkspaceConnection,
+  saveConnection,
+  saveWindowState,
+  updateConnection,
+  updateSavedQuery,
+  updateWorkspace,
+} from '../storage'
 
 export function createRpcHandler(
   state: AppState,
@@ -91,92 +121,50 @@ export function createRpcHandler(
         },
 
         // Connection storage
-        saveConnection: ({ config }) => {
-          const storage = state.getStorage()
-          return storage.connections.save(config)
-        },
+        saveConnection: ({ config }) => saveConnection(config),
         updateConnection: ({ id, config }) => {
-          const storage = state.getStorage()
-          storage.connections.update(id, config)
+          updateConnection(id, config)
         },
-        listConnections: () => {
-          const storage = state.getStorage()
-          return storage.connections.list()
-        },
+        listConnections: () => listConnections(),
         deleteConnection: ({ id }) => {
-          const storage = state.getStorage()
-          storage.workspaces.removeConnectionFromAll(id)
-          storage.connections.delete(id)
+          removeConnectionFromAllWorkspaces(id)
+          deleteConnection(id)
         },
-        getConnectionConfig: ({ id }) => {
-          const storage = state.getStorage()
-          return storage.connections.getConnectionConfig(id)
-        },
+        getConnectionConfig: ({ id }) => getConnectionConfig(id),
 
         // Workspace commands
-        listWorkspaces: () => {
-          const storage = state.getStorage()
-          return storage.workspaces.list()
-        },
-        createWorkspace: ({ config }) => {
-          const storage = state.getStorage()
-          return storage.workspaces.create(config)
-        },
-        updateWorkspace: ({ id, config }) => {
-          const storage = state.getStorage()
-          return storage.workspaces.update(id, config)
-        },
+        listWorkspaces: () => listWorkspaces(),
+        createWorkspace: ({ config }) => createWorkspace(config),
+        updateWorkspace: ({ id, config }) => updateWorkspace(id, config),
         deleteWorkspace: ({ id }) => {
-          const storage = state.getStorage()
-          storage.workspaces.delete(id)
+          deleteWorkspace(id)
         },
         addConnectionToWorkspace: ({ workspaceId, connectionId }) => {
-          const storage = state.getStorage()
-          storage.workspaces.addConnection(workspaceId, connectionId)
+          addWorkspaceConnection(workspaceId, connectionId)
         },
         removeConnectionFromWorkspace: ({ workspaceId, connectionId }) => {
-          const storage = state.getStorage()
-          storage.workspaces.removeConnection(workspaceId, connectionId)
+          removeWorkspaceConnection(workspaceId, connectionId)
         },
         moveConnectionBetweenWorkspaces: ({ connectionId, fromWorkspaceId, toWorkspaceId }) => {
-          const storage = state.getStorage()
-          storage.workspaces.moveConnection(connectionId, fromWorkspaceId, toWorkspaceId)
+          moveWorkspaceConnection(connectionId, fromWorkspaceId, toWorkspaceId)
         },
 
         // Query history
-        addQueryHistory: ({ input }) => {
-          const storage = state.getStorage()
-          return storage.queryHistory.add(input)
-        },
-        listQueryHistory: ({ connectionId, limit }) => {
-          const storage = state.getStorage()
-          return storage.queryHistory.list(connectionId, limit)
-        },
+        addQueryHistory: ({ input }) => addQueryHistory(input),
+        listQueryHistory: ({ connectionId, limit }) => listQueryHistory(connectionId, limit),
         deleteQueryHistory: ({ id }) => {
-          const storage = state.getStorage()
-          storage.queryHistory.delete(id)
+          deleteQueryHistory(id)
         },
         clearQueryHistory: () => {
-          const storage = state.getStorage()
-          storage.queryHistory.clearAll()
+          clearQueryHistory()
         },
 
         // Saved queries
-        createSavedQuery: ({ input }) => {
-          const storage = state.getStorage()
-          return storage.savedQueries.create(input)
-        },
-        listSavedQueries: ({ workspaceId }) => {
-          const storage = state.getStorage()
-          return storage.savedQueries.list(workspaceId)
-        },
-        updateSavedQuery: ({ id, input }) => {
-          const storage = state.getStorage()
-          return storage.savedQueries.update(id, input)
-        },
+        createSavedQuery: ({ input }) => createSavedQuery(input),
+        listSavedQueries: ({ workspaceId }) => listSavedQueries(workspaceId),
+        updateSavedQuery: ({ id, input }) => updateSavedQuery(id, input),
         deleteSavedQuery: ({ id }) => {
-          const storage = state.getStorage()
-          storage.savedQueries.delete(id)
+          deleteSavedQuery(id)
         },
 
         // Update commands
@@ -232,14 +220,12 @@ export function createRpcHandler(
 
         // Utility commands
         clearAllData: () => {
-          const storage = state.getStorage()
-          storage.savedQueries.clearAll()
-          storage.workspaces.clearAll()
-          storage.connections.clearAll()
-          storage.queryHistory.clearAll()
+          clearSavedQueries()
+          clearWorkspaces()
+          clearConnections()
+          clearQueryHistory()
         },
         getAppVersion: () => {
-          // Read from package.json or electrobun config
           try {
             const pkg = require('../../../package.json')
             return pkg.version ?? '0.0.0'
@@ -248,10 +234,6 @@ export function createRpcHandler(
           }
         },
         showSaveDialog: async (_params) => {
-          // Electrobun has openFileDialog but no native save dialog
-          // Use a workaround: prompt for directory + use defaultPath filename
-          // For now, return null to indicate no native save dialog
-          // The frontend will handle this via browser download fallback
           return null
         },
         writeTextFile: async ({ path, content }) => {
@@ -260,16 +242,14 @@ export function createRpcHandler(
         closeWindow: () => {
           const win = getWindow()
           if (win) {
-            // Persist window state before closing
             try {
-              const ws = state.getStorage().windowState
               const maximized = win.isMaximized()
               if (!maximized) {
                 const frame = win.getFrame()
-                ws.save({ ...frame, isMaximized: false })
+                saveWindowState({ ...frame, isMaximized: false })
               } else {
-                const current = ws.get()
-                ws.save({ ...current, isMaximized: true })
+                const current = getWindowState()
+                saveWindowState({ ...current, isMaximized: true })
               }
             } catch {
               // Ignore — storage may already be closed

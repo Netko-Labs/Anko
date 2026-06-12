@@ -1,12 +1,10 @@
 export const KEYBOARD_SHORTCUT_VALUES = [
-  { action: 'Quick Search', keys: ['MOD', 'P'] },
-  { action: 'Autocomplete', keys: ['Ctrl', 'Space'] },
-  { action: 'Run', keys: ['MOD', 'Enter'] },
-  { action: 'Run Current', keys: ['MOD', 'SHIFT', 'Enter'] },
-  { action: 'New Window', keys: ['MOD', 'SHIFT', 'N'] },
+  { action: 'Command Menu', keys: ['MOD', 'K'] },
   { action: 'New Tab', keys: ['MOD', 'T'] },
-  { action: 'Reopen Closed Tabs', keys: ['MOD', 'SHIFT', 'T'] },
   { action: 'Close Tab', keys: ['MOD', 'W'] },
+  { action: 'Run Query', keys: ['MOD', 'Enter'] },
+  { action: 'Toggle Left Sidebar', keys: ['MOD', 'B'] },
+  { action: 'Toggle Right Sidebar', keys: ['MOD', 'SHIFT', 'B'] },
   { action: 'Find', keys: ['MOD', 'F'] },
-  { action: 'Find and Replace', keys: ['MOD', 'R'] },
+  { action: 'Autocomplete', keys: ['Ctrl', 'Space'] },
 ] as const

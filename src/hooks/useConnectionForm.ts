@@ -9,7 +9,7 @@ import {
   testConnection,
   updateConnection,
 } from '@/lib/rpc'
-import { ensureMinimumToastDuration } from '@/lib/toast-utils'
+import { ensureMinimumToastDuration, resolveToast } from '@/lib/toast-utils'
 import { useConnectionStore } from '@/stores/connection'
 import type { ConnectionConfig, ConnectionInfo, DatabaseDriver } from '@/types'
 
@@ -147,16 +147,14 @@ export function useConnectionForm({
       setOperationState({ type: 'test_success' })
 
       await ensureMinimumToastDuration(startTime)
-      toast.success('Connected', {
-        id: toastId,
+      resolveToast.success(toastId, 'Connected', {
         description: `${formData.host}:${formData.port}`,
       })
     } catch (e) {
       const message = formatErrorMessage(e)
       setOperationState({ type: 'test_error', message })
 
-      toast.error('Connection failed', {
-        id: toastId,
+      resolveToast.error(toastId, 'Connection failed', {
         description: message,
       })
     }
