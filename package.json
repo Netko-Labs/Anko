@@ -8,6 +8,7 @@
     "dev": "mirin dev",
     "build": "tsgo -p tsconfig.app.json --noEmit && vite build",
     "build:app": "mirin build",
+    "release": "mirin release",
     "clean": "rm -rf build dist .cache node_modules",
     "lint": "biome lint .",
     "lint:fix": "biome lint --write .",

@@ -227,30 +227,34 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Build frontend
-        run: bun run build
+      - name: Set version to match the release tag
+        run: |
+          V="${{ needs.check-release.outputs.version }}"
+          npm version "${V#v}" --no-git-tag-version --allow-same-version
 
-      - name: Build native drag library
-        run: bun run build:native
-
-      - name: Build Electrobun app
+      - name: Build, sign, notarize + emit update artifacts
         env:
-          ELECTROBUN_DEVELOPER_ID: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          ELECTROBUN_APPLEID: ${{ secrets.APPLE_ID }}
-          ELECTROBUN_APPLEIDPASS: ${{ secrets.APPLE_PASSWORD }}
-          ELECTROBUN_TEAMID: ${{ secrets.APPLE_TEAM_ID }}
-        run: bunx electrobun build --env=stable
+          # mirin release: codesign with the Developer ID, then notarize + staple
+          # before packing, so downloaded updates pass Gatekeeper.
+          MIRIN_SIGN_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          MIRIN_NOTARY_APPLE_ID: ${{ secrets.APPLE_ID }}
+          MIRIN_NOTARY_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          MIRIN_NOTARY_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: bun run release
 
       - name: Upload artifacts to release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ -d artifacts ] && ls artifacts/* 1>/dev/null 2>&1; then
-            for file in artifacts/*; do
+          # build/release/ holds the manifest, the full .tar.zst bundle, and a
+          # delta patch from the previous release. The app polls these via
+          # .../releases/latest/download (mirin.config.ts release.baseUrl).
+          if ls build/release/* 1>/dev/null 2>&1; then
+            for file in build/release/*; do
               [ -f "$file" ] && gh release upload ${{ needs.check-release.outputs.version }} "$file" --repo ${{ github.repository }} --clobber
             done
           else
-            echo "::error::No artifacts found in artifacts/ directory"
+            echo "::error::No artifacts found in build/release/"
             exit 1
           fi
 
