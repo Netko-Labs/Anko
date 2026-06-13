@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.5.0] - 2026-06-13
+
+### Highlights
+We've migrated from Electrobun to mirinjs and it's *chef's kiss*. This release is all about a fresh engine swap, native vibes, and actually working auto-updates. Your Anko experience just got a major glow-up.
+
+### New Features ✨
+- **Auto-Updates**: Real, honest-to-goodness auto-updates are now live. No more manual refreshes—we'll keep you current while you're out there querying databases like a boss.
+- **Native Titlebar Magic**: The titlebar now has proper drag regions and clickable buttons. It's the little things that make a UI feel *native*.
+- **Window State Persistence**: Anko remembers where you left it. Close it, reopen it, and boom—your window's exactly where you want it.
+- **Native File Dialog**: Save your work with a proper system save dialog instead of the usual web nonsense.
+- **App Icon**: We're no longer using the default question mark in a box look. Anko now has a proper icon that actually looks intentional.
+- **DevTools Window**: Debug like a pro with a dedicated DevTools window on launch.
+
+### Improvements ⚡
+- **Storage Layer Overhaul**: Migrated to Drizzle ORM for cleaner, more maintainable persistence queries.
+- **Framework Migration**: Ditched Electrobun and ported everything to mirinjs. The new foundation is leaner, meaner, and significantly less headache-inducing.
+- **Titlebar Performance**: Squashed click latency issues across multiple mirinjs alpha releases. Your clicks now land where you expect.
+
+### Bug Fixes 🐛
+- **Toast Relay Fix**: Main window no longer gets pelted with toast notifications meant for other windows. Peace and quiet restored.
+
 ## [v0.4.1] - 2026-04-09
 
 ### Highlights
