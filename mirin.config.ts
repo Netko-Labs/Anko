@@ -6,6 +6,13 @@ export default defineConfig({
   main: 'src/bun/index.ts',
   icon: 'icon.iconset',
 
+  // Auto-updates from GitHub Releases. `mirin release` emits the artifacts;
+  // the app polls .../releases/latest/download/stable-darwin-<arch>-update.json.
+  release: {
+    baseUrl: 'https://github.com/Netko-Labs/Anko/releases/latest/download',
+    channel: 'stable',
+  },
+
   windows: {
     // Opened manually from src/bun/index.ts so we can restore the saved frame.
     main: {

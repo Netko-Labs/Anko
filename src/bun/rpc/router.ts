@@ -42,6 +42,16 @@ import {
 
 const APP_VERSION = (pkg as { version?: string }).version ?? '0.0.0'
 
+// Live snapshot of the in-flight update download, polled by `getUpdateStatus`.
+// app.updater.download() runs in the background; we mirror its progress here so
+// the existing poll-based frontend (src/lib/updater.ts) works unchanged.
+let downloadStatus: UpdateDownloadStatus = {
+  status: 'idle',
+  message: '',
+  isComplete: false,
+  isError: false,
+}
+
 /** The live main window handle, or null if it isn't open yet. */
 function mainWindow() {
   try {
@@ -215,23 +225,50 @@ export function createRouter(state: AppState) {
       deleteSavedQuery(id)
     }),
 
-    // ---- Update commands (no updater in mirin yet — report "up to date") ----
-    checkForUpdate: rpc.query(() => ({
-      currentVersion: APP_VERSION,
-      version: '',
-      updateAvailable: false,
-      error: '',
-    })),
-    downloadUpdate: rpc.mutation(() => {}),
-    getUpdateStatus: rpc.query(
-      (): UpdateDownloadStatus => ({
-        status: 'idle',
-        message: '',
-        isComplete: false,
-        isError: false,
-      }),
-    ),
-    applyUpdate: rpc.mutation(() => {}),
+    // ---- Update commands (mirin app.updater) ----
+    checkForUpdate: rpc.query(async () => {
+      try {
+        const info = await app.updater.checkForUpdate()
+        return {
+          currentVersion: app.updater.currentVersion || APP_VERSION,
+          version: info?.version ?? '',
+          updateAvailable: !!info,
+          error: '',
+        }
+      } catch (e) {
+        return {
+          currentVersion: app.updater.currentVersion || APP_VERSION,
+          version: '',
+          updateAvailable: false,
+          error: e instanceof Error ? e.message : String(e),
+        }
+      }
+    }),
+    // Start the download in the background; getUpdateStatus is polled for progress.
+    downloadUpdate: rpc.mutation(() => {
+      downloadStatus = { status: 'downloading', message: '', isComplete: false, isError: false }
+      app.updater
+        .download((p) => {
+          downloadStatus.bytesDownloaded = p.received
+          downloadStatus.totalBytes = p.total
+          downloadStatus.progress = p.fraction
+        })
+        .then(() => {
+          downloadStatus = { ...downloadStatus, status: 'ready', isComplete: true }
+        })
+        .catch((e) => {
+          downloadStatus = {
+            ...downloadStatus,
+            status: 'error',
+            isError: true,
+            errorMessage: e instanceof Error ? e.message : String(e),
+          }
+        })
+    }),
+    getUpdateStatus: rpc.query((): UpdateDownloadStatus => downloadStatus),
+    applyUpdate: rpc.mutation(async () => {
+      await app.updater.applyAndRelaunch()
+    }),
 
     // ---- Utility commands ----
     clearAllData: rpc.mutation(() => {
