@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.5.1] - 2026-06-13
+
+### Highlights
+
+We're shipping v0.5.1 to keep Anko running smooth as butter. This is a maintenance release that keeps the lights on while we cook up bigger features behind the scenes. 🔧
+
 ## [v0.5.0] - 2026-06-13
 
 ### Highlights
