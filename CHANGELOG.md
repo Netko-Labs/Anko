@@ -9,6 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.5.0] - 2026-06-13
 
 ### Highlights
+We've leveled up from Electrobun to **mirinjs** and it's been a whole thing—like evolving your starter Pokémon into something way cooler. Plus, your app now auto-updates itself like a responsible desktop citizen, and the UI actually *feels* snappier.
+
+### New Features ✨
+- **Real auto-updates** – Anko now updates itself without you having to manually hunt down new versions like you're playing a roguelike
+- **Native drag region for titlebar** – Those title-bar buttons are finally clickable and don't betray you mid-drag. Revolutionary stuff, really
+- **Window state persistence** – Anko remembers where you left it. It's like it actually cares about your workflow
+- **Native save dialog** – Proper file saving, the way the OS intended
+- **App icon + DevTools window** – Looking sharp and easier to debug when things get weird
+
+### Improvements ⚡
+- **Migrated to mirinjs runtime** – Ditched Electrobun and ported the entire foundation to a snappier, lighter runtime. This is the deep refactor that makes everything feel more responsive
+- **Switched to Drizzle ORM** – Storage queries now use Drizzle for cleaner, type-safe database operations. Your persistence layer just got a glow-up
+- **Multiple runtime refinements** – Title-bar latency fixes, click passthrough improvements, and better logging. It's the thousand small cuts that make the big picture
+
+### Bug Fixes 🐛
+- **Toast notifications no longer spam the main window** – Toasts now stay in their lane and don't clutter up your interface
+
+## [v0.5.0] - 2026-06-13
+
+### Highlights
 We've migrated from Electrobun to mirinjs and it's *chef's kiss*. This release is all about a fresh engine swap, native vibes, and actually working auto-updates. Your Anko experience just got a major glow-up.
 
 ### New Features ✨
