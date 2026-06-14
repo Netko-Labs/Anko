@@ -13,6 +13,10 @@ export default defineConfig({
     channel: 'stable',
   },
 
+  // `mirin release` also emits a drag-to-Applications .dmg installer (signed +
+  // notarized) alongside the updater artifacts. `true` uses the default layout.
+  dmg: true,
+
   windows: {
     // Opened manually from src/bun/index.ts so we can restore the saved frame.
     main: {
