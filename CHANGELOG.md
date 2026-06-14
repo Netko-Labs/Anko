@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.5.2] - 2026-06-14
+
+### Highlights
+
+We've rolled out v0.5.2 with some solid improvements under the hood. Think of it as a maintenance arc—not flashy, but absolutely necessary for the long-term story. 📖
+
+### Under the Hood 🔧
+
+Release prep and internal polish to keep Anko running smooth as butter. No breaking changes here, just good housekeeping to make sure the app stays stable and snappy.
+
 ## [v0.5.1] - 2026-06-13
 
 ### Highlights
