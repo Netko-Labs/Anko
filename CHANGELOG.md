@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.5.4] - 2026-06-15
+
+### Highlights
+We're back with a stability patch that fixes some sneaky bugs lurking in the shadows. Nothing groundbreaking, but your database connections will thank you! 🙏
+
+### Bug Fixes 🐛
+- **Fix ID generation in app:// webviews** – Turns out  doesn't play nice with the app protocol. We've switched to a more compatible approach, because apparently not all code paths lead to Rome.
+- **Surface real database connection errors** – No more false positives! We now properly surface actual connection errors instead of gaslighting you with misleading messages. Your test connections just got honest.
+
 ## [v0.5.3] - 2026-06-14
 
 ### Highlights
