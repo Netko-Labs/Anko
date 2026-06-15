@@ -74,21 +74,22 @@ export function createRouter(state: AppState) {
     disconnect: rpc.mutation(async ({ connectionId }: { connectionId: string }) => {
       await state.disconnect(connectionId)
     }),
+    // Let the connector's error propagate (it throws a descriptive AppError).
+    // Swallowing it into `false` made every failed test look like a success:
+    // the caller (useConnectionForm.handleTest) only treats a *thrown* error as
+    // a failure and ignores the return value, so `false` silently showed
+    // "Connected". On success we resolve (the `true` is unused but harmless).
     testConnection: rpc.mutation(async ({ config }: { config: ConnectionConfig }) => {
-      try {
-        let connector: import('../db/connector').DatabaseConnector
-        if (config.driver === 'mysql') {
-          connector = await MySqlConnector.connect(config)
-        } else if (config.driver === 'sqlite') {
-          connector = await SqliteConnector.connect(config)
-        } else {
-          connector = await PostgresConnector.connect(config)
-        }
-        await connector.close()
-        return true
-      } catch {
-        return false
+      let connector: import('../db/connector').DatabaseConnector
+      if (config.driver === 'mysql') {
+        connector = await MySqlConnector.connect(config)
+      } else if (config.driver === 'sqlite') {
+        connector = await SqliteConnector.connect(config)
+      } else {
+        connector = await PostgresConnector.connect(config)
       }
+      await connector.close()
+      return true
     }),
 
     // ---- Query commands ----
