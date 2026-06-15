@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useDatabaseHierarchyLoader } from '@/hooks/useDatabaseHierarchyLoader'
+import { genId } from '@/lib/id'
 import { useConnectionStore } from '@/stores/connection'
 import { TAB_ACTION_LABELS, type TabActionDialogProps } from '../definitions'
 
@@ -54,7 +55,7 @@ export function TabActionDialog({ open, mode, onOpenChange }: TabActionDialogPro
       if (!selectedDatabase) return
       store.setSelectedDatabase(selectedConnection.id, selectedDatabase)
       store.addQueryTab({
-        id: crypto.randomUUID(),
+        id: genId(),
         connectionId: selectedConnection.id,
         query: '',
         isExecuting: false,

@@ -4,6 +4,7 @@ import { devtools } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 import { DEFAULT_TABLE_EDIT_STATE } from '@/entities/table-edit'
 import { storeLogger } from '@/lib/debug'
+import { genId } from '@/lib/id'
 import { createPrimaryKeyHash } from '@/lib/table-utils'
 import type { QueryTab } from '@/types'
 import { type ConnectionStore, DEFAULT_SCHEMA_CACHE } from './definitions/types'
@@ -163,7 +164,7 @@ export const useConnectionStore = create<ConnectionStore>()(
         }),
       addTableTab: (connectionId, _runtimeConnectionId, database, schema, table) =>
         set((draft) => {
-          const tabId = crypto.randomUUID()
+          const tabId = genId()
           const pageSize = 100
           storeLogger.debug('addTableTab', { tabId, connectionId, database, schema, table })
           const newTab = {
@@ -344,7 +345,7 @@ export const useConnectionStore = create<ConnectionStore>()(
           } else {
             // Create new update change
             tab.editState.pendingChanges.push({
-              id: crypto.randomUUID(),
+              id: genId(),
               type: 'update',
               rowIndex,
               primaryKeyValues,
@@ -361,7 +362,7 @@ export const useConnectionStore = create<ConnectionStore>()(
           if (!tab || !tab.editState) return
 
           tab.editState.pendingChanges.push({
-            id: crypto.randomUUID(),
+            id: genId(),
             type: 'insert',
             rowIndex: -1, // New rows don't have a row index in existing data
             primaryKeyValues: {},
@@ -394,7 +395,7 @@ export const useConnectionStore = create<ConnectionStore>()(
           )
 
           const newChange = {
-            id: crypto.randomUUID(),
+            id: genId(),
             type: 'delete' as const,
             rowIndex,
             primaryKeyValues,
