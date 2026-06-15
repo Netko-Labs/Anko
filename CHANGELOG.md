@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.5.6] - 2026-06-15
+
+### Highlights
+We've patched up a nasty dependency issue that was causing dev builds to crash faster than a poorly optimized query. Now you can run Anko in dev mode without it ragequitting on you! 🎮
+
+### Bug Fixes 🐛
+- **Mirinjs Dependency** — Fixed a critical issue where running the dev build alongside an installed version of Anko would cause it to crash on relaunch. Updated to mirinjs alpha.19 for smooth sailing (and no more ctrl+alt+delete moments).
+
 ## [v0.5.5] - 2026-06-15
 
 ### Highlights
