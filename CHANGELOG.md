@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.5.5] - 2026-06-15
+
+### Highlights
+Right-click copy is back, baby! We've restored the context menu functionality and made sure our secure APIs are playing nice with the latest mirinjs alpha. Your clipboard has been vindicated.
+
+### Bug Fixes 🐛
+- **Restore right-click copy + secure-context APIs**: Fixed a regression where right-click copying stopped working. Also patched up compatibility with mirinjs alpha.17's secure-context implementation. Context menus are officially un-broken™.
+
 ## [v0.5.4] - 2026-06-15
 
 ### Highlights
