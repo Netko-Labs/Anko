@@ -262,8 +262,52 @@ jobs:
         if: always()
         run: security delete-keychain $RUNNER_TEMP/app-signing.keychain-db 2>/dev/null || true
 
+  build-windows:
+    needs: [check-release, create-release]
+    if: needs.check-release.outputs.should_release == 'true'
+    permissions:
+      contents: write
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        # Pulls the prebuilt @mirinjs/win32-x64 (no Rust toolchain needed); the
+        # Windows CEF runtime is downloaded on first `mirin release`.
+        run: bun install
+
+      - name: Set version to match the release tag
+        shell: bash
+        run: |
+          V="${{ needs.check-release.outputs.version }}"
+          npm version "${V#v}" --no-git-tag-version --allow-same-version
+
+      - name: Build + emit update artifacts
+        # mirin release → build/release/: the .zip installer, the .tar.zst updater
+        # bundle, and the win32 update manifest (no codesign on Windows).
+        run: bun run release
+
+      - name: Upload artifacts to release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          if ls build/release/* 1>/dev/null 2>&1; then
+            for file in build/release/*; do
+              [ -f "$file" ] && gh release upload ${{ needs.check-release.outputs.version }} "$file" --repo ${{ github.repository }} --clobber
+            done
+          else
+            echo "::error::No artifacts found in build/release/"
+            exit 1
+          fi
+
   publish-release:
-    needs: [check-release, create-release, build]
+    needs: [check-release, create-release, build, build-windows]
     if: needs.check-release.outputs.should_release == 'true'
     runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions:

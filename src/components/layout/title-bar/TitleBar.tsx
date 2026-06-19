@@ -5,15 +5,20 @@ import {
   IconDeviceDesktop,
   IconLayoutSidebar,
   IconLayoutSidebarRight,
+  IconMinus,
   IconMoon,
   IconPlus,
   IconRefresh,
   IconSearch,
   IconSettings,
+  IconSquare,
   IconSun,
   IconTable,
+  IconX,
 } from '@tabler/icons-react'
+import { windowControls } from 'mirinjs/client'
 import { useCallback, useMemo, useState } from 'react'
+import { isWindows } from '@/lib/platform'
 import { toast } from 'sonner'
 import { resolveToast } from '@/lib/toast-utils'
 import { CommandMenu } from '@/components/command-menu/CommandMenu'
@@ -63,8 +68,9 @@ export function TitleBar({ onToggleLeftSidebar, onToggleRightSidebar }: TitleBar
 
   return (
     <div className="fixed top-0 left-0 right-0 h-9 flex items-center bg-background border-b border-border/50 z-50 select-none">
-      {/* Left section — sidebar toggle + workspace switcher */}
-      <div className="flex items-center h-full pl-19.5 gap-0.5">
+      {/* Left section — sidebar toggle + workspace switcher. macOS reserves room
+          for the native traffic lights; Windows has none, so start flush. */}
+      <div className={cn('flex items-center h-full gap-0.5', isWindows ? 'pl-2' : 'pl-19.5')}>
         <TitleBarButton onClick={onToggleLeftSidebar} tooltip="Toggle sidebar">
           <IconLayoutSidebar className="size-3.5" />
         </TitleBarButton>
@@ -84,6 +90,9 @@ export function TitleBar({ onToggleLeftSidebar, onToggleRightSidebar }: TitleBar
           <IconLayoutSidebarRight className="size-3.5" />
         </TitleBarButton>
       </div>
+
+      {/* Windows window controls (Windows has no native caption buttons). */}
+      {isWindows && <WindowControls />}
 
       {/* Center breadcrumb — absolutely positioned for true centering */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -366,6 +375,52 @@ function TitleBarButton({
         'text-muted-foreground hover:text-foreground/80',
         'hover:bg-muted/60 active:bg-muted',
         'transition-colors duration-100',
+      )}
+    >
+      {children}
+    </button>
+  )
+}
+
+function WindowControls() {
+  return (
+    <div className="flex items-center h-full ml-1">
+      <WindowControlButton onClick={() => windowControls.minimize()} label="Minimize">
+        <IconMinus className="size-3.5" />
+      </WindowControlButton>
+      <WindowControlButton onClick={() => windowControls.maximize()} label="Maximize">
+        <IconSquare className="size-3" />
+      </WindowControlButton>
+      <WindowControlButton onClick={() => windowControls.close()} label="Close" danger>
+        <IconX className="size-3.5" />
+      </WindowControlButton>
+    </div>
+  )
+}
+
+function WindowControlButton({
+  children,
+  onClick,
+  label,
+  danger,
+}: {
+  children: React.ReactNode
+  onClick: () => void
+  label: string
+  danger?: boolean
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={label}
+      aria-label={label}
+      className={cn(
+        'h-9 w-11 inline-flex items-center justify-center',
+        'text-muted-foreground transition-colors duration-100',
+        danger
+          ? 'hover:bg-red-600 hover:text-white'
+          : 'hover:bg-muted/70 hover:text-foreground/90',
       )}
     >
       {children}
