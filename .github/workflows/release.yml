@@ -184,7 +184,8 @@ jobs:
           draft: true
           body: ${{ needs.generate-changelog.outputs.changelog }}
 
-  build:
+  build-macos:
+    name: Build macOS (.dmg)
     needs: [check-release, create-release]
     if: needs.check-release.outputs.should_release == 'true'
     permissions:
@@ -263,6 +264,7 @@ jobs:
         run: security delete-keychain $RUNNER_TEMP/app-signing.keychain-db 2>/dev/null || true
 
   build-windows:
+    name: Build Windows (.exe installer)
     needs: [check-release, create-release]
     if: needs.check-release.outputs.should_release == 'true'
     permissions:
@@ -314,7 +316,7 @@ jobs:
           fi
 
   publish-release:
-    needs: [check-release, create-release, build, build-windows]
+    needs: [check-release, create-release, build-macos, build-windows]
     if: needs.check-release.outputs.should_release == 'true'
     runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions:
