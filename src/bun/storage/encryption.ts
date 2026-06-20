@@ -21,7 +21,10 @@ function getMachineId(): string {
     } else if (process.platform === 'win32') {
       const output = execSync(
         'reg query "HKLM\\SOFTWARE\\Microsoft\\Cryptography" /v MachineGuid',
-        { encoding: 'utf-8' },
+        // windowsHide (CREATE_NO_WINDOW) stops a console window flashing on screen:
+        // the app's host exe is GUI-subsystem, so spawning a console subprocess
+        // would otherwise pop a brief terminal.
+        { encoding: 'utf-8', windowsHide: true },
       )
       const match = output.match(/MachineGuid\s+REG_SZ\s+(.+)/)
       if (match) return match[1].trim()
