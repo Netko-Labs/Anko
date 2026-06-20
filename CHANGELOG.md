@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.5.15] - 2026-06-20
+
+### Highlights
+Your SQL results just got a glow-up! We've leveled up the editor UI and fixed a pesky dropdown bug that was trigger-happy with query execution. Time to query in style. ✨
+
+### New Features ✨
+- **Syntax Highlighting for Zod Schemas + JSON Row Details** — Behold, beautifully highlighted code! We've integrated Shiki to make your Zod schemas and JSON data pop with color-coded goodness. Your eyes (and your schema) will thank you.
+
+### Bug Fixes 🐛
+- **Editor: Run Dropdown Caret No Longer Executes Queries** — That little caret was way too trigger-happy. You can now hover over the dropdown without accidentally yeet-ing your query into the void. Crisis averted! 🎯
+
 ## [v0.5.14] - 2026-06-20
 
 ### Highlights
