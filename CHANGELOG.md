@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.5.11] - 2026-06-20
+
+### Highlights
+We've been grinding on the small stuff that makes a big difference. This update is all about keeping your experience smooth—no more surprise console windows crashing the party when you connect.
+
+### Bug Fixes 🐛
+- **Windows**: Eliminate the annoying console flash that appeared on connection. Your screen now stays as chill as you deserve it to be.
+
 ## [v0.5.10] - 2026-06-20
 
 ### Highlights
