@@ -1,6 +1,7 @@
 import { IconClipboard } from '@tabler/icons-react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { CodeBlock } from '@/components/ui/code-block/CodeBlock'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Select,
@@ -50,9 +51,12 @@ export function ZodGeneratorView({ tableName, columns }: ZodGeneratorViewProps) 
         </button>
       </div>
       <ScrollArea className="flex-1">
-        <pre className="p-3 text-[11px] leading-relaxed font-mono text-foreground/90 whitespace-pre overflow-x-auto">
-          {schemaCode}
-        </pre>
+        <CodeBlock
+          code={schemaCode}
+          language="typescript"
+          wrap={false}
+          className="p-3 text-[11px] leading-relaxed"
+        />
       </ScrollArea>
     </div>
   )

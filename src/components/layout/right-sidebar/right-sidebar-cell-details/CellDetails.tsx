@@ -1,6 +1,7 @@
 import { IconClipboard } from '@tabler/icons-react'
 import { useMemo } from 'react'
 import { toast } from 'sonner'
+import { CodeBlock } from '@/components/ui/code-block/CodeBlock'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { formatValue, isJsonLike, prettyPrintJson } from '@/lib/zod-generator'
 import type { CellDetailsProps } from './definitions'
@@ -48,15 +49,21 @@ export function CellDetails({ value, columnName, columnType }: CellDetailsProps)
       {/* Value */}
       <ScrollArea className="flex-1">
         <div className="p-3">
-          <div
-            className={`text-xs font-mono leading-relaxed ${isNull ? 'text-primary/40 italic' : 'text-foreground/90'} ${
-              isJson
-                ? 'text-[11px] whitespace-pre-wrap break-all'
-                : 'whitespace-pre-wrap break-words'
-            }`}
-          >
-            {formattedValue}
-          </div>
+          {isJson && !isNull ? (
+            <CodeBlock
+              code={formattedValue}
+              language="json"
+              className="text-[11px] leading-relaxed"
+            />
+          ) : (
+            <div
+              className={`text-xs font-mono leading-relaxed whitespace-pre-wrap break-words ${
+                isNull ? 'text-primary/40 italic' : 'text-foreground/90'
+              }`}
+            >
+              {formattedValue}
+            </div>
+          )}
         </div>
       </ScrollArea>
     </div>

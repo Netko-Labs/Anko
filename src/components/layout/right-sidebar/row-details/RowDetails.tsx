@@ -1,6 +1,7 @@
 import { IconChevronDown, IconChevronRight, IconClipboard } from '@tabler/icons-react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { CodeBlock } from '@/components/ui/code-block/CodeBlock'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { formatValue, isJsonLike, prettyPrintJson } from '@/lib/zod-generator'
 import type { FieldRowProps, RowDetailsProps } from './definitions'
@@ -92,11 +93,17 @@ function FieldRow({ column, value, onCopy }: FieldRowProps) {
             <IconClipboard className="size-3" />
           </button>
         </div>
-        <div
-          className={`px-3 pb-1.5 text-xs font-mono ${isNull ? 'text-primary/40 italic' : 'text-foreground/80'}`}
-        >
-          {formattedValue}
-        </div>
+        {isJson && !isNull ? (
+          <div className="px-3 pb-1.5">
+            <CodeBlock code={formattedValue} language="json" className="text-xs" />
+          </div>
+        ) : (
+          <div
+            className={`px-3 pb-1.5 text-xs font-mono ${isNull ? 'text-primary/40 italic' : 'text-foreground/80'}`}
+          >
+            {formattedValue}
+          </div>
+        )}
       </div>
     )
   }
@@ -142,13 +149,19 @@ function FieldRow({ column, value, onCopy }: FieldRowProps) {
 
         {/* Full content */}
         <CollapsibleContent>
-          <div
-            className={`px-3 pb-1.5 pl-7 text-xs font-mono ${isNull ? 'text-primary/40 italic' : 'text-foreground/80'} ${
-              isJson ? 'text-[10px] whitespace-pre-wrap break-all' : ''
-            }`}
-          >
-            {formattedValue}
-          </div>
+          {isJson && !isNull ? (
+            <div className="px-3 pb-1.5 pl-7">
+              <CodeBlock code={formattedValue} language="json" className="text-[10px]" />
+            </div>
+          ) : (
+            <div
+              className={`px-3 pb-1.5 pl-7 text-xs font-mono whitespace-pre-wrap break-words ${
+                isNull ? 'text-primary/40 italic' : 'text-foreground/80'
+              }`}
+            >
+              {formattedValue}
+            </div>
+          )}
         </CollapsibleContent>
       </div>
     </Collapsible>
