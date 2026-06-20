@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.5.13] - 2026-06-20
+
+### Highlights
+Your connections just got a power-up! This release brings bulk operations, smoother scrolling, and finally separates your dev and prod environments so they stop stepping on each other's toes.
+
+### New Features ✨
+- **Tab-row wheel scrolling** – Scroll through your tabs like you're speedrunning through a list. No more awkward side-scrolling.
+- **Multi-select & bulk-delete connections** – Select multiple connections and nuke them in one go. It's like a batch script, but with a GUI that doesn't look like it's from 1995.
+- **Edit workspaces** – Tired of being stuck with your workspace choices? Now you can tweak them without starting over. Freedom!
+
+### Bug Fixes 🐛
+- **Windows dev/prod isolation** – Fixed the chaos where development and production app data were sharing the same folder like roommates with no boundaries. They now have their own spaces.
+
+### Under the Hood 🔧
+- Bumped mirin to 0.1.0-alpha.7 for better dev/prod separation across the board.
+
 ## [v0.5.12] - 2026-06-20
 
 ### Highlights
