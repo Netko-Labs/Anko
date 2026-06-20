@@ -8,13 +8,17 @@ import { getWindowState, saveWindowState } from './storage'
 // ---- App state + storage ----
 const state = new AppState()
 
+// App data dir keyed on the bundle id (from mirin, falling back to the literal so
+// installed builds keep their existing path). `mirin dev` gets a `-dev` suffix so
+// development never reads or writes the installed app's connections/history.
+const appId = app.id ?? 'dev.netko.anko'
 const appDataDir = join(
   process.platform === 'darwin'
     ? join(homedir(), 'Library', 'Application Support')
     : process.platform === 'win32'
       ? (process.env.APPDATA ?? join(homedir(), 'AppData', 'Roaming'))
       : (process.env.XDG_DATA_HOME ?? join(homedir(), '.local', 'share')),
-  'dev.netko.anko',
+  app.isDev ? `${appId}-dev` : appId,
 )
 
 state.initializeStorage(appDataDir)
