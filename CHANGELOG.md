@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.5.12] - 2026-06-20
+
+### Highlights
+We're keeping things tight and focused this release—think of it as a quality-over-quantity sprint. Windows users, we've got something special cooking for you! 🍜
+
+### Under the Hood 🔧
+Update Mirin to 0.1.0-alpha.6, bringing Windows auto-updater fixes to the table. Because nothing says smooth sailing like updates that actually work on the first try. Your Windows setup just leveled up.
+
 ## [v0.5.11] - 2026-06-20
 
 ### Highlights
