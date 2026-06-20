@@ -3,6 +3,7 @@ import { defineConfig } from 'mirinjs/config'
 export default defineConfig({
   id: 'dev.netko.anko',
   name: 'Anko',
+  publisher: 'Netko Labs',
   main: 'src/bun/index.ts',
   icon: 'icon.iconset',
 
@@ -23,6 +24,8 @@ export default defineConfig({
       title: 'Anko',
       width: 1280,
       height: 820,
+      minWidth: 880,
+      minHeight: 600,
       titleBarStyle: 'hiddenInset',
       url: 'app://ui/index.html',
       show: 'ready',

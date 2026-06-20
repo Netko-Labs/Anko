@@ -35,6 +35,8 @@ app.on('ready', async () => {
     // Center the traffic lights in Anko's 36px (h-9) title bar.
     trafficLightPosition: { x: 13, y: 13 },
     show: 'ready',
+    minWidth: 880,
+    minHeight: 600,
     x: saved.x,
     y: saved.y,
     width: saved.width,

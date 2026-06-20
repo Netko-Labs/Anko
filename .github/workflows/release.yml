@@ -278,11 +278,13 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install NSIS (for the installer)
+      - name: Install installer tools (Inno Setup, NSIS, rcedit)
         shell: pwsh
         run: |
-          choco install nsis -y
-          # Ensure makensis is on PATH for the release step.
+          # Inno Setup (modern installer, preferred), NSIS (fallback), rcedit
+          # (embeds the app icon into the exe — Bun's --windows-icon is a no-op).
+          choco install innosetup nsis rcedit -y
+          "C:\Program Files (x86)\Inno Setup 6" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           "C:\Program Files (x86)\NSIS" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Install dependencies
