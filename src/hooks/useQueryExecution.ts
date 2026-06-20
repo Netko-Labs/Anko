@@ -34,8 +34,10 @@ export function useQueryExecution({
     queryRef.current = query
   }, [query])
 
-  const handleExecute = useCallback(async () => {
-    const currentQuery = queryRef.current
+  const handleExecute = useCallback(async (overrideQuery?: string) => {
+    // Run the override (e.g. the editor selection for "Run Selected") when given,
+    // otherwise the whole tab query.
+    const currentQuery = overrideQuery?.trim() ? overrideQuery : queryRef.current
     if (!currentQuery?.trim() || !connectionId || !connectionInfoId) return
 
     editorLogger.debug('executing query', {

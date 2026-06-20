@@ -123,6 +123,8 @@ export function QueryEditor({ tabId }: QueryEditorTabProps) {
     selectedDatabase,
     query: tab?.query,
   })
+  // Latest editor selection, for "Run Selected" and selection-aware Cmd/Ctrl+Enter.
+  const selectionRef = useRef('')
 
   const handleChange = useCallback(
     (value: string) => {
@@ -246,38 +248,54 @@ export function QueryEditor({ tabId }: QueryEditorTabProps) {
             <IconDeviceFloppy className="size-3.5" />
             Save
           </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  size="sm"
-                  onClick={handleExecute}
-                  disabled={tab.isExecuting || !tab.query.trim()}
-                  className="h-7 px-3 gap-1 bg-primary hover:bg-primary/90 text-primary-foreground text-xs"
+          {/* Split button: the Run portion executes; only the caret opens the menu. */}
+          <div className="inline-flex">
+            <Button
+              size="sm"
+              onClick={() => handleExecute()}
+              disabled={tab.isExecuting || !tab.query.trim()}
+              className="h-7 pl-3 pr-2.5 gap-1 bg-primary hover:bg-primary/90 text-primary-foreground text-xs rounded-r-none"
+            >
+              {tab.isExecuting ? (
+                <Loader2Icon className="size-3.5 animate-spin" />
+              ) : (
+                <>
+                  <PlayIcon className="size-3" />
+                  Run
+                </>
+              )}
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    size="sm"
+                    aria-label="Run options"
+                    disabled={tab.isExecuting || !tab.query.trim()}
+                    className="h-7 px-1 bg-primary hover:bg-primary/90 text-primary-foreground text-xs rounded-l-none border-l border-primary-foreground/25"
+                  >
+                    <ChevronDown className="size-3" />
+                  </Button>
+                }
+              />
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => handleExecute()}
+                  className="text-xs text-foreground/90"
                 >
-                  {tab.isExecuting ? (
-                    <Loader2Icon className="size-3.5 animate-spin" />
-                  ) : (
-                    <>
-                      <PlayIcon className="size-3" />
-                      Run
-                    </>
-                  )}
-                  <ChevronDown className="size-3 ml-0.5" />
-                </Button>
-              }
-            />
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleExecute} className="text-xs text-foreground/90">
-                <PlayIcon className="size-3.5 mr-2" />
-                Run All
-              </DropdownMenuItem>
-              <DropdownMenuItem className="text-xs text-foreground/90">
-                <PlayIcon className="size-3.5 mr-2" />
-                Run Selected
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  <PlayIcon className="size-3.5 mr-2" />
+                  Run All
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleExecute(selectionRef.current)}
+                  className="text-xs text-foreground/90"
+                >
+                  <PlayIcon className="size-3.5 mr-2" />
+                  Run Selected
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 
@@ -286,7 +304,10 @@ export function QueryEditor({ tabId }: QueryEditorTabProps) {
         <SQLEditor
           value={tab.query}
           onChange={handleChange}
-          onExecute={handleExecute}
+          onExecute={() => handleExecute(selectionRef.current)}
+          onSelectionChange={(text) => {
+            selectionRef.current = text
+          }}
           driver={connection.info.driver}
           selectedDatabase={selectedDatabase}
           schema={schema}

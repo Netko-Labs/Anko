@@ -22,6 +22,7 @@ export function SQLEditor({
   value,
   onChange,
   onExecute,
+  onSelectionChange,
   driver = 'mysql',
   selectedDatabase,
   schema,
@@ -73,10 +74,15 @@ export function SQLEditor({
   // Store refs to callbacks to avoid recreating the editor
   const onChangeRef = useRef(onChange)
   const executeHandlerRef = useRef(executeHandler)
+  const onSelectionChangeRef = useRef(onSelectionChange)
 
   useEffect(() => {
     onChangeRef.current = onChange
   }, [onChange])
+
+  useEffect(() => {
+    onSelectionChangeRef.current = onSelectionChange
+  }, [onSelectionChange])
 
   useEffect(() => {
     executeHandlerRef.current = executeHandler
@@ -135,6 +141,10 @@ export function SQLEditor({
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             onChangeRef.current(update.state.doc.toString())
+          }
+          if (update.selectionSet || update.docChanged) {
+            const sel = update.state.selection.main
+            onSelectionChangeRef.current?.(update.state.sliceDoc(sel.from, sel.to))
           }
         }),
       ],

@@ -22,6 +22,8 @@ export interface SQLEditorProps {
   value: string
   onChange: (value: string) => void
   onExecute?: () => void
+  /** Fired with the currently selected text (empty string when nothing selected). */
+  onSelectionChange?: (selectedText: string) => void
   driver?: DatabaseDriver
   selectedDatabase?: string
   schema?: SchemaContext
