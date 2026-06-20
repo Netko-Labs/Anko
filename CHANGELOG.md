@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.5.9] - 2026-06-20
+
+### Highlights
+We've leveled up Anko's build pipeline and got our UI looking *crisp*. Think of this as the polish patch before the main event—small but mighty improvements that make everything just work better. ✨
+
+### Improvements ⚡
+Upgrade mirin dependency to 0.1.0-alpha.3, bringing console-free operation and exe icon support to the table. Your Anko icon will now show up in the taskbar like it actually belongs there. (Spoiler: it does.)
+
 ## [v0.5.8] - 2026-06-20
 
 ### Highlights
