@@ -1,7 +1,18 @@
-import { Loader2 } from 'lucide-react'
+import { Loader2, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +23,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { formatErrorMessage } from '@/lib/error-utils'
 import { connect, deleteConnection, getConnectionConfig } from '@/lib/rpc'
 import { ensureMinimumToastDuration, resolveToast } from '@/lib/toast-utils'
+import { cn } from '@/lib/utils'
 import { useConnectionStore } from '@/stores/connection'
 import type { ActiveConnection, ConnectionInfo } from '@/types'
 import { ConnectionDialog } from '../connection-dialog/ConnectionDialog'
@@ -26,6 +38,47 @@ export function ConnectionList({ onConnectionSelect }: ConnectionListProps) {
   const [connectingId, setConnectingId] = useState<string | null>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [bulkDeleting, setBulkDeleting] = useState(false)
+
+  const toggleSelected = (id: string, checked: boolean) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (checked) next.add(id)
+      else next.delete(id)
+      return next
+    })
+  }
+  const clearSelection = () => setSelectedIds(new Set())
+
+  const handleBulkDelete = async () => {
+    const ids = savedConnections.filter((c) => selectedIds.has(c.id)).map((c) => c.id)
+    if (ids.length === 0) return
+    setBulkDeleting(true)
+    const startTime = Date.now()
+    const toastId = toast.loading(`Deleting ${ids.length} connection${ids.length > 1 ? 's' : ''}...`)
+
+    try {
+      for (const id of ids) {
+        await deleteConnection(id)
+        useConnectionStore.getState().removeSavedConnection(id)
+      }
+      await ensureMinimumToastDuration(startTime)
+      resolveToast.success(toastId, 'Connections deleted', {
+        description: `${ids.length} connection${ids.length > 1 ? 's' : ''} removed`,
+      })
+      clearSelection()
+      setConfirmOpen(false)
+    } catch (e) {
+      console.error('Failed to delete connections:', e)
+      resolveToast.error(toastId, 'Failed to delete connections', {
+        description: formatErrorMessage(e),
+      })
+    } finally {
+      setBulkDeleting(false)
+    }
+  }
 
   const handleConnect = async (info: ConnectionInfo) => {
     setConnectingId(info.id)
@@ -82,6 +135,12 @@ export function ConnectionList({ onConnectionSelect }: ConnectionListProps) {
     try {
       await deleteConnection(id)
       useConnectionStore.getState().removeSavedConnection(id)
+      setSelectedIds((prev) => {
+        if (!prev.has(id)) return prev
+        const next = new Set(prev)
+        next.delete(id)
+        return next
+      })
 
       // Ensure minimum toast display time before showing success
       await ensureMinimumToastDuration(startTime)
@@ -113,6 +172,32 @@ export function ConnectionList({ onConnectionSelect }: ConnectionListProps) {
         </Button>
       </div>
 
+      {selectedIds.size > 0 && (
+        <div className="px-3 py-2 border-b flex items-center justify-between gap-2 bg-muted/40">
+          <span className="text-xs text-muted-foreground">{selectedIds.size} selected</span>
+          <div className="flex items-center gap-1">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 px-2 text-xs"
+              onClick={clearSelection}
+            >
+              <X className="w-3 h-3 mr-1" />
+              Clear
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              className="h-7 px-2 text-xs"
+              onClick={() => setConfirmOpen(true)}
+            >
+              <Trash2 className="w-3 h-3 mr-1" />
+              Delete
+            </Button>
+          </div>
+        </div>
+      )}
+
       <ScrollArea className="flex-1">
         <div className="p-2 space-y-1">
           {savedConnections.length === 0 ? (
@@ -127,15 +212,29 @@ export function ConnectionList({ onConnectionSelect }: ConnectionListProps) {
               return (
                 <div
                   key={conn.id}
-                  className="group flex items-center justify-between p-2 rounded-md hover:bg-accent"
+                  className={cn(
+                    'group flex items-center gap-2 p-2 rounded-md hover:bg-accent',
+                    selectedIds.has(conn.id) && 'bg-accent',
+                  )}
                   onPointerEnter={() => setHoveredId(conn.id)}
                   onPointerLeave={() => setHoveredId(null)}
                 >
+                  <Checkbox
+                    checked={selectedIds.has(conn.id)}
+                    onCheckedChange={(checked) => toggleSelected(conn.id, checked === true)}
+                    aria-label={`Select ${conn.name}`}
+                    className={cn(
+                      'shrink-0 transition-opacity',
+                      selectedIds.size > 0 || selectedIds.has(conn.id)
+                        ? 'opacity-100'
+                        : 'opacity-0 group-hover:opacity-100',
+                    )}
+                  />
                   <button
                     type="button"
                     onClick={() => handleConnect(conn)}
                     disabled={connectingId === conn.id || isConnected(conn.id)}
-                    className="flex-1 text-left"
+                    className="flex-1 text-left min-w-0"
                   >
                     <div className="flex items-center gap-2">
                       {connectingId === conn.id ? (
@@ -186,6 +285,26 @@ export function ConnectionList({ onConnectionSelect }: ConnectionListProps) {
         onOpenChange={setDialogOpen}
         editConnection={editConnection}
       />
+
+      <AlertDialog open={confirmOpen} onOpenChange={(o) => !bulkDeleting && setConfirmOpen(o)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Delete {selectedIds.size} connection{selectedIds.size > 1 ? 's' : ''}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently removes the selected connection
+              {selectedIds.size > 1 ? 's' : ''}. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" disabled={bulkDeleting} onClick={handleBulkDelete}>
+              {bulkDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

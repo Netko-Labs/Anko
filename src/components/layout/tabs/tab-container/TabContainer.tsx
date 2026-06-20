@@ -182,7 +182,14 @@ export function TabContainer() {
     <div className="h-full flex flex-col bg-background">
       {/* Tab Bar */}
       <div className="flex items-center bg-muted/50 border-b border-border min-w-0">
-        <div className="flex items-center gap-0.5 px-1 pt-1 overflow-x-auto flex-1 min-w-0 no-scrollbar">
+        <div
+          className="flex items-center gap-0.5 px-1 pt-1 overflow-x-auto flex-1 min-w-0 no-scrollbar"
+          onWheel={(e) => {
+            // Translate vertical wheel into horizontal scroll so a normal mouse can
+            // scroll the tab strip (trackpads already scroll horizontally natively).
+            if (e.deltaY !== 0) e.currentTarget.scrollLeft += e.deltaY
+          }}
+        >
           {queryTabs.map((tab, index) => {
             const isActive = tab.id === activeTabId
             const isTableTab = tab.tableName !== undefined

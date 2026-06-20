@@ -7,6 +7,7 @@ import {
   IconLayoutSidebarRight,
   IconMinus,
   IconMoon,
+  IconPencil,
   IconPlus,
   IconRefresh,
   IconSearch,
@@ -280,11 +281,18 @@ function TitleBarWorkspaceSwitcher() {
 
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId)
 
+  const [menuOpen, setMenuOpen] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editWorkspace, setEditWorkspace] = useState<Workspace | undefined>()
 
   const handleNewWorkspace = () => {
     setEditWorkspace(undefined)
+    setDialogOpen(true)
+  }
+
+  const handleEditWorkspace = (workspace: Workspace) => {
+    setMenuOpen(false)
+    setEditWorkspace(workspace)
     setDialogOpen(true)
   }
 
@@ -302,7 +310,7 @@ function TitleBarWorkspaceSwitcher() {
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenuTrigger
           className={cn(
             'h-7 px-2 inline-flex items-center gap-1.5 rounded-md',
@@ -328,15 +336,26 @@ function TitleBarWorkspaceSwitcher() {
             <DropdownMenuItem
               key={workspace.id}
               onClick={() => setActiveWorkspace(workspace.id)}
-              className="gap-2"
+              className="gap-2 group/ws"
             >
               <div className="flex size-5 items-center justify-center rounded border text-xs shrink-0">
                 <WorkspaceIcon icon={workspace.icon} className="size-3" />
               </div>
               <span className="flex-1 truncate text-xs">{workspace.name}</span>
               {workspace.id === activeWorkspaceId && (
-                <span className="text-[10px] text-primary shrink-0">Active</span>
+                <span className="text-[10px] text-primary shrink-0 group-hover/ws:hidden">Active</span>
               )}
+              <button
+                type="button"
+                aria-label={`Edit ${workspace.name}`}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleEditWorkspace(workspace)
+                }}
+                className="opacity-0 group-hover/ws:opacity-100 rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-opacity shrink-0"
+              >
+                <IconPencil className="size-3" />
+              </button>
             </DropdownMenuItem>
           ))}
           <DropdownMenuSeparator />
