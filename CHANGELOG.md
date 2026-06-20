@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.5.8] - 2026-06-20
+
+### Highlights
+We've leveled up our installer game! This release brings smoother Windows installation experience with our new NSIS-powered setup wizard. Think of it as our way of saying welcome to Anko without the awkward handshake. ✨
+
+### Under the Hood 🔧
+- Bump mirin to 0.1.0-alpha.1 for improved Windows installer support
+- Configure CI/CD to properly build and package the NSIS installer
+
 ## [v0.5.7] - 2026-06-20
 
 ### Highlights
