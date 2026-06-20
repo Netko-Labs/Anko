@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.5.7] - 2026-06-20
+
+### Highlights
+We're bringing the Windows experience to the next level! Anko now gets proper title-bar controls and we're shipping our shiny new Mirin UI library. It's like we finally gave our Windows build the legendary arc it deserved. 🪟✨
+
+### New Features ✨
+- **Windows Title-Bar Controls** – Customize your window buttons like you're configuring a gaming rig. Drag, snap, and control Anko the way *you* want it
+- **Mirin 0.1.0-alpha.0 Integration** – Our fresh new UI library is here and ready to make the interface even cleaner. Buckle up for the anime-smooth transitions ahead
+- **Official Windows Release** – Anko is now fully ready for the Windows squad. No more beta energy; this is the real deal
+
 ## [v0.5.6] - 2026-06-15
 
 ### Highlights
