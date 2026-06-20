@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.5.14] - 2026-06-20
+
+### Highlights
+We're back with a stability patch that's been on our backlog longer than a Save Game in a roguelike. Nothing flashy, but the kind of update that makes Windows users breathe a little easier.
+
+### Under the Hood 🔧
+Bump mirin dependency to 0.1.0-alpha.8 with a crucial fix for Windows auto-update swaps. Your Anko client should now update smoother than a perfectly executed anime battle sequence.
+
 ## [v0.5.13] - 2026-06-20
 
 ### Highlights
