@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.5.10] - 2026-06-20
+
+### Highlights
+We've been polishing things like it's a speedrun any% WR attempt! The Windows installer now feels as smooth as butter, and we've upgraded our query engine (mirin) to keep your SQL flowing like a well-paced anime arc.
+
+### New Features ✨
+- **Windows Installer Polish** – Installation is now smoother than a perfectly animated frame. No more jank, just vibes and efficiency.
+- **mirin 0.1.0-alpha.5 Integration** – Our query engine just got a fresh coat of paint. Better performance, better stability, better *everything*. Time to make your queries shine.
+
 ## [v0.5.9] - 2026-06-20
 
 ### Highlights
