@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.6.0] - 2026-06-23
+
+### Highlights
+You know that feeling when your database diagrams finally stop looking like abstract art? We heard you. This release brings serious visual firepower with an editable ERD generator and some quality-of-life improvements that'll make your SQL sessions feel way less like a mystery dungeon.
+
+### New Features ✨
+- **Editable ERD Diagram Generator** – Craft and export database relationship diagrams without needing a whiteboard and a prayer. Visual debugging has never looked so good.
+- **Column Type Display** – Stop squinting at your results table wondering what type that field actually is. We now show exact database column types front and center.
+- **Workspace Session Persistence** – Your workspace remembers what you were doing. Close Anko and come back later—your queries, connections, and state are waiting exactly where you left them. It's like a save point, but better.
+
 ## [v0.5.15] - 2026-06-20
 
 ### Highlights
