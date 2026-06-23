@@ -5,13 +5,45 @@ import type {
   ColumnInfo,
   ConnectionConfig,
   DatabaseConnector,
+  ErdSchema,
   QueryResult,
   SchemaInfo,
   TableInfo,
 } from './connector'
+import { assembleErdSchema, type RawErdColumn, type RawErdForeignKey } from './erd-utils'
 import { extractTableFromSelect } from './query-utils'
+import {
+  buildColumnsFromRow,
+  buildColumnsFromTypeMap,
+  type ColumnTypeInfo,
+  TypeMapCache,
+} from './type-enrich'
 
 const POOL_TTL_MS = 5 * 60 * 1000 // 5 minutes
+
+/**
+ * Formats a Postgres `information_schema.columns` row (unaliased) into a concise
+ * exact type (e.g. `varchar(255)`, `numeric(10,2)`, `int4`, `timestamptz`).
+ * Mirrors getColumns' formatting so result types match the schema browser.
+ */
+const PG_FORMATTED_TYPE = `
+  CASE
+    WHEN data_type = 'character varying' THEN 'varchar(' || COALESCE(character_maximum_length::text, 'max') || ')'
+    WHEN data_type = 'character' THEN 'char(' || COALESCE(character_maximum_length::text, '1') || ')'
+    WHEN data_type = 'numeric' THEN 'numeric(' || COALESCE(numeric_precision::text, '') || ',' || COALESCE(numeric_scale::text, '') || ')'
+    WHEN data_type = 'timestamp without time zone' THEN 'timestamp'
+    WHEN data_type = 'timestamp with time zone' THEN 'timestamptz'
+    WHEN data_type = 'time without time zone' THEN 'time'
+    WHEN data_type = 'time with time zone' THEN 'timetz'
+    WHEN data_type = 'double precision' THEN 'float8'
+    WHEN data_type = 'real' THEN 'float4'
+    WHEN data_type = 'integer' THEN 'int4'
+    WHEN data_type = 'smallint' THEN 'int2'
+    WHEN data_type = 'bigint' THEN 'int8'
+    WHEN data_type = 'boolean' THEN 'bool'
+    WHEN data_type = 'ARRAY' THEN udt_name
+    ELSE data_type
+  END`
 const EVICTION_INTERVAL_MS = 60 * 1000 // 60 seconds
 
 interface PoolEntry {
@@ -24,6 +56,7 @@ export class PostgresConnector implements DatabaseConnector {
   private pools: Map<string, PoolEntry> = new Map()
   private defaultDatabase: string
   private evictionTimer: ReturnType<typeof setInterval> | null = null
+  private typeCache = new TypeMapCache()
 
   private constructor(
     config: ConnectionConfig,
@@ -146,19 +179,12 @@ export class PostgresConnector implements DatabaseConnector {
       const executionTimeMs = Math.round(performance.now() - start)
 
       if (Array.isArray(rows)) {
+        // Exact column types from the catalog for the queried table; falls back
+        // to the value's JS type for aliases/expressions/joined columns.
+        const table = extractTableFromSelect(query)
+        const typeMap = table ? await this.getColumnTypeMap(pool, table) : new Map()
         const columns: ColumnInfo[] =
-          rows.length > 0
-            ? Object.keys(rows[0]).map((key) => ({
-                name: key,
-                data_type:
-                  typeof rows[0][key] === 'number'
-                    ? 'number'
-                    : typeof rows[0][key] === 'boolean'
-                      ? 'boolean'
-                      : 'string',
-                nullable: true,
-              }))
-            : await this.getColumnsForEmptySelect(pool, query)
+          rows.length > 0 ? buildColumnsFromRow(rows[0], typeMap) : buildColumnsFromTypeMap(typeMap)
 
         const jsonRows: unknown[][] = rows.map((row: Record<string, unknown>) =>
           columns.map((col) => {
@@ -203,31 +229,42 @@ export class PostgresConnector implements DatabaseConnector {
     }
   }
 
-  private async getColumnsForEmptySelect(
+  /**
+   * Exact column types for a table, keyed by column name, formatted like
+   * getColumns (`varchar(255)`, `int4`, `timestamptz`, …). Scoped to the first
+   * schema on the pool's search_path (set by executeWithContext). Cached.
+   */
+  private async getColumnTypeMap(
     pool: InstanceType<typeof SQL>,
-    query: string,
-  ): Promise<ColumnInfo[]> {
-    const trimmed = query.trim().toUpperCase()
-    if (!trimmed.startsWith('SELECT')) return []
+    table: string,
+  ): Promise<Map<string, ColumnTypeInfo>> {
+    const cached = this.typeCache.get(table)
+    if (cached) return cached
 
-    const tableName = extractTableFromSelect(query)
-    if (!tableName) return []
-
+    const map = new Map<string, ColumnTypeInfo>()
     try {
       const rows = await pool.unsafe(
-        'SELECT column_name, data_type FROM information_schema.columns WHERE table_name = $1 ORDER BY ordinal_position',
-        [tableName],
+        `SELECT column_name, ${PG_FORMATTED_TYPE} AS data_type, is_nullable
+         FROM information_schema.columns
+         WHERE table_name = $1 AND table_schema = current_schema()
+         ORDER BY ordinal_position`,
+        [table],
       )
-
-      if (!Array.isArray(rows)) return []
-      return rows.map((row: Record<string, unknown>) => ({
-        name: String(row.column_name ?? ''),
-        data_type: String(row.data_type ?? ''),
-        nullable: true,
-      }))
+      if (Array.isArray(rows)) {
+        for (const row of rows as Record<string, unknown>[]) {
+          const name = String(row.column_name ?? '')
+          if (!name) continue
+          map.set(name, {
+            dataType: String(row.data_type ?? ''),
+            nullable: String(row.is_nullable ?? '') === 'YES',
+          })
+        }
+      }
     } catch {
-      return []
+      // Unresolvable (cross-schema table, permissions, etc.) — caller falls back.
     }
+    this.typeCache.set(table, map)
+    return map
   }
 
   async getDatabases(): Promise<SchemaInfo[]> {
@@ -341,6 +378,98 @@ export class PostgresConnector implements DatabaseConnector {
       default_value: row.column_default != null ? String(row.column_default) : undefined,
       extra: row.extra ? String(row.extra) : undefined,
     }))
+  }
+
+  async getErdSchema(database: string, schema?: string): Promise<ErdSchema> {
+    const pool = await this.getPool(database)
+    const schemaName = schema || 'public'
+
+    const tableRows = await pool.unsafe(
+      `SELECT table_name FROM information_schema.tables
+       WHERE table_schema = $1 AND table_type = 'BASE TABLE'
+       ORDER BY table_name`,
+      [schemaName],
+    )
+    const colRows = await pool.unsafe(
+      `SELECT table_name, column_name, ${PG_FORMATTED_TYPE} AS data_type, is_nullable,
+              is_identity, column_default
+       FROM information_schema.columns
+       WHERE table_schema = $1
+       ORDER BY table_name, ordinal_position`,
+      [schemaName],
+    )
+    const pkRows = await pool.unsafe(
+      `SELECT kcu.table_name, kcu.column_name
+       FROM information_schema.table_constraints tc
+       JOIN information_schema.key_column_usage kcu
+         ON tc.constraint_name = kcu.constraint_name AND tc.table_schema = kcu.table_schema
+       WHERE tc.constraint_type = 'PRIMARY KEY' AND tc.table_schema = $1`,
+      [schemaName],
+    )
+    const uniqueRows = await pool.unsafe(
+      `SELECT kcu.table_name, kcu.column_name
+       FROM information_schema.table_constraints tc
+       JOIN information_schema.key_column_usage kcu
+         ON tc.constraint_name = kcu.constraint_name AND tc.table_schema = kcu.table_schema
+       WHERE tc.constraint_type = 'UNIQUE' AND tc.table_schema = $1`,
+      [schemaName],
+    )
+    const fkRows = await pool.unsafe(
+      `SELECT tc.table_name AS from_table, kcu.column_name AS from_column,
+              ccu.table_name AS to_table, ccu.column_name AS to_column, tc.constraint_name
+       FROM information_schema.table_constraints tc
+       JOIN information_schema.key_column_usage kcu
+         ON tc.constraint_name = kcu.constraint_name AND tc.table_schema = kcu.table_schema
+       JOIN information_schema.constraint_column_usage ccu
+         ON ccu.constraint_name = tc.constraint_name AND ccu.table_schema = tc.table_schema
+       WHERE tc.constraint_type = 'FOREIGN KEY' AND tc.table_schema = $1`,
+      [schemaName],
+    )
+
+    const tableNames = (Array.isArray(tableRows) ? tableRows : []).map(
+      (r: Record<string, unknown>) => String(r.table_name ?? ''),
+    )
+    const pkSet = new Set(
+      (Array.isArray(pkRows) ? pkRows : []).map(
+        (r: Record<string, unknown>) =>
+          `${String(r.table_name ?? '')}.${String(r.column_name ?? '')}`,
+      ),
+    )
+    const uniqueSet = new Set(
+      (Array.isArray(uniqueRows) ? uniqueRows : []).map(
+        (r: Record<string, unknown>) =>
+          `${String(r.table_name ?? '')}.${String(r.column_name ?? '')}`,
+      ),
+    )
+    const columns: RawErdColumn[] = (Array.isArray(colRows) ? colRows : []).map(
+      (r: Record<string, unknown>) => {
+        const table = String(r.table_name ?? '')
+        const name = String(r.column_name ?? '')
+        const def = r.column_default != null ? String(r.column_default) : undefined
+        const isIdentity = String(r.is_identity ?? '') === 'YES'
+        return {
+          table,
+          name,
+          data_type: String(r.data_type ?? ''),
+          nullable: String(r.is_nullable ?? '') === 'YES',
+          isPrimaryKey: pkSet.has(`${table}.${name}`),
+          isUnique: uniqueSet.has(`${table}.${name}`),
+          isAutoIncrement: isIdentity || (def?.startsWith('nextval(') ?? false),
+          defaultValue: def,
+        }
+      },
+    )
+    const fks: RawErdForeignKey[] = (Array.isArray(fkRows) ? fkRows : []).map(
+      (r: Record<string, unknown>) => ({
+        fromTable: String(r.from_table ?? ''),
+        fromColumn: String(r.from_column ?? ''),
+        toTable: String(r.to_table ?? ''),
+        toColumn: String(r.to_column ?? ''),
+        constraintName: String(r.constraint_name ?? '') || undefined,
+      }),
+    )
+
+    return assembleErdSchema(tableNames, columns, fks)
   }
 
   async close(): Promise<void> {

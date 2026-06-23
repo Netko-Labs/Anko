@@ -5,16 +5,25 @@ import type {
   ColumnInfo,
   ConnectionConfig,
   DatabaseConnector,
+  ErdSchema,
   QueryResult,
   SchemaInfo,
   TableInfo,
 } from './connector'
+import { assembleErdSchema, type RawErdColumn, type RawErdForeignKey } from './erd-utils'
 import { extractTableFromSelect } from './query-utils'
+import {
+  buildColumnsFromRow,
+  buildColumnsFromTypeMap,
+  type ColumnTypeInfo,
+  TypeMapCache,
+} from './type-enrich'
 
 const HIDDEN_DATABASES = ['information_schema', 'performance_schema']
 
 export class MySqlConnector implements DatabaseConnector {
   private sql: InstanceType<typeof SQL>
+  private typeCache = new TypeMapCache()
 
   private constructor(sql: InstanceType<typeof SQL>) {
     this.sql = sql
@@ -80,19 +89,12 @@ export class MySqlConnector implements DatabaseConnector {
 
       // Check if this is a result set (SELECT) or an execute result (INSERT/UPDATE/DELETE)
       if (Array.isArray(rows)) {
+        // Exact column types from the catalog for the queried table; falls back
+        // to the value's JS type for aliases/expressions/joined columns.
+        const table = extractTableFromSelect(query)
+        const typeMap = table ? await this.getColumnTypeMap(table) : new Map()
         const columns: ColumnInfo[] =
-          rows.length > 0
-            ? Object.keys(rows[0]).map((key) => ({
-                name: key,
-                data_type:
-                  typeof rows[0][key] === 'number'
-                    ? 'number'
-                    : typeof rows[0][key] === 'boolean'
-                      ? 'boolean'
-                      : 'string',
-                nullable: true,
-              }))
-            : await this.getColumnsForEmptySelect(query)
+          rows.length > 0 ? buildColumnsFromRow(rows[0], typeMap) : buildColumnsFromTypeMap(typeMap)
 
         const jsonRows: unknown[][] = rows.map((row: Record<string, unknown>) =>
           columns.map((col) => {
@@ -151,30 +153,38 @@ export class MySqlConnector implements DatabaseConnector {
     }
   }
 
-  private async getColumnsForEmptySelect(query: string): Promise<ColumnInfo[]> {
-    const trimmed = query.trim().toUpperCase()
-    if (!trimmed.startsWith('SELECT')) return []
+  /**
+   * Exact column types for a table, keyed by column name. Uses COLUMN_TYPE for
+   * the full declared type (e.g. `varchar(255)`, `bigint unsigned`,
+   * `decimal(10,2)`, `enum('a','b')`). Scoped to the current database. Cached.
+   */
+  private async getColumnTypeMap(table: string): Promise<Map<string, ColumnTypeInfo>> {
+    const cached = this.typeCache.get(table)
+    if (cached) return cached
 
-    const tableName = extractTableFromSelect(query)
-    if (!tableName) return []
-
+    const map = new Map<string, ColumnTypeInfo>()
     try {
       const rows = await this.sql`
-        SELECT COLUMN_NAME, DATA_TYPE
+        SELECT COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE
         FROM information_schema.COLUMNS
-        WHERE TABLE_NAME = ${tableName}
+        WHERE TABLE_NAME = ${table} AND TABLE_SCHEMA = DATABASE()
         ORDER BY ORDINAL_POSITION
       `
-
-      if (!Array.isArray(rows)) return []
-      return rows.map((row: Record<string, unknown>) => ({
-        name: String(row.COLUMN_NAME ?? row.column_name ?? ''),
-        data_type: String(row.DATA_TYPE ?? row.data_type ?? ''),
-        nullable: true,
-      }))
+      if (Array.isArray(rows)) {
+        for (const row of rows as Record<string, unknown>[]) {
+          const name = String(row.COLUMN_NAME ?? row.column_name ?? '')
+          if (!name) continue
+          map.set(name, {
+            dataType: String(row.COLUMN_TYPE ?? row.column_type ?? ''),
+            nullable: String(row.IS_NULLABLE ?? row.is_nullable ?? '') === 'YES',
+          })
+        }
+      }
     } catch {
-      return []
+      // Unresolvable (cross-db table, permissions, etc.) — caller falls back.
     }
+    this.typeCache.set(table, map)
+    return map
   }
 
   async getDatabases(): Promise<SchemaInfo[]> {
@@ -232,6 +242,60 @@ export class MySqlConnector implements DatabaseConnector {
         row.COLUMN_DEFAULT != null ? String(row.COLUMN_DEFAULT ?? row.column_default) : undefined,
       extra: row.EXTRA || row.extra ? String(row.EXTRA ?? row.extra) || undefined : undefined,
     }))
+  }
+
+  async getErdSchema(database: string): Promise<ErdSchema> {
+    // Base tables only (skip views) — the ERD is about real entities + FKs.
+    const tableRows = await this.sql`
+      SELECT TABLE_NAME
+      FROM information_schema.TABLES
+      WHERE TABLE_SCHEMA = ${database} AND TABLE_TYPE = 'BASE TABLE'
+      ORDER BY TABLE_NAME
+    `
+    const colRows = await this.sql`
+      SELECT TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_KEY, EXTRA,
+             COLUMN_DEFAULT, ORDINAL_POSITION
+      FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = ${database}
+      ORDER BY TABLE_NAME, ORDINAL_POSITION
+    `
+    const fkRows = await this.sql`
+      SELECT TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME, CONSTRAINT_NAME
+      FROM information_schema.KEY_COLUMN_USAGE
+      WHERE TABLE_SCHEMA = ${database} AND REFERENCED_TABLE_NAME IS NOT NULL
+    `
+
+    const tableNames = (Array.isArray(tableRows) ? tableRows : []).map(
+      (r: Record<string, unknown>) => String(r.TABLE_NAME ?? r.table_name ?? ''),
+    )
+    const columns: RawErdColumn[] = (Array.isArray(colRows) ? colRows : []).map(
+      (r: Record<string, unknown>) => {
+        const key = String(r.COLUMN_KEY ?? r.column_key ?? '')
+        const extra = String(r.EXTRA ?? r.extra ?? '').toLowerCase()
+        const def = r.COLUMN_DEFAULT ?? r.column_default
+        return {
+          table: String(r.TABLE_NAME ?? r.table_name ?? ''),
+          name: String(r.COLUMN_NAME ?? r.column_name ?? ''),
+          data_type: String(r.COLUMN_TYPE ?? r.column_type ?? ''),
+          nullable: String(r.IS_NULLABLE ?? r.is_nullable ?? '') === 'YES',
+          isPrimaryKey: key === 'PRI',
+          isUnique: key === 'UNI',
+          isAutoIncrement: extra.includes('auto_increment'),
+          defaultValue: def != null ? String(def) : undefined,
+        }
+      },
+    )
+    const fks: RawErdForeignKey[] = (Array.isArray(fkRows) ? fkRows : []).map(
+      (r: Record<string, unknown>) => ({
+        fromTable: String(r.TABLE_NAME ?? r.table_name ?? ''),
+        fromColumn: String(r.COLUMN_NAME ?? r.column_name ?? ''),
+        toTable: String(r.REFERENCED_TABLE_NAME ?? r.referenced_table_name ?? ''),
+        toColumn: String(r.REFERENCED_COLUMN_NAME ?? r.referenced_column_name ?? ''),
+        constraintName: String(r.CONSTRAINT_NAME ?? r.constraint_name ?? '') || undefined,
+      }),
+    )
+
+    return assembleErdSchema(tableNames, columns, fks)
   }
 
   async close(): Promise<void> {

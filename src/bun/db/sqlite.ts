@@ -5,13 +5,23 @@ import type {
   ColumnInfo,
   ConnectionConfig,
   DatabaseConnector,
+  ErdSchema,
   QueryResult,
   SchemaInfo,
   TableInfo,
 } from './connector'
+import { assembleErdSchema, type RawErdColumn, type RawErdForeignKey } from './erd-utils'
+import { extractTableFromSelect } from './query-utils'
+import {
+  buildColumnsFromRow,
+  buildColumnsFromTypeMap,
+  type ColumnTypeInfo,
+  TypeMapCache,
+} from './type-enrich'
 
 export class SqliteConnector implements DatabaseConnector {
   private sql: InstanceType<typeof SQL>
+  private typeCache = new TypeMapCache()
 
   private constructor(sql: InstanceType<typeof SQL>) {
     this.sql = sql
@@ -56,17 +66,13 @@ export class SqliteConnector implements DatabaseConnector {
       const rows = await this.sql.unsafe(query)
       const executionTimeMs = Math.round(performance.now() - start)
 
-      if (Array.isArray(rows) && rows.length > 0) {
-        const columns: ColumnInfo[] = Object.keys(rows[0]).map((key) => ({
-          name: key,
-          data_type:
-            typeof rows[0][key] === 'number'
-              ? 'number'
-              : typeof rows[0][key] === 'boolean'
-                ? 'boolean'
-                : 'string',
-          nullable: true,
-        }))
+      if (Array.isArray(rows)) {
+        // Exact column types from the table's schema (PRAGMA); falls back to the
+        // value's JS type for aliases/expressions/joined columns.
+        const table = extractTableFromSelect(query)
+        const typeMap = table ? await this.getColumnTypeMap(table) : new Map()
+        const columns: ColumnInfo[] =
+          rows.length > 0 ? buildColumnsFromRow(rows[0], typeMap) : buildColumnsFromTypeMap(typeMap)
 
         const jsonRows: unknown[][] = rows.map((row: Record<string, unknown>) =>
           columns.map((col) => {
@@ -85,15 +91,6 @@ export class SqliteConnector implements DatabaseConnector {
         }
       }
 
-      if (Array.isArray(rows) && rows.length === 0) {
-        return {
-          columns: [],
-          rows: [],
-          affected_rows: 0,
-          execution_time_ms: executionTimeMs,
-        }
-      }
-
       // Non-SELECT result
       return {
         columns: [],
@@ -105,6 +102,35 @@ export class SqliteConnector implements DatabaseConnector {
       const msg = e instanceof Error ? e.message : String(e)
       throw AppError.database(msg)
     }
+  }
+
+  /**
+   * Exact column types for a table, keyed by column name, from the declared
+   * schema (PRAGMA table_info → e.g. `integer`, `text`, `varchar(50)`). Mirrors
+   * getColumns so result types match the schema browser. Cached.
+   */
+  private async getColumnTypeMap(table: string): Promise<Map<string, ColumnTypeInfo>> {
+    const cached = this.typeCache.get(table)
+    if (cached) return cached
+
+    const map = new Map<string, ColumnTypeInfo>()
+    try {
+      const rows = await this.sql.unsafe(`PRAGMA table_info("${table.replace(/"/g, '""')}")`)
+      if (Array.isArray(rows)) {
+        for (const row of rows as Record<string, unknown>[]) {
+          const name = String(row.name ?? '')
+          if (!name) continue
+          map.set(name, {
+            dataType: String(row.type ?? '').toLowerCase() || 'text',
+            nullable: Number(row.notnull ?? 0) === 0,
+          })
+        }
+      }
+    } catch {
+      // Not a real table (expression/pragma result) — caller falls back.
+    }
+    this.typeCache.set(table, map)
+    return map
   }
 
   async getDatabases(): Promise<SchemaInfo[]> {
@@ -145,6 +171,78 @@ export class SqliteConnector implements DatabaseConnector {
       key: Number(row.pk ?? 0) > 0 ? 'PRI' : undefined,
       default_value: row.dflt_value != null ? String(row.dflt_value) : undefined,
     }))
+  }
+
+  async getErdSchema(): Promise<ErdSchema> {
+    const tableRows = await this.sql`
+      SELECT name FROM sqlite_master
+      WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
+      ORDER BY name
+    `
+    const tableNames = (Array.isArray(tableRows) ? tableRows : []).map(
+      (r: Record<string, unknown>) => String(r.name ?? ''),
+    )
+
+    const columns: RawErdColumn[] = []
+    const fks: RawErdForeignKey[] = []
+
+    // SQLite has no batch catalog query; PRAGMA is per-table (DBs are small).
+    for (const table of tableNames) {
+      const quoted = `"${table.replace(/"/g, '""')}"`
+
+      // Columns participating in a UNIQUE index (for the unique modifier badge).
+      const uniqueColumns = new Set<string>()
+      const indexList = await this.sql.unsafe(`PRAGMA index_list(${quoted})`)
+      if (Array.isArray(indexList)) {
+        for (const idx of indexList as Record<string, unknown>[]) {
+          if (Number(idx.unique ?? 0) !== 1) continue
+          const idxName = String(idx.name ?? '')
+          if (!idxName) continue
+          const info = await this.sql.unsafe(`PRAGMA index_info("${idxName.replace(/"/g, '""')}")`)
+          if (Array.isArray(info)) {
+            for (const ic of info as Record<string, unknown>[]) {
+              uniqueColumns.add(String(ic.name ?? ''))
+            }
+          }
+        }
+      }
+
+      const colRows = await this.sql.unsafe(`PRAGMA table_info(${quoted})`)
+      if (Array.isArray(colRows)) {
+        for (const r of colRows as Record<string, unknown>[]) {
+          const name = String(r.name ?? '')
+          const type = String(r.type ?? '').toLowerCase() || 'text'
+          const isPk = Number(r.pk ?? 0) > 0
+          const def = r.dflt_value
+          columns.push({
+            table,
+            name,
+            data_type: type,
+            nullable: Number(r.notnull ?? 0) === 0,
+            isPrimaryKey: isPk,
+            isUnique: uniqueColumns.has(name),
+            // INTEGER PRIMARY KEY is SQLite's rowid alias (auto-incrementing).
+            isAutoIncrement: isPk && type === 'integer',
+            defaultValue: def != null ? String(def) : undefined,
+          })
+        }
+      }
+
+      const fkList = await this.sql.unsafe(`PRAGMA foreign_key_list(${quoted})`)
+      if (Array.isArray(fkList)) {
+        for (const r of fkList as Record<string, unknown>[]) {
+          fks.push({
+            fromTable: table,
+            fromColumn: String(r.from ?? ''),
+            toTable: String(r.table ?? ''),
+            toColumn: String(r.to ?? ''),
+            constraintName: undefined,
+          })
+        }
+      }
+    }
+
+    return assembleErdSchema(tableNames, columns, fks)
   }
 
   async close(): Promise<void> {
