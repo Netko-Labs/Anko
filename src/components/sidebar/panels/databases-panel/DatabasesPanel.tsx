@@ -32,11 +32,15 @@ export function DatabasesPanel({
 }: DatabasesPanelProps) {
   const [connectingId, setConnectingId] = useState<string | null>(null)
   const [connectedExpanded, setConnectedExpanded] = useState(true)
+  const [reconnectExpanded, setReconnectExpanded] = useState(true)
   const [savedExpanded, setSavedExpanded] = useState(true)
 
   // Connection store
   const savedConnections = useConnectionStore((s) => s.savedConnections)
   const activeConnections = useConnectionStore((s) => s.activeConnections)
+  // Connections that were live in this workspace's last session, awaiting a
+  // manual reconnect (restored by the session loader, see lib/session.ts).
+  const pendingReconnect = useConnectionStore((s) => s.pendingReconnect)
 
   // Get connections filtered by workspace
   const workspaceConnections = useMemo(() => {
@@ -44,22 +48,26 @@ export function DatabasesPanel({
     return savedConnections.filter((conn) => activeWorkspace.connection_ids.includes(conn.id))
   }, [savedConnections, activeWorkspace])
 
-  // Separate connected and disconnected connections
-  const { connectedList, disconnectedList } = useMemo(() => {
+  // Split into connected / pending-reconnect / saved.
+  const { connectedList, reconnectList, disconnectedList } = useMemo(() => {
     const connected: { conn: ConnectionInfo; active: ActiveConnection }[] = []
+    const reconnect: ConnectionInfo[] = []
     const disconnected: ConnectionInfo[] = []
+    const pendingIds = new Set(pendingReconnect.map((p) => p.connectionId))
 
     for (const conn of workspaceConnections) {
       const activeConn = activeConnections.find((c) => c.id === conn.id)
       if (activeConn) {
         connected.push({ conn, active: activeConn })
+      } else if (pendingIds.has(conn.id)) {
+        reconnect.push(conn)
       } else {
         disconnected.push(conn)
       }
     }
 
-    return { connectedList: connected, disconnectedList: disconnected }
-  }, [workspaceConnections, activeConnections])
+    return { connectedList: connected, reconnectList: reconnect, disconnectedList: disconnected }
+  }, [workspaceConnections, activeConnections, pendingReconnect])
 
   // Handle connect
   const handleConnect = async (info: ConnectionInfo) => {
@@ -77,14 +85,20 @@ export function DatabasesPanel({
       const config = await getConnectionConfig(info.id)
       const connectionId = await connect(config)
 
+      // Restore the database that was selected when the session was saved.
+      const pending = useConnectionStore
+        .getState()
+        .pendingReconnect.find((p) => p.connectionId === info.id)
+
       const active: ActiveConnection = {
         id: info.id,
         connectionId,
         info,
-        selectedDatabase: info.database,
+        selectedDatabase: pending?.selectedDatabase ?? info.database,
       }
 
       useConnectionStore.getState().addActiveConnection(active)
+      useConnectionStore.getState().removePendingReconnect(info.id)
       onConnectionSelect?.(active)
 
       // Ensure toast displays for minimum duration
@@ -184,10 +198,40 @@ export function DatabasesPanel({
                 </Collapsible>
               )}
 
+              {/* Reconnect section — connected last session, awaiting reconnect */}
+              {reconnectList.length > 0 && (
+                <Collapsible open={reconnectExpanded} onOpenChange={setReconnectExpanded}>
+                  {connectedList.length > 0 && <div className="h-1" />}
+                  <CollapsibleTrigger className="flex items-center gap-1 px-1.5 py-0.5 w-full hover:bg-accent/50 rounded-sm cursor-pointer select-none">
+                    <IconChevronRight
+                      className={`size-2.5 text-muted-foreground transition-transform ${
+                        reconnectExpanded ? 'rotate-90' : ''
+                      }`}
+                    />
+                    <span className="size-1.5 rounded-full bg-amber-500" />
+                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">
+                      Reconnect ({reconnectList.length})
+                    </span>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    {reconnectList.map((conn) => (
+                      <DisconnectedConnection
+                        key={conn.id}
+                        connection={conn}
+                        isConnecting={connectingId === conn.id}
+                        onConnect={() => handleConnect(conn)}
+                        onEdit={() => onEditConnection(conn)}
+                        onDelete={() => handleDelete(conn.id)}
+                      />
+                    ))}
+                  </CollapsibleContent>
+                </Collapsible>
+              )}
+
               {/* Saved section */}
               {disconnectedList.length > 0 && (
                 <Collapsible open={savedExpanded} onOpenChange={setSavedExpanded}>
-                  {connectedList.length > 0 && <div className="h-1" />}
+                  {(connectedList.length > 0 || reconnectList.length > 0) && <div className="h-1" />}
                   <CollapsibleTrigger className="flex items-center gap-1 px-1.5 py-0.5 w-full hover:bg-accent/50 rounded-sm cursor-pointer select-none">
                     <IconChevronRight
                       className={`size-2.5 text-muted-foreground transition-transform ${

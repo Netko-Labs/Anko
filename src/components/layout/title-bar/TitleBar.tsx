@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { WorkspaceDialog } from '@/components/workspace/WorkspaceDialog'
 import { listWorkspaces, openDevToolsWindow } from '@/lib/rpc'
+import { switchWorkspace } from '@/lib/session'
 import { checkForUpdate, fetchChangelogForVersion } from '@/lib/updater'
 import { cn } from '@/lib/utils'
 import { useConnectionStore } from '@/stores/connection'
@@ -276,7 +277,6 @@ function TitleBarSettingsMenu() {
 function TitleBarWorkspaceSwitcher() {
   const workspaces = useWorkspaceStore((s) => s.workspaces)
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
-  const setActiveWorkspace = useWorkspaceStore((s) => s.setActiveWorkspace)
   const setWorkspaces = useWorkspaceStore((s) => s.setWorkspaces)
 
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId)
@@ -335,7 +335,7 @@ function TitleBarWorkspaceSwitcher() {
           {workspaces.map((workspace) => (
             <DropdownMenuItem
               key={workspace.id}
-              onClick={() => setActiveWorkspace(workspace.id)}
+              onClick={() => void switchWorkspace(workspace.id)}
               className="gap-2 group/ws"
             >
               <div className="flex size-5 items-center justify-center rounded border text-xs shrink-0">

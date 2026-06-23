@@ -26,7 +26,9 @@ import {
   deleteQueryHistory,
   deleteSavedQuery,
   deleteWorkspace,
+  getAppMeta,
   getConnectionConfig,
+  getWorkspaceSession,
   listConnections,
   listQueryHistory,
   listSavedQueries,
@@ -35,10 +37,14 @@ import {
   removeConnectionFromAllWorkspaces,
   removeWorkspaceConnection,
   saveConnection,
+  saveWorkspaceSession,
+  setAppMeta,
   updateConnection,
   updateSavedQuery,
   updateWorkspace,
 } from '../storage'
+
+const ACTIVE_WORKSPACE_KEY = 'activeWorkspaceId'
 
 const APP_VERSION = (pkg as { version?: string }).version ?? '0.0.0'
 
@@ -114,6 +120,20 @@ export function createRouter(state: AppState) {
     getDatabases: rpc.query(async ({ connectionId }: { connectionId: string }) => {
       return state.getConnection(connectionId).getDatabases()
     }),
+    // Whole-database/schema graph (tables + columns + FKs) for the ERD view.
+    getErdSchema: rpc.query(
+      async ({
+        connectionId,
+        database,
+        schema,
+      }: {
+        connectionId: string
+        database: string
+        schema?: string
+      }) => {
+        return state.getConnection(connectionId).getErdSchema(database, schema)
+      },
+    ),
     getSchemas: rpc.query(
       async ({ connectionId, database }: { connectionId: string; database: string }) => {
         return state.getConnection(connectionId).getSchemas(database)
@@ -196,6 +216,21 @@ export function createRouter(state: AppState) {
         moveWorkspaceConnection(connectionId, fromWorkspaceId, toWorkspaceId)
       },
     ),
+
+    // ---- Workspace sessions (persisted tabs + snapshot results) ----
+    getWorkspaceSession: rpc.query(
+      ({ workspaceId }: { workspaceId: string }): string | null =>
+        getWorkspaceSession(workspaceId),
+    ),
+    saveWorkspaceSession: rpc.mutation(
+      ({ workspaceId, data }: { workspaceId: string; data: string }) => {
+        saveWorkspaceSession(workspaceId, data)
+      },
+    ),
+    getActiveWorkspaceId: rpc.query((): string | null => getAppMeta(ACTIVE_WORKSPACE_KEY)),
+    setActiveWorkspaceId: rpc.mutation(({ workspaceId }: { workspaceId: string }) => {
+      setAppMeta(ACTIVE_WORKSPACE_KEY, workspaceId)
+    }),
 
     // ---- Query history ----
     addQueryHistory: rpc.mutation(({ input }: { input: AddQueryHistoryInput }) =>
@@ -292,6 +327,28 @@ export function createRouter(state: AppState) {
     writeTextFile: rpc.mutation(async ({ path, content }: { path: string; content: string }) => {
       await Bun.write(path, content)
     }),
+    // Save a binary image (e.g. an exported ERD PNG). The frontend passes a
+    // base64 payload; a native save dialog picks the path. Returns it, or null
+    // if cancelled.
+    saveImageFile: rpc.mutation(
+      async ({
+        defaultName,
+        base64,
+      }: {
+        defaultName?: string
+        base64: string
+      }): Promise<string | null> => {
+        let path = await dialog.saveFile({ defaultName })
+        if (!path) return null
+        // Ensure the saved file keeps the intended extension even if the dialog
+        // dropped it or the user typed a bare name.
+        const dot = defaultName?.lastIndexOf('.') ?? -1
+        const ext = dot > 0 ? defaultName!.slice(dot) : ''
+        if (ext && !path.toLowerCase().endsWith(ext.toLowerCase())) path += ext
+        await Bun.write(path, Buffer.from(base64, 'base64'))
+        return path
+      },
+    ),
 
     // ---- Window controls ----
     closeWindow: rpc.mutation(() => {

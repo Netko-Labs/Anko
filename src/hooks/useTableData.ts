@@ -160,6 +160,18 @@ export function useTableData(
     }
   }, [tableName, tabResult, tabIsExecuting, tabPage, hasLoaded, loadPage, loadTotalRows])
 
+  // Refresh a restored snapshot once its connection is (re)connected. A stale
+  // table tab keeps showing its persisted rows until the DB comes back; when a
+  // runtime connection appears, re-fetch the current page (loadPage clears the
+  // stale flag via setQueryResult). Safe for table tabs — it's just a SELECT.
+  const tabIsStale = tab?.isStale
+  useEffect(() => {
+    if (tabIsStale && runtimeConnectionId && tableName && !tabIsExecuting) {
+      loadPage(tabPage ?? 0)
+      loadTotalRows()
+    }
+  }, [tabIsStale, runtimeConnectionId, tableName, tabIsExecuting, tabPage, loadPage, loadTotalRows])
+
   // Handle refresh
   const handleRefresh = useCallback(async () => {
     tableLogger.debug('refreshing table', { tableName, page: tabPage ?? 0 })

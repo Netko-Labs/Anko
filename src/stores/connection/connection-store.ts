@@ -150,6 +150,44 @@ export const useConnectionStore = create<ConnectionStore>()(
       activeTabId: null,
       setActiveTabId: (id) => set({ activeTabId: id }),
 
+      // Per-workspace session restore
+      pendingReconnect: [],
+      setPendingReconnect: (connections) => set({ pendingReconnect: connections }),
+      removePendingReconnect: (connectionId) =>
+        set((draft) => {
+          draft.pendingReconnect = draft.pendingReconnect.filter(
+            (c) => c.connectionId !== connectionId,
+          )
+        }),
+      applySession: (data) =>
+        set((draft) => {
+          storeLogger.debug('applySession', {
+            tabs: data.tabs.length,
+            connections: data.connections.length,
+            activeTabId: data.activeTabId,
+          })
+          // A restored tab with a result is showing a snapshot → mark it stale.
+          const tabs: QueryTab[] = data.tabs.map((t) => ({
+            ...t,
+            isExecuting: false,
+            isStale: t.result != null,
+          }))
+          draft.queryTabs = tabs
+          draft.queryTabsById = rebuildTabsMap(tabs)
+          draft.activeTabId = data.activeTabId
+          draft.pendingReconnect = data.connections
+        }),
+      clearSession: () =>
+        set((draft) => {
+          storeLogger.debug('clearSession')
+          draft.queryTabs = []
+          draft.queryTabsById = new Map()
+          draft.activeTabId = null
+          draft.activeConnections = []
+          draft.schemaCache = {}
+          draft.pendingReconnect = []
+        }),
+
       // Query tabs
       queryTabs: [],
       queryTabsById: new Map(),
@@ -177,6 +215,45 @@ export const useConnectionStore = create<ConnectionStore>()(
             schemaName: schema,
             page: 0,
             pageSize,
+          }
+          draft.queryTabs.push(newTab)
+          draft.queryTabsById = new Map(draft.queryTabsById)
+          draft.queryTabsById.set(tabId, newTab)
+          draft.activeTabId = tabId
+        }),
+      addErdTab: (connectionId, database, schema) =>
+        set((draft) => {
+          // Focus an existing ERD tab for the same target instead of duplicating.
+          const existing = draft.queryTabs.find(
+            (t) =>
+              t.connectionId === connectionId &&
+              t.erd?.database === database &&
+              t.erd?.schema === schema,
+          )
+          if (existing) {
+            draft.activeTabId = existing.id
+            return
+          }
+
+          const tabId = genId()
+          storeLogger.debug('addErdTab', { tabId, connectionId, database, schema })
+          const newTab: QueryTab = {
+            id: tabId,
+            connectionId,
+            query: '',
+            isExecuting: false,
+            customName: `ERD: ${schema ?? database}`,
+            erd: {
+              database,
+              schema,
+              nodes: [],
+              hiddenTables: [],
+              notes: [],
+              customRelations: [],
+              theme: 'dark',
+              showColumnTypes: true,
+              layoutDirection: 'LR',
+            },
           }
           draft.queryTabs.push(newTab)
           draft.queryTabsById = new Map(draft.queryTabsById)
@@ -234,6 +311,8 @@ export const useConnectionStore = create<ConnectionStore>()(
             tab.result = result
             tab.error = undefined
             tab.isExecuting = false
+            // A freshly fetched result is no longer a restored snapshot.
+            tab.isStale = false
             draft.queryTabsById = rebuildTabsMap(draft.queryTabs)
           }
         }),

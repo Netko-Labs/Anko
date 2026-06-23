@@ -6,6 +6,8 @@ import type {
   QueryResult,
   QueryTab,
   SchemaInfo,
+  SerializedConnection,
+  SessionData,
   TableInfo,
 } from '@/types'
 
@@ -53,6 +55,19 @@ export interface ConnectionStore {
   activeTabId: string | null
   setActiveTabId: (id: string | null) => void
 
+  // Per-workspace session restore (tabs/connections swap with the workspace)
+  // Connections that were live when the active workspace's session was saved,
+  // pending a manual reconnect (rendered in the sidebar "Reconnect" group).
+  pendingReconnect: SerializedConnection[]
+  setPendingReconnect: (connections: SerializedConnection[]) => void
+  removePendingReconnect: (connectionId: string) => void
+  // Replace all session-scoped state (tabs + active tab + pending) from a
+  // restored session. Does not touch saved connections or schema cache.
+  applySession: (data: SessionData) => void
+  // Reset all session-scoped state (used before applying another workspace's
+  // session). Clears tabs, active connections, schema cache, and pending.
+  clearSession: () => void
+
   // Query tabs
   queryTabs: QueryTab[]
   queryTabsById: Map<string, QueryTab> // Indexed structure for O(1) lookups
@@ -65,6 +80,8 @@ export interface ConnectionStore {
     schema: string | undefined,
     table: string,
   ) => void
+  /** Open (or focus) an ERD tab for a database/schema on a connection. */
+  addErdTab: (connectionId: string, database: string, schema?: string) => void
   removeQueryTab: (id: string) => void
   reorderQueryTabs: (fromIndex: number, toIndex: number) => void
   renameQueryTab: (tabId: string, customName: string | undefined) => void

@@ -10,6 +10,7 @@ import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import { Toaster } from '@/components/ui/sonner'
 import { UpdateModal } from '@/components/update/UpdateModal'
 import { useUpdateChecker } from '@/hooks/useUpdateChecker'
+import { useWorkspaceSession } from '@/hooks/useWorkspaceSession'
 import { listenForInvalidation } from '@/lib/data-bridge'
 import { closeWindow, listConnections, listWorkspaces } from '@/lib/rpc'
 import { listenForRemoteToasts } from '@/lib/toast-bridge'
@@ -35,6 +36,9 @@ function App() {
 
   // Check for updates on startup
   useUpdateChecker()
+
+  // Restore per-workspace session (tabs + snapshot data) and keep it saved.
+  useWorkspaceSession()
 
   // Listen for toast messages from other windows (e.g. DevTools)
   useEffect(() => {

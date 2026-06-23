@@ -84,3 +84,20 @@ export const windowStateTable = sqliteTable(
   },
   (table) => [check('single_row', sql`${table.id} = 1`)],
 )
+
+// Persisted per-workspace UI session (open tabs + snapshot results + which
+// connections were connected). `data` is a JSON blob (see SessionData on the
+// frontend). One row per workspace; cascades when the workspace is deleted.
+export const workspaceSessionTable = sqliteTable('workspace_sessions', {
+  workspaceId: text('workspace_id')
+    .primaryKey()
+    .references(() => workspaceTable.id, { onDelete: 'cascade' }),
+  data: text('data').notNull(),
+  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+})
+
+// Small key/value store for app-wide UI state (e.g. the last active workspace id).
+export const appMetaTable = sqliteTable('app_meta', {
+  key: text('key').primaryKey(),
+  value: text('value').notNull(),
+})

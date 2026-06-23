@@ -131,4 +131,20 @@ function createTables(sqlite: Database) {
       is_maximized INTEGER NOT NULL DEFAULT 0
     )
   `)
+
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS workspace_sessions (
+      workspace_id TEXT PRIMARY KEY,
+      data TEXT NOT NULL,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
+    )
+  `)
+
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS app_meta (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    )
+  `)
 }

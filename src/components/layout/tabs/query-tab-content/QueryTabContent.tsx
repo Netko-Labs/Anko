@@ -20,7 +20,17 @@ export function QueryTabContent({ tabId }: QueryTabContentProps) {
         <ResizableHandle className="h-px w-full cursor-row-resize" />
 
         <ResizablePanel defaultSize={60} minSize={10}>
-          <ResultsTable result={tab.result} error={tab.error} isExecuting={tab.isExecuting} />
+          <div className="flex flex-col h-full">
+            {tab.isStale && tab.result && (
+              <div className="flex items-center gap-2 border-b border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs text-muted-foreground">
+                <span className="size-1.5 rounded-full bg-amber-500 shrink-0" />
+                Snapshot from your last session — re-run the query to refresh.
+              </div>
+            )}
+            <div className="flex-1 min-h-0">
+              <ResultsTable result={tab.result} error={tab.error} isExecuting={tab.isExecuting} />
+            </div>
+          </div>
         </ResizablePanel>
       </ResizablePanelGroup>
 

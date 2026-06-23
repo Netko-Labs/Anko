@@ -7,6 +7,7 @@ import type {
   ConnectionConfig,
   ConnectionInfo,
   CreateSavedQueryInput,
+  ErdSchema,
   QueryHistoryEntry,
   QueryResult,
   SavedQuery,
@@ -117,6 +118,14 @@ export async function getColumns(
   return result
 }
 
+export async function getErdSchema(
+  connectionId: string,
+  database: string,
+  schema?: string,
+): Promise<ErdSchema> {
+  return trackedRequest('getErdSchema', () => api.getErdSchema({ connectionId, database, schema }))
+}
+
 // Storage commands
 export async function saveConnection(config: ConnectionConfig): Promise<ConnectionInfo> {
   return trackedRequest('saveConnection', () => api.saveConnection({ config }))
@@ -181,6 +190,23 @@ export async function moveConnectionBetweenWorkspaces(
   return trackedRequest('moveConnectionBetweenWorkspaces', () =>
     api.moveConnectionBetweenWorkspaces({ connectionId, fromWorkspaceId, toWorkspaceId }),
   )
+}
+
+// Workspace session commands (persisted tabs + snapshot results)
+export async function getWorkspaceSession(workspaceId: string): Promise<string | null> {
+  return trackedRequest('getWorkspaceSession', () => api.getWorkspaceSession({ workspaceId }))
+}
+
+export async function saveWorkspaceSession(workspaceId: string, data: string): Promise<void> {
+  return trackedRequest('saveWorkspaceSession', () => api.saveWorkspaceSession({ workspaceId, data }))
+}
+
+export async function getActiveWorkspaceId(): Promise<string | null> {
+  return trackedRequest('getActiveWorkspaceId', () => api.getActiveWorkspaceId({}))
+}
+
+export async function setActiveWorkspaceId(workspaceId: string): Promise<void> {
+  return trackedRequest('setActiveWorkspaceId', () => api.setActiveWorkspaceId({ workspaceId }))
 }
 
 // Query History commands
@@ -259,6 +285,10 @@ export async function showSaveDialog(
 
 export async function writeTextFile(path: string, content: string): Promise<void> {
   return trackedRequest('writeTextFile', () => api.writeTextFile({ path, content }))
+}
+
+export async function saveImageFile(base64: string, defaultName?: string): Promise<string | null> {
+  return trackedRequest('saveImageFile', () => api.saveImageFile({ defaultName, base64 }))
 }
 
 export async function closeWindow(): Promise<void> {

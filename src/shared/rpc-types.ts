@@ -56,6 +56,36 @@ export interface QueryResult {
   executed_query?: string
 }
 
+export interface ErdColumn {
+  name: string
+  data_type: string
+  nullable: boolean
+  isPrimaryKey: boolean
+  isForeignKey: boolean
+  isUnique: boolean
+  isAutoIncrement: boolean
+  defaultValue?: string
+}
+
+export interface ErdTable {
+  name: string
+  columns: ErdColumn[]
+}
+
+export interface ErdRelation {
+  id: string
+  fromTable: string
+  fromColumn: string
+  toTable: string
+  toColumn: string
+  constraintName?: string
+}
+
+export interface ErdSchema {
+  tables: ErdTable[]
+  relations: ErdRelation[]
+}
+
 export interface WorkspaceConfig {
   name: string
   icon: string

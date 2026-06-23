@@ -1,5 +1,5 @@
 import { IconDatabase, IconDeviceFloppy, IconHistory, IconSearch } from '@tabler/icons-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { ConnectionDialog } from '@/components/connection/ConnectionDialog'
 import { listWorkspaces } from '@/lib/rpc'
 import { cn } from '@/lib/utils'
@@ -22,7 +22,7 @@ export function AppSidebar({ onConnectionSelect }: AppSidebarProps) {
   const open = useLeftSidebarStore((s) => s.open)
   const [activeNav, setActiveNav] = useState<NavItemId>('connections')
 
-  // Workspace store
+  // Workspace store (loaded at boot by useWorkspaceSession).
   const workspaces = useWorkspaceStore((s) => s.workspaces)
   const setWorkspaces = useWorkspaceStore((s) => s.setWorkspaces)
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
@@ -30,19 +30,6 @@ export function AppSidebar({ onConnectionSelect }: AppSidebarProps) {
   // Local state
   const [connectionDialogOpen, setConnectionDialogOpen] = useState(false)
   const [editConnection, setEditConnection] = useState<ConnectionInfo | undefined>()
-
-  // Load workspaces on mount
-  useEffect(() => {
-    const loadWorkspaces = async () => {
-      try {
-        const ws = await listWorkspaces()
-        setWorkspaces(ws)
-      } catch (e) {
-        console.error('Failed to load workspaces:', e)
-      }
-    }
-    loadWorkspaces()
-  }, [setWorkspaces])
 
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId)
 

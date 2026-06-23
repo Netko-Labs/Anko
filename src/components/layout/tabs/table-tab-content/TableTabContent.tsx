@@ -18,6 +18,7 @@ import type { FilterCondition } from '@/types'
 import type { TableTabContentProps } from '../definitions'
 import { TableFooter } from '../table-footer/TableFooter'
 import { UnsavedChangesDialog } from '../unsaved-changes-dialog/UnsavedChangesDialog'
+import { DisconnectedTableView } from './DisconnectedTableView'
 
 export function TableTabContent({ tabId }: TableTabContentProps) {
   const tab = useConnectionStore((s) => s.queryTabs.find((t) => t.id === tabId))
@@ -202,8 +203,18 @@ export function TableTabContent({ tabId }: TableTabContentProps) {
     )
   }, [tableInstance])
 
-  // Early return if no tab or connection data
-  if (!tableName || !runtimeConnectionId) {
+  // Early return if this isn't a table tab.
+  if (!tableName) {
+    return null
+  }
+
+  // Connection isn't live (fresh restore, or swapped-away workspace): show the
+  // persisted snapshot read-only behind a reconnect banner instead of a blank.
+  if (!runtimeConnectionId && connectionId) {
+    return <DisconnectedTableView connectionId={connectionId} result={tabResult} />
+  }
+
+  if (!runtimeConnectionId) {
     return null
   }
 

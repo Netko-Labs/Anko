@@ -35,6 +35,7 @@ export interface FilterCondition {
 
 // Import TableEditState - using inline import to avoid circular dependencies
 import type { TableEditState } from './table-edit'
+import type { ErdTabState } from './erd'
 
 export interface QueryTab {
   id: string
@@ -55,4 +56,11 @@ export interface QueryTab {
   totalRows?: number
   // Table editing state (only for table browse tabs)
   editState?: TableEditState
+  // ERD diagram state (only for ERD tabs). When set, this tab renders the
+  // entity-relationship diagram instead of a query/table view.
+  erd?: ErdTabState
+  // Runtime-only: set when a tab is restored from a persisted session with a
+  // snapshot result. The data is shown but may be out of date until the tab's
+  // connection is reconnected and the query/table is re-fetched. Not persisted.
+  isStale?: boolean
 }
