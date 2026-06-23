@@ -38,6 +38,8 @@ export interface DatabaseNodeProps {
   onRefreshTables?: (schema: string) => void
   onRefreshColumns?: (schema: string, table: string) => void
   onOpenTable?: (schema: string, table: string) => void
+  /** Generate an ERD for this database (no schema), or a schema within it. */
+  onGenerateErd?: (schema?: string) => void
 }
 
 export interface SchemaNodeProps {
@@ -54,6 +56,8 @@ export interface SchemaNodeProps {
   onInsertText?: (text: string) => void
   onRefreshColumns?: (table: string) => void
   onOpenTable?: (table: string) => void
+  /** Generate an ERD for this schema. */
+  onGenerateErd?: () => void
 }
 
 export interface TableNodeProps {

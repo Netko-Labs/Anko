@@ -107,6 +107,7 @@ export const filterLogger = createLogger('filter') // FilterBar
 export const tabLogger = createLogger('tab') // Tab management
 export const treeLogger = createLogger('tree') // DatabaseTree
 export const editLogger = createLogger('edit') // Cell editing
+export const erdLogger = createLogger('erd') // ERD diagram
 
 /**
  * Creates a timer for measuring operation duration.

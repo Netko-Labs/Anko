@@ -33,6 +33,7 @@ export function useTreeEventHandlers({
   const setSelectedDatabaseRef = useRef(useConnectionStore.getState().setSelectedDatabase)
   const removeActiveConnectionRef = useRef(useConnectionStore.getState().removeActiveConnection)
   const addTableTabRef = useRef(useConnectionStore.getState().addTableTab)
+  const addErdTabRef = useRef(useConnectionStore.getState().addErdTab)
 
   const handleConnectionClick = useCallback(() => {
     treeLogger.debug('connection node toggled', { connectionId, wasExpanded: isExpanded })
@@ -107,6 +108,13 @@ export function useTreeEventHandlers({
     [connection.id, connectionId],
   )
 
+  const handleGenerateErd = useCallback(
+    (database: string, schema?: string) => {
+      addErdTabRef.current(connection.id, database, schema)
+    },
+    [connection.id],
+  )
+
   const handleRefreshTables = useCallback(
     (database: string, schema: string) => refreshTables(database, schema),
     [refreshTables],
@@ -124,6 +132,7 @@ export function useTreeEventHandlers({
     handleTableClick,
     handleDisconnect,
     handleOpenTable,
+    handleGenerateErd,
     handleRefreshTables,
     handleRefreshColumns,
   }

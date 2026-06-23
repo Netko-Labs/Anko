@@ -1,4 +1,4 @@
-import { IconTable } from '@tabler/icons-react'
+import { IconSitemap, IconTable } from '@tabler/icons-react'
 import { Code2, Pencil, Plus, X } from 'lucide-react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -13,6 +13,7 @@ import { useTabRename } from '@/hooks/useTabRename'
 import { tabLogger } from '@/lib/debug'
 import { cn } from '@/lib/utils'
 import { useConnectionStore } from '@/stores/connection'
+import { ErdTabContent } from '../erd-tab-content/ErdTabContent'
 import { QueryTabContent } from '../query-tab-content/QueryTabContent'
 import { TabActionDialog } from '../tab-action-dialog/TabActionDialog'
 import { TableTabContent } from '../table-tab-content/TableTabContent'
@@ -192,7 +193,8 @@ export function TabContainer() {
         >
           {queryTabs.map((tab, index) => {
             const isActive = tab.id === activeTabId
-            const isTableTab = tab.tableName !== undefined
+            const isErdTab = tab.erd !== undefined
+            const isTableTab = !isErdTab && tab.tableName !== undefined
             const hasChanges = isTableTab && (tab.editState?.pendingChanges?.length ?? 0) > 0
             const isDragging = dragState.isDragging && dragState.draggedIndex === index
             const isDragOver = dragState.isDragging && dragState.overIndex === index
@@ -237,7 +239,15 @@ export function TabContainer() {
                 {isActive && (
                   <span className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-primary" />
                 )}
-                {isTableTab ? (
+                {isErdTab ? (
+                  <IconSitemap
+                    className={cn(
+                      'size-3.5',
+                      isActive && 'text-primary',
+                      isAnyDragging && 'pointer-events-none',
+                    )}
+                  />
+                ) : isTableTab ? (
                   <IconTable
                     className={cn(
                       'size-3.5',
@@ -349,13 +359,16 @@ export function TabContainer() {
       <div className="flex-1 min-h-0">
         {hasTabs ? (
           queryTabs.map((tab) => {
-            const isTableTab = tab.tableName !== undefined
+            const isErdTab = tab.erd !== undefined
+            const isTableTab = !isErdTab && tab.tableName !== undefined
             return (
               <div
                 key={tab.id}
                 className={cn('h-full', tab.id === activeTabId ? 'block' : 'hidden')}
               >
-                {isTableTab ? (
+                {isErdTab ? (
+                  <ErdTabContent tabId={tab.id} />
+                ) : isTableTab ? (
                   <TableTabContent tabId={tab.id} />
                 ) : (
                   <QueryTabContent tabId={tab.id} />

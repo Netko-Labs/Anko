@@ -1,4 +1,9 @@
-import { IconDatabase as DatabaseIcon, IconCopy, IconRefresh } from '@tabler/icons-react'
+import {
+  IconDatabase as DatabaseIcon,
+  IconCopy,
+  IconRefresh,
+  IconSitemap,
+} from '@tabler/icons-react'
 import { memo } from 'react'
 import { toast } from 'sonner'
 import {
@@ -34,6 +39,7 @@ export const DatabaseNode = memo(
     onRefreshTables,
     onRefreshColumns,
     onOpenTable,
+    onGenerateErd,
   }: DatabaseNodeProps) {
     const handleCopyName = () => {
       navigator.clipboard.writeText(database.name)
@@ -83,6 +89,7 @@ export const DatabaseNode = memo(
                       onInsertText={onInsertText}
                       onRefreshColumns={(table: string) => onRefreshColumns?.(schema.name, table)}
                       onOpenTable={(table: string) => onOpenTable?.(schema.name, table)}
+                      onGenerateErd={() => onGenerateErd?.(schema.name)}
                     />
                   )
                 })
@@ -119,6 +126,12 @@ export const DatabaseNode = memo(
             <IconCopy className="size-4 mr-2" />
             Copy Name
           </ContextMenuItem>
+          {!isPostgreSQL && (
+            <ContextMenuItem onClick={() => onGenerateErd?.()}>
+              <IconSitemap className="size-4 mr-2" />
+              Generate ERD
+            </ContextMenuItem>
+          )}
           <ContextMenuSeparator />
           <ContextMenuItem onClick={() => onRefreshTables?.('')}>
             <IconRefresh className="size-4 mr-2" />
@@ -147,7 +160,8 @@ export const DatabaseNode = memo(
       prev.onInsertText === next.onInsertText &&
       prev.onRefreshTables === next.onRefreshTables &&
       prev.onRefreshColumns === next.onRefreshColumns &&
-      prev.onOpenTable === next.onOpenTable
+      prev.onOpenTable === next.onOpenTable &&
+      prev.onGenerateErd === next.onGenerateErd
     )
   },
 )

@@ -41,6 +41,7 @@ export function DatabaseTree({ connection, onEdit, onDelete, onInsertText }: Dat
     handleTableClick,
     handleDisconnect,
     handleOpenTable,
+    handleGenerateErd,
     handleRefreshTables,
     handleRefreshColumns,
   } = useTreeEventHandlers({ connection, isPostgreSQL, state, dispatch, dataLoaders })
@@ -109,6 +110,7 @@ export function DatabaseTree({ connection, onEdit, onDelete, onInsertText }: Dat
               onRefreshTables={(schema) => handleRefreshTables(db.name, schema)}
               onRefreshColumns={(schema, table) => handleRefreshColumns(db.name, schema, table)}
               onOpenTable={(schema, table) => handleOpenTable(db.name, schema, table)}
+              onGenerateErd={(schema) => handleGenerateErd(db.name, schema)}
             />
           ))}
         </div>
