@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.6.1] - 2026-06-24
+
+### Highlights
+A quick maintenance release to keep Anko running smoothly! We've leveled up our dependencies so you can focus on what matters—crafting killer queries without a care in the world.
+
+### Under the Hood 🔧
+Update mirinjs to 0.1.0-alpha.9 for improved stability and compatibility. Think of it as a quality-of-life patch for the engine that powers your SQL dreams.
+
 ## [v0.6.0] - 2026-06-23
 
 ### Highlights
