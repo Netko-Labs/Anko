@@ -302,21 +302,28 @@ export class PostgresConnector implements DatabaseConnector {
 
     const rows = await pool.unsafe(
       `SELECT
-        table_name, table_schema, table_type,
-        (SELECT reltuples::bigint FROM pg_class WHERE relname = tables.table_name LIMIT 1) as row_count
-       FROM information_schema.tables
-       WHERE table_schema = $1
-       ORDER BY table_name`,
+        t.table_name, t.table_schema, t.table_type,
+        c.reltuples::bigint as row_count
+       FROM information_schema.tables t
+       LEFT JOIN pg_namespace n ON n.nspname = t.table_schema
+       LEFT JOIN pg_class c ON c.relname = t.table_name AND c.relnamespace = n.oid
+       WHERE t.table_schema = $1
+       ORDER BY t.table_name`,
       [schemaName],
     )
 
     if (!Array.isArray(rows)) return []
-    return rows.map((row: Record<string, unknown>) => ({
-      name: String(row.table_name ?? ''),
-      schema: String(row.table_schema ?? ''),
-      table_type: String(row.table_type ?? ''),
-      row_count: row.row_count != null ? Number(row.row_count) : undefined,
-    }))
+    return rows.map((row: Record<string, unknown>) => {
+      // Postgres uses reltuples = -1 to mean "never analyzed / unknown" (PG 14+),
+      // so treat any negative estimate as no count rather than showing -1.
+      const estimate = row.row_count != null ? Number(row.row_count) : undefined
+      return {
+        name: String(row.table_name ?? ''),
+        schema: String(row.table_schema ?? ''),
+        table_type: String(row.table_type ?? ''),
+        row_count: estimate != null && estimate >= 0 ? estimate : undefined,
+      }
+    })
   }
 
   async getColumns(database: string, schema: string, table: string): Promise<ColumnDetail[]> {
