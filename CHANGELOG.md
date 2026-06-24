@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.6.2] - 2026-06-24
+
+### Highlights
+We're back with a precision strike on PostgreSQL shenanigans! This patch fixes a pesky schema display issue that was showing up like an unwanted NPC in your database queries.
+
+### Bug Fixes 🐛
+- **Schema**: Stop displaying those confusing  row estimates for never-analyzed Postgres tables. Your schema view just got a whole lot cleaner!
+
 ## [v0.6.1] - 2026-06-24
 
 ### Highlights
