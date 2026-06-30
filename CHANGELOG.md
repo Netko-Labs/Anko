@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.6.3] - 2026-06-30
+
+### Highlights
+A small but mighty release! We've bumped up our dependencies to keep things fresh and running smoothly. Think of it as a maintenance arc—not the flashiest episode, but essential for the long-term plot. ✨
+
+### Under the Hood 🔧
+Update mirinjs to v0.1.0-alpha.10 for improved stability and performance. Our dependencies are now leveling up!
+
 ## [v0.6.2] - 2026-06-24
 
 ### Highlights
