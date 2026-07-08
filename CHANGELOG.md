@@ -6,15 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
-## [v0.7.1] - 2026-07-08
-
-### Highlights
-Linux users, your time has come! Anko now plays nice with your beloved penguin, complete with auto-updates that work like a charm. We're talking AppImage, deb, rpm—the full buffet. 🐧
-
-### New Features ✨
-- **Linux Support & Auto-Updates** – Anko is now available for Linux with automatic update capabilities. Choose your poison: AppImage, deb, or rpm packages. No more manual version shuffling!
-- **Continuous Release CI** – Our build pipeline now automatically generates and distributes Linux artifacts, because who has time to do this by hand?
-
 ## [v0.7.0] - 2026-07-08
 
 ### Highlights
