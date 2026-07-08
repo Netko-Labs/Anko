@@ -18,6 +18,14 @@ export default defineConfig({
   // notarized) alongside the updater artifacts. `true` uses the default layout.
   dmg: true,
 
+  // Linux packaging (`mirin build --linux` / `mirin release`): AppImage + .deb +
+  // .rpm. Metadata feeds the deb/rpm control fields and the .desktop entry.
+  linux: {
+    description: 'Cross-platform SQL database client for MySQL and PostgreSQL',
+    homepage: 'https://github.com/Netko-Labs/Anko',
+    category: 'Development',
+  },
+
   windows: {
     // Opened manually from src/bun/index.ts so we can restore the saved frame.
     main: {
