@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.7.3] - 2026-07-08
+
+### Highlights
+We've hit a nice checkpoint release! Think of this as the checkpoint save before the next big dungeon—stable, reliable, and ready for whatever queries you throw at it.
+
+*No major feature additions this cycle, but we're keeping things smooth and steady for you SQL adventurers out there.*
+
 ## [v0.7.2] - 2026-07-08
 
 ### Highlights
