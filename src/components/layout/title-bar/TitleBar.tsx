@@ -19,7 +19,7 @@ import {
 } from '@tabler/icons-react'
 import { windowControls } from 'mirinjs/client'
 import { useCallback, useMemo, useState } from 'react'
-import { isWindows } from '@/lib/platform'
+import { hasCustomControls } from '@/lib/platform'
 import { toast } from 'sonner'
 import { resolveToast } from '@/lib/toast-utils'
 import { CommandMenu } from '@/components/command-menu/CommandMenu'
@@ -72,7 +72,7 @@ export function TitleBar({ onToggleLeftSidebar, onToggleRightSidebar }: TitleBar
     <div className="fixed top-0 left-0 right-0 h-9 flex items-center bg-background border-b border-border/50 z-50 select-none">
       {/* Left section — sidebar toggle + workspace switcher. macOS reserves room
           for the native traffic lights; Windows has none, so start flush. */}
-      <div className={cn('flex items-center h-full gap-0.5', isWindows ? 'pl-2' : 'pl-19.5')}>
+      <div className={cn('flex items-center h-full gap-0.5', hasCustomControls ? 'pl-2' : 'pl-19.5')}>
         <TitleBarButton onClick={onToggleLeftSidebar} tooltip="Toggle sidebar">
           <IconLayoutSidebar className="size-3.5" />
         </TitleBarButton>
@@ -94,7 +94,7 @@ export function TitleBar({ onToggleLeftSidebar, onToggleRightSidebar }: TitleBar
       </div>
 
       {/* Windows window controls (Windows has no native caption buttons). */}
-      {isWindows && <WindowControls />}
+      {hasCustomControls && <WindowControls />}
 
       {/* Center breadcrumb — absolutely positioned for true centering */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
