@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.7.2] - 2026-07-08
+
+### Highlights
+Linux users, your moment has arrived! This release brings proper Linux support with auto-updates and multiple distribution formats. Plus, we fixed some audio codec shenanigans that were definitely not a vibe. 🐧
+
+### New Features ✨
+- **Linux Auto-Updates & Release Infrastructure** – Anko now ships with proper Linux support featuring AppImage, deb, and rpm packages. Auto-updates are included, so you'll always be running the latest version without breaking a sweat.
+
+### Under the Hood 🔧
+- **Mirinjs Bump** – Updated mirinjs to v0.1.0-alpha.14, which fixes a Linux release codec issue that was causing some audio-related headaches.
+
 ## [v0.7.0] - 2026-07-08
 
 ### Highlights
