@@ -1,5 +1,6 @@
 import { execSync } from 'node:child_process'
 import { createCipheriv, createDecipheriv, pbkdf2Sync, randomBytes } from 'node:crypto'
+import { readFileSync } from 'node:fs'
 import { AppError } from '../error'
 
 const KEY_SIZE = 32
@@ -17,7 +18,10 @@ function getMachineId(): string {
       const match = output.match(/"IOPlatformUUID"\s*=\s*"([^"]+)"/)
       if (match) return match[1]
     } else if (process.platform === 'linux') {
-      return Bun.file('/etc/machine-id').text() as unknown as string
+      // readFileSync (not Bun.file().text(), which is async) — getMachineId is a
+      // sync function feeding pbkdf2Sync; a Promise here throws "password must be
+      // a string or buffer". /etc/machine-id has a trailing newline, so trim.
+      return readFileSync('/etc/machine-id', 'utf-8').trim()
     } else if (process.platform === 'win32') {
       const output = execSync(
         'reg query "HKLM\\SOFTWARE\\Microsoft\\Cryptography" /v MachineGuid',
