@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.7.0] - 2026-07-08
+
+### Highlights
+Anko is now leveling up on Linux! We've shipped native window controls and fixed some critical encryption gremlins that were haunting your connections. Time to make your SQL queries run as smooth as a well-optimized database index.
+
+### New Features ✨
+- **Native Linux title bar** — Say goodbye to that generic look. Anko now rocks proper min/max/close window controls that feel right at home on the Linux desktop. It's the little things that make a difference, you know?
+
+### Bug Fixes 🐛
+- **Fixed connection encryption on Linux** — We discovered our machine-id reader was being too asynchronous for its own good, which was breaking encrypted connections. Now it reads synchronously like it should, so your queries stay safe and sound.
+
+### Under the Hood 🔧
+- Configure Linux packaging with AppImage, deb, and rpm support — Download Anko in whatever package format makes your distro happy.
+
 ## [v0.6.3] - 2026-06-30
 
 ### Highlights
