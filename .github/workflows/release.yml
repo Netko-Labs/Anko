@@ -317,8 +317,63 @@ jobs:
             exit 1
           fi
 
+  build-linux:
+    name: Build Linux (AppImage/deb/rpm + updater)
+    needs: [check-release, create-release]
+    if: needs.check-release.outputs.should_release == 'true'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install packaging tools
+        # fpm (deb + rpm, needs ruby + rpm/rpmbuild), appimagetool (AppImage,
+        # invoked with --appimage-extract-and-run since CI runners lack FUSE),
+        # squashfs-tools (mksquashfs for the AppImage payload).
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ruby ruby-dev build-essential squashfs-tools rpm
+          sudo gem install --no-document fpm
+          sudo curl -fsSL -o /usr/local/bin/appimagetool \
+            https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          sudo chmod +x /usr/local/bin/appimagetool
+
+      - name: Install dependencies
+        # Pulls the prebuilt @mirinjs/linux-x64 (no Rust toolchain needed); the
+        # Linux CEF runtime is downloaded on first `mirin release`.
+        run: bun install
+
+      - name: Set version to match the release tag
+        run: |
+          V="${{ needs.check-release.outputs.version }}"
+          npm version "${V#v}" --no-git-tag-version --allow-same-version
+
+      - name: Build + emit update artifacts + packages
+        # mirin release → build/release/: the linux update manifest + .tar.zst
+        # updater bundle, plus the AppImage / .deb / .rpm packages.
+        run: bun run release
+
+      - name: Upload artifacts to release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if ls build/release/* 1>/dev/null 2>&1; then
+            for file in build/release/*; do
+              [ -f "$file" ] && gh release upload ${{ needs.check-release.outputs.version }} "$file" --repo ${{ github.repository }} --clobber
+            done
+          else
+            echo "::error::No artifacts found in build/release/"
+            exit 1
+          fi
+
   publish-release:
-    needs: [check-release, create-release, build-macos, build-windows]
+    needs: [check-release, create-release, build-macos, build-windows, build-linux]
     if: needs.check-release.outputs.should_release == 'true'
     runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions:
