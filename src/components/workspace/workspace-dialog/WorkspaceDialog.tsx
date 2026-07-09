@@ -14,7 +14,7 @@ import { createWorkspace, updateWorkspace } from '@/lib/rpc'
 import { cn } from '@/lib/utils'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { WorkspaceConfig } from '@/types'
-import { DEFAULT_WORKSPACE_ICON, WORKSPACE_ICONS, type WorkspaceDialogProps } from '../definitions'
+import { DEFAULT_WORKSPACE_ICON, WORKSPACE_ICONS, type WorkspaceDialogProps } from '../lib'
 
 export function WorkspaceDialog({ open, onOpenChange, editWorkspace }: WorkspaceDialogProps) {
   const [name, setName] = React.useState('')

@@ -1,6 +1,6 @@
 import { Bug, ChevronDown, ChevronRight } from 'lucide-react'
 import { memo, useState } from 'react'
-import type { DebugPanelProps } from '@/components/results/definitions'
+import type { DebugPanelProps } from '@/components/results/lib'
 
 export const DebugPanel = memo(function DebugPanel({
   originalQuery,

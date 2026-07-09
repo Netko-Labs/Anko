@@ -1,8 +1,8 @@
 import { and, eq } from 'drizzle-orm'
 import { AppError } from '../../error'
 import { getDb } from '../client'
-import { workspaceTable } from '../schema'
 import { getWorkspaceById } from '../queries/get-workspace'
+import { workspaceTable } from '../schema'
 
 export function deleteWorkspace(id: string): void {
   const workspace = getWorkspaceById(id)

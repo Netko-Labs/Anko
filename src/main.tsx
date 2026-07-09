@@ -4,6 +4,7 @@ import './index.css'
 import App from './App'
 import DevToolsView from './DevToolsView'
 
+// conventions §5: window.location is the unavoidable browser API for routing the DevTools window
 const isDevTools = window.location.hash === '#devtools'
 
 createRoot(document.getElementById('root')!).render(

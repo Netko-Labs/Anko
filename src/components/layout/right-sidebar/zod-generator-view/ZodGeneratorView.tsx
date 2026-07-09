@@ -10,8 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { type ValidatorLib, VALIDATOR_OPTIONS, generateSchema } from '@/lib/schema-generators'
-import type { ZodGeneratorViewProps } from './definitions'
+import { generateSchema, VALIDATOR_OPTIONS, type ValidatorLib } from '@/lib/schema-generators'
+import type { ZodGeneratorViewProps } from './lib'
 
 export function ZodGeneratorView({ tableName, columns }: ZodGeneratorViewProps) {
   const [validator, setValidator] = useState<ValidatorLib>('zod')

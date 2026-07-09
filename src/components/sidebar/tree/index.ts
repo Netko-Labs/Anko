@@ -1,3 +1,3 @@
-export { DatabaseTree } from './DatabaseTree'
 export { DatabaseTypeIcon, MySQLIcon, PostgreSQLIcon } from './database-icons'
-export { TreeNode } from './TreeNode'
+export { DatabaseTree } from './database-tree'
+export { TreeNode } from './tree-node'

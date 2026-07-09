@@ -1,1 +1,1 @@
-export { WorkspaceIcon } from './workspace-icon/WorkspaceIcon'
+export { WorkspaceIcon } from './workspace-icon'

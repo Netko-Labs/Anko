@@ -1,9 +1,9 @@
 import { Loader2 } from 'lucide-react'
 import { memo } from 'react'
-import { DataTable } from '../data-table-component/DataTable'
-import { DebugPanel } from '../debug-panel/DebugPanel'
-import type { ResultsTableProps } from '../definitions'
-import { KeyboardShortcutsHelp } from '../keyboard-shortcuts-help/KeyboardShortcutsHelp'
+import { DataTable } from '../data-table'
+import { DebugPanel } from '../debug-panel'
+import { KeyboardShortcutsHelp } from '../keyboard-shortcuts-help'
+import type { ResultsTableProps } from '../lib'
 
 export const ResultsTable = memo(function ResultsTable({
   result,

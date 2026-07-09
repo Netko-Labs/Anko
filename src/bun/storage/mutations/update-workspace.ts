@@ -1,9 +1,9 @@
 import { eq, sql } from 'drizzle-orm'
 import { AppError } from '../../error'
-import type { Workspace, WorkspaceConfig } from '../entities'
 import { getDb } from '../client'
-import { workspaceTable } from '../schema'
+import type { Workspace, WorkspaceConfig } from '../entities'
 import { getWorkspaceById } from '../queries/get-workspace'
+import { workspaceTable } from '../schema'
 
 export function updateWorkspace(id: string, config: WorkspaceConfig): Workspace {
   getDb()

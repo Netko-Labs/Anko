@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
-import type { WindowState } from '../entities'
 import { getDb } from '../client'
+import type { WindowState } from '../entities'
 import { windowStateTable } from '../schema'
 
 const DEFAULT_STATE: WindowState = {

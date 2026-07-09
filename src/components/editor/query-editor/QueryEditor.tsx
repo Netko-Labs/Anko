@@ -1,7 +1,6 @@
 import { IconDatabase, IconDeviceFloppy, IconServer } from '@tabler/icons-react'
 import { ChevronDown, ChevronRight, Loader2Icon, PlayIcon } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { toast } from 'sonner'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -9,16 +8,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useQueryExecution } from '@/hooks/useQueryExecution'
-import { createTimer, editorLogger } from '@/lib/debug'
-import { formatErrorMessage } from '@/lib/error-utils'
-import { getDatabases } from '@/lib/rpc'
 import { useConnectionStore } from '@/stores/connection'
 import { useWorkspaceStore } from '@/stores/workspace'
-import type { QueryEditorTabProps } from '../definitions'
-import { SaveQueryDialog } from '../save-query-dialog/SaveQueryDialog'
-import type { SchemaContext } from '../sql-autocomplete'
-import { SQLEditor } from '../sql-editor/SQLEditor'
+import type { QueryEditorTabProps } from '../lib'
+import { SaveQueryDialog } from '../save-query-dialog'
+import { SQLEditor } from '../sql-editor'
+import { useQueryEditorDatabases } from './lib/hooks/useQueryEditorDatabases'
+import { useQueryExecution } from './lib/hooks/useQueryExecution'
 
 export function QueryEditor({ tabId }: QueryEditorTabProps) {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false)
@@ -32,8 +28,6 @@ export function QueryEditor({ tabId }: QueryEditorTabProps) {
 
   // Refs for store actions
   const updateQueryTabRef = useRef(useConnectionStore.getState().updateQueryTab)
-  const setSelectedDatabaseRef = useRef(useConnectionStore.getState().setSelectedDatabase)
-  const setDatabasesRef = useRef(useConnectionStore.getState().setDatabases)
 
   // Derive tab and connection
   const tab = useMemo(() => queryTabs.find((t) => t.id === tabId), [queryTabs, tabId])
@@ -52,60 +46,12 @@ export function QueryEditor({ tabId }: QueryEditorTabProps) {
   const schemaCacheForConnection = connectionId ? schemaCache[connectionId] : undefined
   const connectionName = connection?.info.name ?? ''
 
-  const databases = useMemo(() => {
-    return schemaCacheForConnection?.databases || []
-  }, [schemaCacheForConnection])
-
-  const schema: SchemaContext | undefined = useMemo(() => {
-    if (!schemaCacheForConnection) return undefined
-    return {
-      databases: schemaCacheForConnection.databases,
-      tables: schemaCacheForConnection.tables,
-      columns: schemaCacheForConnection.columns,
-    }
-  }, [schemaCacheForConnection])
-
-  // Load databases if not cached
-  useEffect(() => {
-    if (!connectionId || !connectionInfoId) return
-
-    const hasDatabases =
-      schemaCacheForConnection?.databases && schemaCacheForConnection.databases.length > 0
-
-    if (hasDatabases) {
-      editorLogger.debug('databases cache hit', {
-        connectionId,
-        count: schemaCacheForConnection.databases.length,
-      })
-      return
-    }
-
-    editorLogger.debug('databases cache miss, loading', { connectionId })
-    const timer = createTimer(editorLogger, 'load databases')
-
-    getDatabases(connectionId)
-      .then((dbs) => {
-        timer.end({ count: dbs.length })
-        setDatabasesRef.current(connectionId, dbs)
-        if (!selectedDatabase && dbs.length > 0) {
-          setSelectedDatabaseRef.current(connectionInfoId, dbs[0].name)
-        }
-      })
-      .catch((e) => {
-        timer.fail(e)
-        toast.error('Failed to load databases', { description: formatErrorMessage(e) })
-      })
-  }, [connectionId, connectionInfoId, selectedDatabase, schemaCacheForConnection])
-
-  const handleDatabaseChange = useCallback(
-    (database: string) => {
-      if (connectionInfoId) {
-        editorLogger.debug('database changed', { connectionInfoId, database })
-        setSelectedDatabaseRef.current(connectionInfoId, database)
-      }
-    },
-    [connectionInfoId],
-  )
+  const { databases, schema, handleDatabaseChange } = useQueryEditorDatabases({
+    connectionId,
+    connectionInfoId,
+    selectedDatabase,
+    schemaCacheForConnection,
+  })
 
   const handleConnectionChange = useCallback(
     (newConnectionInfoId: string) => {

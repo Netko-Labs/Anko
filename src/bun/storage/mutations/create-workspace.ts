@@ -1,8 +1,8 @@
 import { AppError } from '../../error'
-import type { Workspace, WorkspaceConfig } from '../entities'
 import { getDb } from '../client'
-import { workspaceTable } from '../schema'
+import type { Workspace, WorkspaceConfig } from '../entities'
 import { getWorkspaceById } from '../queries/get-workspace'
+import { workspaceTable } from '../schema'
 
 export function createWorkspace(config: WorkspaceConfig): Workspace {
   const id = crypto.randomUUID()

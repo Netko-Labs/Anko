@@ -17,9 +17,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useConnectionForm } from '@/hooks/useConnectionForm'
 import type { DatabaseDriver } from '@/types'
-import { type ConnectionDialogProps, DEFAULT_PORTS, DEFAULT_USERS } from '../definitions'
+import { type ConnectionDialogProps, DEFAULT_PORTS, DEFAULT_USERS } from '../lib'
+import { useConnectionForm } from './lib/hooks/useConnectionForm'
 
 export function ConnectionDialog({
   open,

@@ -1,5 +1,5 @@
-import { ConnectionList } from '@/components/connection/ConnectionList'
-import type { SidebarProps } from '../definitions'
+import { ConnectionList } from '@/components/connection/connection-list'
+import type { SidebarProps } from './lib'
 
 export function Sidebar({ onConnectionSelect }: SidebarProps) {
   return (

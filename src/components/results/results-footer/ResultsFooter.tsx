@@ -1,6 +1,6 @@
 import { ChevronDown } from 'lucide-react'
 import { toast } from 'sonner'
-import type { ResultsFooterProps } from '@/components/results/definitions'
+import type { ResultsFooterProps } from '@/components/results/lib'
 import { Badge } from '@/components/ui/badge'
 import {
   DropdownMenu,

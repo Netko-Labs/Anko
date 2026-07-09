@@ -7,8 +7,8 @@ import { useConnectionStore } from '@/stores/connection'
 import { useSavedQueriesStore } from '@/stores/saved-queries'
 import { useWorkspaceStore } from '@/stores/workspace'
 import type { SavedQuery } from '@/types'
-import { SaveQueryDialog } from '../save-query-dialog/SaveQueryDialog'
-import { SavedQueryItem } from '../saved-query-item/SavedQueryItem'
+import { SaveQueryDialog } from '../save-query-dialog'
+import { SavedQueryItem } from '../saved-query-item'
 
 export function SavedQueriesPanel() {
   const [dialogOpen, setDialogOpen] = useState(false)

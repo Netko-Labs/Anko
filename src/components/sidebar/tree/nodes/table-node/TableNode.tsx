@@ -8,9 +8,9 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from '@/components/ui/context-menu'
-import type { TableNodeProps } from '../../../definitions'
-import { TreeNode } from '../../TreeNode'
-import { ColumnNode } from '../column-node/ColumnNode'
+import type { TableNodeProps } from '../../../lib'
+import { TreeNode } from '../../tree-node'
+import { ColumnNode } from '../column-node'
 
 export const TableNode = memo(
   function TableNode({

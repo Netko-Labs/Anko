@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { useRightSidebarStore } from '@/stores/right-sidebar'
-import { RIGHT_SIDEBAR_MAX_WIDTH, RIGHT_SIDEBAR_MIN_WIDTH } from '../definitions'
+import { RIGHT_SIDEBAR_MAX_WIDTH, RIGHT_SIDEBAR_MIN_WIDTH } from '../lib'
 import { RightSidebarContent } from '../right-sidebar-content/RightSidebarContent'
 
 export function RightSidebar() {

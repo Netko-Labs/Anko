@@ -1,3 +1,6 @@
+// conventions: >300 lines — the tab strip renders a single per-tab map whose item markup is
+// interwoven with rename/close/drag handlers sharing local state; extract a TabStripItem with a
+// props boundary when next touched.
 import { IconSitemap, IconTable } from '@tabler/icons-react'
 import { Code2, Pencil, Plus, X } from 'lucide-react'
 import { useCallback, useMemo, useRef, useState } from 'react'
@@ -8,8 +11,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useTabDragAndDrop } from '@/hooks/useTabDragAndDrop'
-import { useTabRename } from '@/hooks/useTabRename'
 import { tabLogger } from '@/lib/debug'
 import { cn } from '@/lib/utils'
 import { useConnectionStore } from '@/stores/connection'
@@ -18,6 +19,8 @@ import { QueryTabContent } from '../query-tab-content/QueryTabContent'
 import { TabActionDialog } from '../tab-action-dialog/TabActionDialog'
 import { TableTabContent } from '../table-tab-content/TableTabContent'
 import { UnsavedChangesDialog } from '../unsaved-changes-dialog/UnsavedChangesDialog'
+import { useTabDragAndDrop } from './lib/hooks/useTabDragAndDrop'
+import { useTabRename } from './lib/hooks/useTabRename'
 
 export function TabContainer() {
   const queryTabs = useConnectionStore((s) => s.queryTabs)

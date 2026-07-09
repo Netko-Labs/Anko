@@ -18,19 +18,23 @@ export class AppState {
     if (!this.storageReady) throw AppError.storage('Storage not initialized')
   }
 
-  async connect(config: ConnectionConfig): Promise<string> {
-    let connector: DatabaseConnector
-    if (config.driver === 'mysql') {
-      connector = await MySqlConnector.connect(config)
-    } else if (config.driver === 'sqlite') {
-      connector = await SqliteConnector.connect(config)
-    } else {
-      connector = await PostgresConnector.connect(config)
-    }
+  private async createConnector(config: ConnectionConfig): Promise<DatabaseConnector> {
+    if (config.driver === 'mysql') return MySqlConnector.connect(config)
+    if (config.driver === 'sqlite') return SqliteConnector.connect(config)
+    return PostgresConnector.connect(config)
+  }
 
+  async connect(config: ConnectionConfig): Promise<string> {
+    const connector = await this.createConnector(config)
     const connectionId = crypto.randomUUID()
     this.connections.set(connectionId, connector)
     return connectionId
+  }
+
+  /** Open a throwaway connection to validate a config, then close it. */
+  async testConnection(config: ConnectionConfig): Promise<void> {
+    const connector = await this.createConnector(config)
+    await connector.close()
   }
 
   async disconnect(connectionId: string): Promise<void> {

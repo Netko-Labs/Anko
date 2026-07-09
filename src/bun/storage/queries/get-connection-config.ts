@@ -1,6 +1,6 @@
 import { AppError } from '../../error'
-import type { ConnectionConfig } from '../entities'
 import { decrypt } from '../encryption'
+import type { ConnectionConfig } from '../entities'
 import { getConnection } from './get-connection'
 
 export function getConnectionConfig(id: string): ConnectionConfig {

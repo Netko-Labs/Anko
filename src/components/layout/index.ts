@@ -1,7 +1,7 @@
 // Main layout exports
 
-export * from './definitions'
+export { CloseAppDialog, getCloseAppPreference, setCloseAppPreference } from './close-app-dialog'
 export { RightSidebar } from './right-sidebar'
-// Sub-folder re-exports
+export { Sidebar } from './sidebar'
 export * from './tabs'
-export { TitleBar } from './title-bar/TitleBar'
+export { TitleBar } from './title-bar'

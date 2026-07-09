@@ -1,5 +1,5 @@
-import type { ConnectionInfo } from '../entities'
 import { getDb } from '../client'
+import type { ConnectionInfo } from '../entities'
 import { connectionTable } from '../schema'
 
 export function listConnections(): ConnectionInfo[] {

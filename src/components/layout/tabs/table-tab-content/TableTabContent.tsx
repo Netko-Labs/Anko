@@ -1,7 +1,7 @@
 import type { Table } from '@tanstack/react-table'
 import { Columns } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
-import { DataTable } from '@/components/results/data-table-component/DataTable'
+import { DataTable } from '@/components/results/data-table'
 import { FilterBar } from '@/components/results/filter-bar/FilterBar'
 import { ResultsTable } from '@/components/results/results-table/ResultsTable'
 import {
@@ -10,15 +10,15 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useTableCommit } from '@/hooks/useTableCommit'
-import { useTableData } from '@/hooks/useTableData'
-import { useTableEditing } from '@/hooks/useTableEditing'
 import { useConnectionStore } from '@/stores/connection'
 import type { FilterCondition } from '@/types'
-import type { TableTabContentProps } from '../definitions'
+import type { TableTabContentProps } from '../lib'
 import { TableFooter } from '../table-footer/TableFooter'
 import { UnsavedChangesDialog } from '../unsaved-changes-dialog/UnsavedChangesDialog'
 import { DisconnectedTableView } from './DisconnectedTableView'
+import { useTableCommit } from './lib/hooks/useTableCommit'
+import { useTableData } from './lib/hooks/useTableData'
+import { useTableEditing } from './lib/hooks/useTableEditing'
 
 export function TableTabContent({ tabId }: TableTabContentProps) {
   const tab = useConnectionStore((s) => s.queryTabs.find((t) => t.id === tabId))

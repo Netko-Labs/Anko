@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { UpdateStore } from './definitions/types'
+import type { UpdateStore } from './lib/types'
 
 export const useUpdateStore = create<UpdateStore>((set) => ({
   updateAvailable: false,

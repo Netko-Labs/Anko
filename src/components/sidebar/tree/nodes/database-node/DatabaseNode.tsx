@@ -14,10 +14,10 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu'
 import { setsEqual } from '@/lib/utils'
-import type { DatabaseNodeProps } from '../../../definitions'
-import { TreeNode } from '../../TreeNode'
-import { SchemaNode } from '../schema-node/SchemaNode'
-import { TableNode } from '../table-node/TableNode'
+import type { DatabaseNodeProps } from '../../../lib'
+import { TreeNode } from '../../tree-node'
+import { SchemaNode } from '../schema-node'
+import { TableNode } from '../table-node'
 
 export const DatabaseNode = memo(
   function DatabaseNode({

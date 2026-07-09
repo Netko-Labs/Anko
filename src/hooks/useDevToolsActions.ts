@@ -1,6 +1,7 @@
+// conventions: >300 lines — aggregates devtools mutation handlers (seed, reset, workspace/connection ops); split by action group when next touched
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { TEST_DATABASES } from '@/components/sidebar/dialogs/devtools/test-databases'
+import { TEST_DATABASES } from '@/components/sidebar/dialogs/devtools'
 import { broadcastInvalidation } from '@/lib/data-bridge'
 import { formatErrorMessage } from '@/lib/error-utils'
 import {

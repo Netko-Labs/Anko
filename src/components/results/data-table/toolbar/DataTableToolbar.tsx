@@ -6,7 +6,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import type { DataTableToolbarProps } from '../definitions'
+import type { DataTableToolbarProps } from '../lib'
 
 export function DataTableToolbar({ table }: DataTableToolbarProps) {
   const hidableColumns = table.getAllColumns().filter((col) => col.getCanHide()) as Column<

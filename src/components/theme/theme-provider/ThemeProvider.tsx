@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import type { Theme, ThemeProviderProps } from './definitions'
-import { THEME_PROVIDER_VALUES } from './definitions'
+import type { Theme, ThemeProviderProps } from './lib'
+import { THEME_PROVIDER_VALUES } from './lib'
 import { ThemeProviderContext } from './ThemeContext'
 
 const getSystemTheme = (): 'light' | 'dark' =>

@@ -1,7 +1,7 @@
 import { IconKey, IconTable } from '@tabler/icons-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
-import type { ColumnRowProps, TableSchemaViewProps } from './definitions'
+import type { ColumnRowProps, TableSchemaViewProps } from './lib'
 
 export function TableSchemaView({ tableName, columns, database, schema }: TableSchemaViewProps) {
   return (

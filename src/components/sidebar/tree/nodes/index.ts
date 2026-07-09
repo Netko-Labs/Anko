@@ -1,4 +1,4 @@
-export { ColumnNode } from './column-node/ColumnNode'
-export { DatabaseNode } from './database-node/DatabaseNode'
-export { SchemaNode } from './schema-node/SchemaNode'
-export { TableNode } from './table-node/TableNode'
+export { ColumnNode } from './column-node'
+export { DatabaseNode } from './database-node'
+export { SchemaNode } from './schema-node'
+export { TableNode } from './table-node'

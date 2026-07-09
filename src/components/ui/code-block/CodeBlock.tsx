@@ -1,5 +1,5 @@
 import ShikiHighlighter, { createJavaScriptRegexEngine } from 'react-shiki'
-import { useTheme } from '@/components/theme/ThemeProvider'
+import { useTheme } from '@/components/theme/theme-provider'
 import { cn } from '@/lib/utils'
 
 // Pure-JS regex engine (no oniguruma WASM) so highlighting works in the offline

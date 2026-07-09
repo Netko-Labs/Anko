@@ -1,9 +1,9 @@
 import { asc, count, eq, lt, sql } from 'drizzle-orm'
 import { AppError } from '../../error'
-import type { AddQueryHistoryInput, QueryHistoryEntry } from '../entities'
 import { getDb } from '../client'
-import { queryHistoryTable } from '../schema'
+import type { AddQueryHistoryInput, QueryHistoryEntry } from '../entities'
 import { getQueryHistoryEntry } from '../queries/get-query-history-entry'
+import { queryHistoryTable } from '../schema'
 
 const MAX_HISTORY_ENTRIES = 1000
 const HISTORY_RETENTION_DAYS = 30

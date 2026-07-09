@@ -1,7 +1,8 @@
 import { create } from 'zustand'
 import { storeLogger } from '@/lib/debug'
 import type { Workspace } from '@/types'
-import { DEFAULT_WORKSPACE_ID, type WorkspaceStore } from './definitions/types'
+import { DEFAULT_WORKSPACE_ID } from './lib/constants'
+import type { WorkspaceStore } from './lib/types'
 
 export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   workspaces: [],

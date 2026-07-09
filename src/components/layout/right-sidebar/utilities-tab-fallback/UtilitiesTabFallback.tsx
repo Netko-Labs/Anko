@@ -1,4 +1,4 @@
-import { RIGHT_SIDEBAR_VALUES } from '../definitions'
+import { RIGHT_SIDEBAR_VALUES } from '../lib'
 
 export function UtilitiesTabFallback() {
   return (

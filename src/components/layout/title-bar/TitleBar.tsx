@@ -1,50 +1,22 @@
 import {
-  IconChevronDown,
-  IconCode,
   IconDatabase,
-  IconDeviceDesktop,
   IconLayoutSidebar,
   IconLayoutSidebarRight,
   IconMinus,
-  IconMoon,
-  IconPencil,
-  IconPlus,
-  IconRefresh,
   IconSearch,
-  IconSettings,
   IconSquare,
-  IconSun,
   IconTable,
   IconX,
 } from '@tabler/icons-react'
 import { windowControls } from 'mirinjs/client'
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
+import { CommandMenu } from '@/components/command-menu'
 import { hasCustomControls } from '@/lib/platform'
-import { toast } from 'sonner'
-import { resolveToast } from '@/lib/toast-utils'
-import { CommandMenu } from '@/components/command-menu/CommandMenu'
-import { WorkspaceIcon } from '@/components/sidebar/menus/workspace-icon/WorkspaceIcon'
-import { useTheme } from '@/components/theme/ThemeProvider'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { WorkspaceDialog } from '@/components/workspace/WorkspaceDialog'
-import { listWorkspaces, openDevToolsWindow } from '@/lib/rpc'
-import { switchWorkspace } from '@/lib/session'
-import { checkForUpdate, fetchChangelogForVersion } from '@/lib/updater'
 import { cn } from '@/lib/utils'
 import { useConnectionStore } from '@/stores/connection'
-import { useUpdateStore } from '@/stores/update'
-import { useWorkspaceStore } from '@/stores/workspace'
-import type { Workspace } from '@/types'
-import type { TitleBarProps } from './definitions'
+import type { TitleBarProps } from './lib'
+import { TitleBarSettingsMenu } from './title-bar-settings-menu/TitleBarSettingsMenu'
+import { TitleBarWorkspaceSwitcher } from './title-bar-workspace-switcher/TitleBarWorkspaceSwitcher'
 
 export function TitleBar({ onToggleLeftSidebar, onToggleRightSidebar }: TitleBarProps) {
   const [commandOpen, setCommandOpen] = useState(false)
@@ -72,7 +44,9 @@ export function TitleBar({ onToggleLeftSidebar, onToggleRightSidebar }: TitleBar
     <div className="fixed top-0 left-0 right-0 h-9 flex items-center bg-background border-b border-border/50 z-50 select-none">
       {/* Left section — sidebar toggle + workspace switcher. macOS reserves room
           for the native traffic lights; Windows has none, so start flush. */}
-      <div className={cn('flex items-center h-full gap-0.5', hasCustomControls ? 'pl-2' : 'pl-19.5')}>
+      <div
+        className={cn('flex items-center h-full gap-0.5', hasCustomControls ? 'pl-2' : 'pl-19.5')}
+      >
         <TitleBarButton onClick={onToggleLeftSidebar} tooltip="Toggle sidebar">
           <IconLayoutSidebar className="size-3.5" />
         </TitleBarButton>
@@ -160,221 +134,6 @@ export function TitleBar({ onToggleLeftSidebar, onToggleRightSidebar }: TitleBar
   )
 }
 
-function TitleBarSettingsMenu() {
-  const { theme, setTheme } = useTheme()
-  const setUpdateAvailable = useUpdateStore((s) => s.setUpdateAvailable)
-  const setModalOpen = useUpdateStore((s) => s.setModalOpen)
-
-  const handleCheckForUpdates = useCallback(async () => {
-    const toastId = toast.loading('Checking for updates...')
-
-    try {
-      const result = await checkForUpdate()
-
-      if (result.available && result.info) {
-        const changelogBody = await fetchChangelogForVersion(result.info.version)
-        const enrichedInfo = {
-          ...result.info,
-          body: changelogBody ?? result.info.body,
-        }
-
-        setUpdateAvailable(true, enrichedInfo, result.update)
-
-        resolveToast.success(toastId, 'Update available!', {
-          description: `Version ${result.info.version} is ready to download`,
-          duration: 10000,
-          action: {
-            label: 'View Details',
-            onClick: () => setModalOpen(true),
-          },
-        })
-      } else {
-        resolveToast.success(toastId, "You're up to date!", {
-          description: 'No new updates available',
-          duration: 3000,
-        })
-      }
-    } catch {
-      resolveToast.error(toastId, 'Failed to check for updates', {
-        duration: 5000,
-      })
-    }
-  }, [setUpdateAvailable, setModalOpen])
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        className={cn(
-          'h-7 w-7 inline-flex items-center justify-center rounded-md',
-          'text-muted-foreground hover:text-foreground/80',
-          'hover:bg-muted/60 active:bg-muted',
-          'transition-colors duration-100 outline-none',
-        )}
-      >
-        <IconSettings className="size-3.5" />
-      </DropdownMenuTrigger>
-
-      <DropdownMenuContent align="end" sideOffset={4} className="min-w-44 z-100">
-        <DropdownMenuItem onClick={() => toast.info('Settings coming soon')}>
-          <IconSettings className="size-4 mr-2" />
-          Settings
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            {theme === 'dark' ? (
-              <IconMoon className="size-4 mr-2" />
-            ) : theme === 'light' ? (
-              <IconSun className="size-4 mr-2" />
-            ) : (
-              <IconDeviceDesktop className="size-4 mr-2" />
-            )}
-            Theme
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuItem onClick={() => setTheme('light')}>
-              <IconSun className="size-4 mr-2" />
-              Light
-              {theme === 'light' && (
-                <span className="ml-auto text-xs text-muted-foreground">Active</span>
-              )}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme('dark')}>
-              <IconMoon className="size-4 mr-2" />
-              Dark
-              {theme === 'dark' && (
-                <span className="ml-auto text-xs text-muted-foreground">Active</span>
-              )}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme('system')}>
-              <IconDeviceDesktop className="size-4 mr-2" />
-              System
-              {theme === 'system' && (
-                <span className="ml-auto text-xs text-muted-foreground">Active</span>
-              )}
-            </DropdownMenuItem>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleCheckForUpdates}>
-          <IconRefresh className="size-4 mr-2" />
-          Check for updates
-        </DropdownMenuItem>
-        {import.meta.env.DEV && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => openDevToolsWindow()}>
-              <IconCode className="size-4 mr-2" />
-              Dev Tools
-            </DropdownMenuItem>
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
-
-function TitleBarWorkspaceSwitcher() {
-  const workspaces = useWorkspaceStore((s) => s.workspaces)
-  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
-  const setWorkspaces = useWorkspaceStore((s) => s.setWorkspaces)
-
-  const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId)
-
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [editWorkspace, setEditWorkspace] = useState<Workspace | undefined>()
-
-  const handleNewWorkspace = () => {
-    setEditWorkspace(undefined)
-    setDialogOpen(true)
-  }
-
-  const handleEditWorkspace = (workspace: Workspace) => {
-    setMenuOpen(false)
-    setEditWorkspace(workspace)
-    setDialogOpen(true)
-  }
-
-  const handleDialogChange = async (open: boolean) => {
-    setDialogOpen(open)
-    if (!open) {
-      try {
-        const ws = await listWorkspaces()
-        setWorkspaces(ws)
-      } catch {
-        /* ignore */
-      }
-    }
-  }
-
-  return (
-    <>
-      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
-        <DropdownMenuTrigger
-          className={cn(
-            'h-7 px-2 inline-flex items-center gap-1.5 rounded-md',
-            'text-muted-foreground hover:text-foreground/80',
-            'hover:bg-muted/60 active:bg-muted',
-            'transition-colors duration-100 outline-none',
-            'text-[11px] w-32',
-          )}
-        >
-          {activeWorkspace ? (
-            <WorkspaceIcon icon={activeWorkspace.icon} className="size-3.5 shrink-0" />
-          ) : (
-            <IconDatabase className="size-3.5 shrink-0" />
-          )}
-          <span className="truncate flex-1 text-left">
-            {activeWorkspace?.name ?? 'All Connections'}
-          </span>
-          <IconChevronDown className="size-2.5 opacity-70 shrink-0" />
-        </DropdownMenuTrigger>
-
-        <DropdownMenuContent align="start" sideOffset={4} className="min-w-48 z-100">
-          {workspaces.map((workspace) => (
-            <DropdownMenuItem
-              key={workspace.id}
-              onClick={() => void switchWorkspace(workspace.id)}
-              className="gap-2 group/ws"
-            >
-              <div className="flex size-5 items-center justify-center rounded border text-xs shrink-0">
-                <WorkspaceIcon icon={workspace.icon} className="size-3" />
-              </div>
-              <span className="flex-1 truncate text-xs">{workspace.name}</span>
-              {workspace.id === activeWorkspaceId && (
-                <span className="text-[10px] text-primary shrink-0 group-hover/ws:hidden">Active</span>
-              )}
-              <button
-                type="button"
-                aria-label={`Edit ${workspace.name}`}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleEditWorkspace(workspace)
-                }}
-                className="opacity-0 group-hover/ws:opacity-100 rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-opacity shrink-0"
-              >
-                <IconPencil className="size-3" />
-              </button>
-            </DropdownMenuItem>
-          ))}
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleNewWorkspace}>
-            <IconPlus className="size-4 mr-2" />
-            New Workspace
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <WorkspaceDialog
-        open={dialogOpen}
-        onOpenChange={handleDialogChange}
-        editWorkspace={editWorkspace}
-      />
-    </>
-  )
-}
-
 function TitleBarButton({
   children,
   onClick,
@@ -437,9 +196,7 @@ function WindowControlButton({
       className={cn(
         'h-9 w-11 inline-flex items-center justify-center',
         'text-muted-foreground transition-colors duration-100',
-        danger
-          ? 'hover:bg-red-600 hover:text-white'
-          : 'hover:bg-muted/70 hover:text-foreground/90',
+        danger ? 'hover:bg-red-600 hover:text-white' : 'hover:bg-muted/70 hover:text-foreground/90',
       )}
     >
       {children}

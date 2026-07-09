@@ -1,4 +1,4 @@
-import { Loader2, Trash2, X } from 'lucide-react'
+import { Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import {
@@ -12,22 +12,15 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { formatErrorMessage } from '@/lib/error-utils'
 import { connect, deleteConnection, getConnectionConfig } from '@/lib/rpc'
 import { ensureMinimumToastDuration, resolveToast } from '@/lib/toast-utils'
-import { cn } from '@/lib/utils'
 import { useConnectionStore } from '@/stores/connection'
 import type { ActiveConnection, ConnectionInfo } from '@/types'
-import { ConnectionDialog } from '../connection-dialog/ConnectionDialog'
-import type { ConnectionListProps } from '../definitions'
+import { ConnectionDialog } from '../connection-dialog'
+import type { ConnectionListProps } from '../lib'
+import { ConnectionListItem } from './connection-list-item'
 
 export function ConnectionList({ onConnectionSelect }: ConnectionListProps) {
   const savedConnections = useConnectionStore((s) => s.savedConnections)
@@ -57,7 +50,9 @@ export function ConnectionList({ onConnectionSelect }: ConnectionListProps) {
     if (ids.length === 0) return
     setBulkDeleting(true)
     const startTime = Date.now()
-    const toastId = toast.loading(`Deleting ${ids.length} connection${ids.length > 1 ? 's' : ''}...`)
+    const toastId = toast.loading(
+      `Deleting ${ids.length} connection${ids.length > 1 ? 's' : ''}...`,
+    )
 
     try {
       for (const id of ids) {
@@ -176,12 +171,7 @@ export function ConnectionList({ onConnectionSelect }: ConnectionListProps) {
         <div className="px-3 py-2 border-b flex items-center justify-between gap-2 bg-muted/40">
           <span className="text-xs text-muted-foreground">{selectedIds.size} selected</span>
           <div className="flex items-center gap-1">
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-7 px-2 text-xs"
-              onClick={clearSelection}
-            >
+            <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={clearSelection}>
               <X className="w-3 h-3 mr-1" />
               Clear
             </Button>
@@ -207,75 +197,24 @@ export function ConnectionList({ onConnectionSelect }: ConnectionListProps) {
               Click "New Connection" to add one.
             </div>
           ) : (
-            savedConnections.map((conn) => {
-              const showMenu = hoveredId === conn.id || menuOpenId === conn.id
-              return (
-                <div
-                  key={conn.id}
-                  className={cn(
-                    'group flex items-center gap-2 p-2 rounded-md hover:bg-accent',
-                    selectedIds.has(conn.id) && 'bg-accent',
-                  )}
-                  onPointerEnter={() => setHoveredId(conn.id)}
-                  onPointerLeave={() => setHoveredId(null)}
-                >
-                  <Checkbox
-                    checked={selectedIds.has(conn.id)}
-                    onCheckedChange={(checked) => toggleSelected(conn.id, checked === true)}
-                    aria-label={`Select ${conn.name}`}
-                    className={cn(
-                      'shrink-0 transition-opacity',
-                      selectedIds.size > 0 || selectedIds.has(conn.id)
-                        ? 'opacity-100'
-                        : 'opacity-0 group-hover:opacity-100',
-                    )}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleConnect(conn)}
-                    disabled={connectingId === conn.id || isConnected(conn.id)}
-                    className="flex-1 text-left min-w-0"
-                  >
-                    <div className="flex items-center gap-2">
-                      {connectingId === conn.id ? (
-                        <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
-                      ) : (
-                        <span
-                          className={`w-2 h-2 rounded-full ${
-                            isConnected(conn.id) ? 'bg-green-500' : 'bg-muted'
-                          }`}
-                        />
-                      )}
-                      <span className="font-medium text-sm">{conn.name}</span>
-                    </div>
-                    <div className="text-xs text-muted-foreground ml-4">
-                      {conn.host}:{conn.port}
-                      {conn.database && ` / ${conn.database}`}
-                    </div>
-                  </button>
-
-                  {showMenu && (
-                    <DropdownMenu
-                      open={menuOpenId === conn.id}
-                      onOpenChange={(open) => setMenuOpenId(open ? conn.id : null)}
-                    >
-                      <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md text-sm font-medium h-8 w-8 hover:bg-accent hover:text-accent-foreground">
-                        ⋮
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleEdit(conn)}>Edit</DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          onClick={() => handleDelete(conn.id)}
-                        >
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                </div>
-              )
-            })
+            savedConnections.map((conn) => (
+              <ConnectionListItem
+                key={conn.id}
+                connection={conn}
+                isSelected={selectedIds.has(conn.id)}
+                selectionActive={selectedIds.size > 0}
+                isConnecting={connectingId === conn.id}
+                isConnected={isConnected(conn.id)}
+                showMenu={hoveredId === conn.id || menuOpenId === conn.id}
+                menuOpen={menuOpenId === conn.id}
+                onHoverChange={(hovered) => setHoveredId(hovered ? conn.id : null)}
+                onMenuOpenChange={(open) => setMenuOpenId(open ? conn.id : null)}
+                onToggleSelected={(checked) => toggleSelected(conn.id, checked)}
+                onConnect={() => handleConnect(conn)}
+                onEdit={() => handleEdit(conn)}
+                onDelete={() => handleDelete(conn.id)}
+              />
+            ))
           )}
         </div>
       </ScrollArea>
@@ -299,7 +238,11 @@ export function ConnectionList({ onConnectionSelect }: ConnectionListProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={bulkDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" disabled={bulkDeleting} onClick={handleBulkDelete}>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={bulkDeleting}
+              onClick={handleBulkDelete}
+            >
               {bulkDeleting ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -1,6 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
-import type { ErrorBoundaryProps, ErrorBoundaryState } from '../definitions'
+import type { ErrorBoundaryProps, ErrorBoundaryState } from '../lib'
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {

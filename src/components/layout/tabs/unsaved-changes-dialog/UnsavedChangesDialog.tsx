@@ -8,7 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { UNSAVED_CHANGES_VALUES, type UnsavedChangesDialogProps } from '../definitions'
+import { UNSAVED_CHANGES_VALUES, type UnsavedChangesDialogProps } from '../lib'
 
 export function UnsavedChangesDialog({
   open,

@@ -1,8 +1,8 @@
 import { AppError } from '../../error'
-import type { CreateSavedQueryInput, SavedQuery } from '../entities'
 import { getDb } from '../client'
-import { savedQueryTable } from '../schema'
+import type { CreateSavedQueryInput, SavedQuery } from '../entities'
 import { getSavedQueryById } from '../queries/get-saved-query'
+import { savedQueryTable } from '../schema'
 
 export function createSavedQuery(input: CreateSavedQueryInput): SavedQuery {
   const id = crypto.randomUUID()

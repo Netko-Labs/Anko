@@ -1,4 +1,4 @@
-import { KEYBOARD_SHORTCUT_VALUES } from '@/components/results/definitions'
+import { KEYBOARD_SHORTCUT_VALUES } from '@/components/results/lib'
 
 export function KeyboardShortcutsHelp() {
   const isMac = typeof navigator !== 'undefined' && navigator.platform.includes('Mac')

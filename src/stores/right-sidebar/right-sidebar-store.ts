@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { storeLogger } from '@/lib/debug'
-import type { RightSidebarStore, TableInfo } from './definitions/types'
+import type { RightSidebarStore, TableInfo } from './lib/types'
 
 const DEFAULT_WIDTH = 280
 const MIN_WIDTH = 200

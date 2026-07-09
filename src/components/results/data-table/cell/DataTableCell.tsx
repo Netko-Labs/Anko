@@ -1,5 +1,5 @@
-import type { DataTableCellProps } from '../definitions'
-import { formatCellValue } from '../utils'
+import type { DataTableCellProps } from '../lib'
+import { formatCellValue } from '../lib/utils'
 
 export function DataTableCell({ cell }: DataTableCellProps) {
   return formatCellValue(cell.getValue())

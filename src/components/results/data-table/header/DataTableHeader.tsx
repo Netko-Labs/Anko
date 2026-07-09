@@ -1,9 +1,9 @@
 import { IconKey } from '@tabler/icons-react'
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { ColumnMeta } from '../../definitions'
-import type { DataTableHeaderProps } from '../definitions'
-import { getDisplayType } from '../utils'
+import type { ColumnMeta } from '../../lib'
+import type { DataTableHeaderProps } from '../lib'
+import { getDisplayType } from '../lib/utils'
 
 export function DataTableHeader({ header }: DataTableHeaderProps) {
   const meta = header.column.columnDef.meta as ColumnMeta | undefined

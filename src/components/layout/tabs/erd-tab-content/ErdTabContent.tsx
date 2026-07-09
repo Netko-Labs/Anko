@@ -1,4 +1,8 @@
+// conventions: >300 lines — single React Flow canvas whose node/edge state, persistence,
+// layout, and export callbacks are tightly coupled through shared RF hooks; graph/layout
+// helpers already extracted to utils/. Split remaining canvas hooks when next touched.
 import '@xyflow/react/dist/style.css'
+import { IconDatabaseOff, IconPlugConnected } from '@tabler/icons-react'
 import {
   Background,
   type Connection,
@@ -16,10 +20,9 @@ import {
   useReactFlow,
 } from '@xyflow/react'
 import { toBlob, toJpeg, toSvg } from 'html-to-image'
-import { IconDatabaseOff, IconPlugConnected } from '@tabler/icons-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { useTheme } from '@/components/theme/ThemeProvider'
+import { useTheme } from '@/components/theme/theme-provider'
 import { connectSaved } from '@/lib/connect'
 import { erdLogger } from '@/lib/debug'
 import { formatErrorMessage } from '@/lib/error-utils'
@@ -27,11 +30,12 @@ import { genId } from '@/lib/id'
 import { getErdSchema, saveImageFile, showSaveDialog, writeTextFile } from '@/lib/rpc'
 import { useConnectionStore } from '@/stores/connection'
 import type { ErdCustomRelation, ErdLayoutDirection, ErdNodeState, ErdTabState } from '@/types'
-import { buildEdges, buildNodes, type GraphActions } from './erd-graph'
 import { ErdNoteNode } from './ErdNoteNode'
-import { computeLayout } from './erd-layout'
 import { ErdTableNode } from './ErdTableNode'
 import { ErdToolbar } from './ErdToolbar'
+import type { GraphActions } from './lib'
+import { buildEdges, buildNodes } from './lib/utils/erd-graph'
+import { computeLayout } from './lib/utils/erd-layout'
 
 const nodeTypes: NodeTypes = { erdTable: ErdTableNode, erdNote: ErdNoteNode }
 

@@ -2,7 +2,7 @@
 
 import { Separator } from "react-resizable-panels"
 import { cn } from "@/lib/utils"
-import type { ResizableHandleProps } from "./definitions"
+import type { ResizableHandleProps } from "./lib"
 
 export function ResizableHandle({
   withHandle: _withHandle,

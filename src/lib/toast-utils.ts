@@ -1,4 +1,4 @@
-import { toast, type ExternalToast } from 'sonner'
+import { type ExternalToast, toast } from 'sonner'
 
 /** Default auto-dismiss duration when resolving a loading toast (ms). */
 const TOAST_DURATION = 4000

@@ -1,12 +1,12 @@
 import { IconPalette, IconX } from '@tabler/icons-react'
-import { NodeResizer, type NodeProps } from '@xyflow/react'
+import { type NodeProps, NodeResizer } from '@xyflow/react'
 import { memo, useState } from 'react'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { ERD_NOTE_COLORS, type ErdNoteNodeData } from './definitions'
+import { ERD_NOTE_COLORS, type ErdNoteNodeData } from './lib'
 
 /** A resizable, editable, recolorable sticky note placed on the ERD canvas. */
 function ErdNoteNodeComponent({ data, selected }: NodeProps) {

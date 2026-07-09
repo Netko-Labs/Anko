@@ -7,7 +7,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from '@/components/ui/context-menu'
-import type { SavedQueryItemProps } from './definitions'
+import type { SavedQueryItemProps } from './lib'
 
 export function SavedQueryItem({
   query,

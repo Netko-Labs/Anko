@@ -1,9 +1,9 @@
 export class AppError extends Error {
-  constructor(
-    public readonly type: string,
-    message: string,
-  ) {
+  readonly type: string
+
+  constructor(type: string, message: string) {
     super(message)
+    this.type = type
     this.name = 'AppError'
   }
 

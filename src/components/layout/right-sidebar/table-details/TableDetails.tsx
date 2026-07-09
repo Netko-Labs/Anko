@@ -3,9 +3,9 @@ import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { cn } from '@/lib/utils'
 import { generateSchema } from '@/lib/schema-generators'
-import type { ColumnRowProps, TableDetailsProps } from './definitions'
+import { cn } from '@/lib/utils'
+import type { ColumnRowProps, TableDetailsProps } from './lib'
 
 export function TableDetails({ tableName, columns, database, schema }: TableDetailsProps) {
   const [activeTab, setActiveTab] = useState('schema')

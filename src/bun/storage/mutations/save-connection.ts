@@ -1,7 +1,7 @@
-import type { ConnectionConfig, ConnectionInfo } from '../entities'
 import { getDb } from '../client'
-import { connectionTable } from '../schema'
 import { encrypt } from '../encryption'
+import type { ConnectionConfig, ConnectionInfo } from '../entities'
+import { connectionTable } from '../schema'
 
 export function saveConnection(config: ConnectionConfig): ConnectionInfo {
   const id = crypto.randomUUID()

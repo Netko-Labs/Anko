@@ -1,6 +1,6 @@
 import { Trash2, Undo2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import type { RowActionsProps } from '../definitions'
+import type { RowActionsProps } from '../lib'
 
 export function RowActions({
   isNewRow,

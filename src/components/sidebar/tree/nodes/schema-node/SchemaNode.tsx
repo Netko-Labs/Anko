@@ -9,9 +9,9 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu'
 import { setsEqual } from '@/lib/utils'
-import type { SchemaNodeProps } from '../../../definitions'
-import { TreeNode } from '../../TreeNode'
-import { TableNode } from '../table-node/TableNode'
+import type { SchemaNodeProps } from '../../../lib'
+import { TreeNode } from '../../tree-node'
+import { TableNode } from '../table-node'
 
 export const SchemaNode = memo(
   function SchemaNode({

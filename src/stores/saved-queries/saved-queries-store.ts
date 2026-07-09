@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { storeLogger } from '@/lib/debug'
-import type { SavedQueriesStore } from './definitions/types'
+import type { SavedQueriesStore } from './lib/types'
 
 export const useSavedQueriesStore = create<SavedQueriesStore>((set) => ({
   queries: [],

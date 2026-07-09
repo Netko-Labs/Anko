@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 import { CodeBlock } from '@/components/ui/code-block/CodeBlock'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { formatValue, isJsonLike, prettyPrintJson } from '@/lib/zod-generator'
-import type { FieldRowProps, RowDetailsProps } from './definitions'
+import type { FieldRowProps, RowDetailsProps } from './lib'
 
 export function RowDetails({ row, columns }: RowDetailsProps) {
   const handleCopyValue = (value: unknown) => {

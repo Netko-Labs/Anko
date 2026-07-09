@@ -1,8 +1,8 @@
 import { eq, sql } from 'drizzle-orm'
-import type { ConnectionConfig } from '../entities'
 import { getDb } from '../client'
-import { connectionTable } from '../schema'
 import { encrypt } from '../encryption'
+import type { ConnectionConfig } from '../entities'
+import { connectionTable } from '../schema'
 
 export function updateConnection(id: string, config: ConnectionConfig): void {
   const encryptedPassword = encrypt(config.password)

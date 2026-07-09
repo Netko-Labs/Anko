@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { editLogger } from '@/lib/debug'
 import { cn } from '@/lib/utils'
-import type { EditableCellProps } from '../definitions'
-import { formatCellValue } from '../utils'
+import type { EditableCellProps } from '../lib'
+import { formatCellValue } from '../lib/utils'
 
 export function EditableCell({
   cell,

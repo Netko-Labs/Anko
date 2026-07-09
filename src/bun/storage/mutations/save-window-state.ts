@@ -1,5 +1,5 @@
-import type { WindowState } from '../entities'
 import { getDb } from '../client'
+import type { WindowState } from '../entities'
 import { windowStateTable } from '../schema'
 
 export function saveWindowState(state: WindowState): void {

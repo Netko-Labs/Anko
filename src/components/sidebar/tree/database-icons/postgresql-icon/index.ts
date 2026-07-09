@@ -1,0 +1,1 @@
+export { PostgreSQLIcon } from './PostgreSQLIcon'

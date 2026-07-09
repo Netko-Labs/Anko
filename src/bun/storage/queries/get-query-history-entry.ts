@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
-import type { QueryHistoryEntry } from '../entities'
 import { getDb } from '../client'
+import type { QueryHistoryEntry } from '../entities'
 import { queryHistoryTable } from '../schema'
 
 export function getQueryHistoryEntry(id: string): QueryHistoryEntry | null {

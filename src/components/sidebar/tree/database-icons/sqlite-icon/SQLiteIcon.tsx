@@ -1,5 +1,5 @@
 import { IconDatabaseStar } from '@tabler/icons-react'
-import type { DatabaseIconProps } from '../definitions/types'
+import type { DatabaseIconProps } from '../lib'
 
 export function SQLiteIcon({ className }: DatabaseIconProps) {
   return <IconDatabaseStar className={className} />

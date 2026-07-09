@@ -1,14 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ErrorBoundary } from '@/components/errors/ErrorBoundary'
-import { CloseAppDialog } from '@/components/layout/close-app-dialog/CloseAppDialog'
-import { getCloseAppPreference } from '@/components/layout/close-app-dialog/close-app-preference/CloseAppPreference'
+import { ErrorBoundary } from '@/components/errors/error-boundary'
+import { CloseAppDialog, getCloseAppPreference } from '@/components/layout/close-app-dialog'
 import { RightSidebar } from '@/components/layout/right-sidebar'
 import { TabContainer } from '@/components/layout/tabs'
-import { TitleBar } from '@/components/layout/title-bar/TitleBar'
-import { AppSidebar } from '@/components/sidebar/AppSidebar'
-import { ThemeProvider } from '@/components/theme/ThemeProvider'
+import { TitleBar } from '@/components/layout/title-bar'
+import { AppSidebar } from '@/components/sidebar/app-sidebar'
+import { ThemeProvider } from '@/components/theme/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
-import { UpdateModal } from '@/components/update/UpdateModal'
+import { UpdateModal } from '@/components/update/update-modal'
 import { useUpdateChecker } from '@/hooks/useUpdateChecker'
 import { useWorkspaceSession } from '@/hooks/useWorkspaceSession'
 import { listenForInvalidation } from '@/lib/data-bridge'
@@ -120,6 +119,7 @@ function App() {
       }
     }
 
+    // conventions §5: window-level keydown is the unavoidable browser API for app-global shortcuts
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [queryTabs.length, activeTabId, removeQueryTab, toggleRightSidebar])
@@ -139,6 +139,7 @@ function App() {
       }
     }
 
+    // conventions §5: window-level listeners are the unavoidable browser API for suppressing native context-menu/reload
     window.addEventListener('contextmenu', handleContextMenu)
     window.addEventListener('keydown', handleKeyDown)
     return () => {

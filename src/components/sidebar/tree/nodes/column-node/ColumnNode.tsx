@@ -1,7 +1,7 @@
 import { IconColumns, IconKey } from '@tabler/icons-react'
 import { memo } from 'react'
-import type { ColumnNodeProps } from '../../../definitions'
-import { TreeNode } from '../../TreeNode'
+import type { ColumnNodeProps } from '../../../lib'
+import { TreeNode } from '../../tree-node'
 
 export const ColumnNode = memo(
   function ColumnNode({ column, onClick, level = 3 }: ColumnNodeProps) {

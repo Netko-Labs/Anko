@@ -1,28 +1,16 @@
-import {
-  IconChevronRight,
-  IconPencil,
-  IconPlugConnected,
-  IconPlus,
-  IconTrash,
-} from '@tabler/icons-react'
+import { IconChevronRight, IconPlus } from '@tabler/icons-react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from '@/components/ui/context-menu'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { formatErrorMessage } from '@/lib/error-utils'
 import { connect, deleteConnection, getConnectionConfig } from '@/lib/rpc'
 import { ensureMinimumToastDuration, resolveToast } from '@/lib/toast-utils'
 import { useConnectionStore } from '@/stores/connection'
 import type { ActiveConnection, ConnectionInfo } from '@/types'
-import { DatabaseTree, DatabaseTypeIcon, TreeNode } from '../../tree'
-import type { DatabasesPanelProps, DisconnectedConnectionProps } from './definitions'
+import { DatabaseTree } from '../../tree'
+import { DisconnectedConnection } from './disconnected-connection'
+import type { DatabasesPanelProps } from './lib'
 
 export function DatabasesPanel({
   activeWorkspace,
@@ -231,7 +219,9 @@ export function DatabasesPanel({
               {/* Saved section */}
               {disconnectedList.length > 0 && (
                 <Collapsible open={savedExpanded} onOpenChange={setSavedExpanded}>
-                  {(connectedList.length > 0 || reconnectList.length > 0) && <div className="h-1" />}
+                  {(connectedList.length > 0 || reconnectList.length > 0) && (
+                    <div className="h-1" />
+                  )}
                   <CollapsibleTrigger className="flex items-center gap-1 px-1.5 py-0.5 w-full hover:bg-accent/50 rounded-sm cursor-pointer select-none">
                     <IconChevronRight
                       className={`size-2.5 text-muted-foreground transition-transform ${
@@ -262,51 +252,5 @@ export function DatabasesPanel({
         </div>
       </ScrollArea>
     </div>
-  )
-}
-
-function DisconnectedConnection({
-  connection,
-  isConnecting,
-  onConnect,
-  onEdit,
-  onDelete,
-}: DisconnectedConnectionProps) {
-  return (
-    <ContextMenu>
-      <ContextMenuTrigger>
-        <TreeNode
-          label={connection.name}
-          secondaryLabel={`${connection.host}:${connection.port}`}
-          icon={
-            <DatabaseTypeIcon
-              driver={connection.driver}
-              className="size-4 text-muted-foreground/70"
-            />
-          }
-          isExpandable={false}
-          isLoading={isConnecting}
-          onClick={onConnect}
-          onDoubleClick={onConnect}
-          level={0}
-          className="opacity-80 hover:opacity-100"
-        />
-      </ContextMenuTrigger>
-      <ContextMenuContent>
-        <ContextMenuItem onClick={onConnect}>
-          <IconPlugConnected className="size-4 mr-2" />
-          Connect
-        </ContextMenuItem>
-        <ContextMenuItem onClick={onEdit}>
-          <IconPencil className="size-4 mr-2" />
-          Edit
-        </ContextMenuItem>
-        <ContextMenuSeparator />
-        <ContextMenuItem onClick={onDelete} variant="destructive">
-          <IconTrash className="size-4 mr-2" />
-          Delete
-        </ContextMenuItem>
-      </ContextMenuContent>
-    </ContextMenu>
   )
 }

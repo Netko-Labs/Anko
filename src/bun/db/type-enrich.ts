@@ -60,8 +60,11 @@ export function buildColumnsFromTypeMap(typeMap: Map<string, ColumnTypeInfo>): C
  */
 export class TypeMapCache {
   private cache = new Map<string, { map: Map<string, ColumnTypeInfo>; expires: number }>()
+  private readonly ttlMs: number
 
-  constructor(private ttlMs = 10_000) {}
+  constructor(ttlMs = 10_000) {
+    this.ttlMs = ttlMs
+  }
 
   get(key: string): Map<string, ColumnTypeInfo> | undefined {
     const entry = this.cache.get(key)

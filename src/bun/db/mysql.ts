@@ -1,3 +1,5 @@
+// conventions: >300 lines — one DatabaseConnector with catalog queries and ERD
+// assembly; no clean seam without live-DB verification; split when next touched.
 import { SQL } from 'bun'
 import { AppError } from '../error'
 import type {

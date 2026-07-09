@@ -1,8 +1,8 @@
 import { Database } from 'bun:sqlite'
-import { type BunSQLiteDatabase, drizzle } from 'drizzle-orm/bun-sqlite'
-import { eq } from 'drizzle-orm'
 import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
+import { eq } from 'drizzle-orm'
+import { type BunSQLiteDatabase, drizzle } from 'drizzle-orm/bun-sqlite'
 import * as schema from './schema'
 import { workspaceTable } from './schema'
 

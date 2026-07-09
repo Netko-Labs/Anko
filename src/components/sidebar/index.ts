@@ -1,9 +1,9 @@
 // Main sidebar exports
-export { AppSidebar } from './AppSidebar'
-export * from './definitions'
+export { AppSidebar } from './app-sidebar'
 export * from './dialogs'
+export * from './lib'
 export * from './menus'
 // Sub-folder re-exports
 export * from './panels'
-export { SidebarIconButton } from './SidebarIconButton'
+export { SidebarIconButton } from './sidebar-icon-button'
 export * from './tree'

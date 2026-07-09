@@ -1,8 +1,8 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import type { ColumnInfo } from '@/types'
-import type { ColumnMeta } from '../definitions'
-import type { RowData } from './definitions'
-import { isPrimaryKey } from './utils'
+import type { ColumnMeta } from '../lib'
+import type { RowData } from './lib'
+import { isPrimaryKey } from './lib/utils'
 
 export function createDynamicColumns(queryColumns: ColumnInfo[]): ColumnDef<RowData, unknown>[] {
   // Row number column (always first, sticky, not sortable/hideable)

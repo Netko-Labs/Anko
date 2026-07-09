@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
-import type { Workspace } from '../entities'
 import { getDb } from '../client'
+import type { Workspace } from '../entities'
 import { workspaceTable } from '../schema'
 import { getWorkspaceConnections } from './get-workspace-connections'
 

@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
-import type { SavedQuery } from '../entities'
 import { getDb } from '../client'
+import type { SavedQuery } from '../entities'
 import { savedQueryTable } from '../schema'
 
 export function getSavedQueryById(id: string): SavedQuery | null {

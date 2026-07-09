@@ -1,0 +1,1 @@
+export { ResultsFooter } from './ResultsFooter'

@@ -33,9 +33,9 @@ export interface FilterCondition {
   value: string
 }
 
+import type { ErdTabState } from './erd'
 // Import TableEditState - using inline import to avoid circular dependencies
 import type { TableEditState } from './table-edit'
-import type { ErdTabState } from './erd'
 
 export interface QueryTab {
   id: string

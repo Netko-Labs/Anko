@@ -1,6 +1,6 @@
 import { useRightSidebarStore } from '@/stores/right-sidebar'
-import { RIGHT_SIDEBAR_VALUES } from '../definitions'
-import { CellDetails } from '../right-sidebar-cell-details/CellDetails'
+import { CellDetails } from '../cell-details/CellDetails'
+import { RIGHT_SIDEBAR_VALUES } from '../lib'
 import { RowDetails } from '../row-details/RowDetails'
 
 export function DataTabContent() {

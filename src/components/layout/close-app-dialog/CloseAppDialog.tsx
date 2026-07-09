@@ -10,8 +10,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { setCloseAppPreference } from './close-app-preference/CloseAppPreference'
-import type { CloseAppDialogProps } from './definitions'
-import { CLOSE_APP_VALUES } from './definitions/values'
+import type { CloseAppDialogProps } from './lib'
+import { CLOSE_APP_VALUES } from './lib/values'
 
 export function CloseAppDialog({ open, onOpenChange, onConfirm, onCancel }: CloseAppDialogProps) {
   const [rememberChoice, setRememberChoice] = useState(false)

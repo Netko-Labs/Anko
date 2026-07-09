@@ -21,8 +21,8 @@ import {
 } from '@/components/ui/context-menu'
 import { cn } from '@/lib/utils'
 import type { ErdColumn } from '@/types'
-import { ERD_COLORS, type ErdTableNodeData, sourceHandleId, targetHandleId } from './definitions'
-import { HEADER_HEIGHT, NODE_WIDTH, ROW_HEIGHT } from './erd-layout'
+import { ERD_COLORS, type ErdTableNodeData, HEADER_HEIGHT, NODE_WIDTH, ROW_HEIGHT } from './lib'
+import { sourceHandleId, targetHandleId } from './lib/utils/erd-graph'
 
 /** A small uppercase modifier chip (PK / AI / U). */
 function Badge({ label, title, className }: { label: string; title: string; className?: string }) {

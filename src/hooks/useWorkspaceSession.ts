@@ -31,7 +31,8 @@ export function useWorkspaceSession() {
     return useConnectionStore.subscribe(trigger)
   }, [])
 
-  // Best-effort flush on window close / hide.
+  // conventions §5: beforeunload/pagehide are real browser lifecycle events
+  // (allowed window usage) for a best-effort final session flush on close/hide.
   useEffect(() => {
     const flush = () => {
       void saveSessionNow(useWorkspaceStore.getState().activeWorkspaceId)

@@ -12,11 +12,10 @@ import {
   lineNumbers,
 } from '@codemirror/view'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { useTheme } from '@/components/theme/ThemeProvider'
+import { useTheme } from '@/components/theme/theme-provider'
 import { editorLogger } from '@/lib/debug'
-import type { SQLEditorProps } from '../definitions'
-import { createBasicSqlAutocomplete, createSqlAutocomplete } from '../sql-autocomplete'
-import { createSqlTheme } from '../sql-theme'
+import type { SQLEditorProps } from '../lib'
+import { createBasicSqlAutocomplete, createSqlAutocomplete, createSqlTheme } from './lib/utils'
 
 export function SQLEditor({
   value,

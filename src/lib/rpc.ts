@@ -1,3 +1,4 @@
+// conventions: >300 lines — typed RPC wrappers for every backend command; split by domain (connections, schema, queries, workspaces) re-exported from here when next touched
 import { client } from 'mirinjs/client'
 import type { Router } from '@/bun/rpc/router'
 import type { UpdateCheckResult, UpdateDownloadStatus } from '@/shared/rpc-types'
@@ -198,7 +199,9 @@ export async function getWorkspaceSession(workspaceId: string): Promise<string |
 }
 
 export async function saveWorkspaceSession(workspaceId: string, data: string): Promise<void> {
-  return trackedRequest('saveWorkspaceSession', () => api.saveWorkspaceSession({ workspaceId, data }))
+  return trackedRequest('saveWorkspaceSession', () =>
+    api.saveWorkspaceSession({ workspaceId, data }),
+  )
 }
 
 export async function getActiveWorkspaceId(): Promise<string | null> {

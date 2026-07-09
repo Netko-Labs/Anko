@@ -29,8 +29,8 @@ import {
   SIDEBAR_WIDTH,
   SIDEBAR_WIDTH_ICON,
   SIDEBAR_WIDTH_MOBILE,
-} from './definitions'
-import type { SidebarContextProps } from './definitions'
+} from './lib'
+import type { SidebarContextProps } from './lib'
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null)
 

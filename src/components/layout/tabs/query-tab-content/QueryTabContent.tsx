@@ -1,9 +1,9 @@
-import { QueryEditor } from '@/components/editor/QueryEditor'
+import { QueryEditor } from '@/components/editor/query-editor'
 import { ResultsFooter } from '@/components/results/results-footer/ResultsFooter'
 import { ResultsTable } from '@/components/results/results-table/ResultsTable'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
 import { useConnectionStore } from '@/stores/connection'
-import type { QueryTabContentProps } from '../definitions'
+import type { QueryTabContentProps } from '../lib'
 
 export function QueryTabContent({ tabId }: QueryTabContentProps) {
   const tab = useConnectionStore((s) => s.queryTabs.find((t) => t.id === tabId))

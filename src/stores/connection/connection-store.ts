@@ -1,3 +1,4 @@
+// conventions: >300 lines — single Zustand store spanning saved/active connections, schema cache, session, query tabs, and table editing; split into slice creators when next touched
 import { enableMapSet } from 'immer'
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
@@ -7,7 +8,8 @@ import { storeLogger } from '@/lib/debug'
 import { genId } from '@/lib/id'
 import { createPrimaryKeyHash } from '@/lib/table-utils'
 import type { QueryTab } from '@/types'
-import { type ConnectionStore, DEFAULT_SCHEMA_CACHE } from './definitions/types'
+import { DEFAULT_SCHEMA_CACHE } from './lib/constants'
+import type { ConnectionStore } from './lib/types'
 
 // Enable Immer support for Map and Set
 enableMapSet()

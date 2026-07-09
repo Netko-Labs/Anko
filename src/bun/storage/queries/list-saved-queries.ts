@@ -1,6 +1,6 @@
 import { asc, eq, isNull, or } from 'drizzle-orm'
-import type { SavedQuery } from '../entities'
 import { getDb } from '../client'
+import type { SavedQuery } from '../entities'
 import { savedQueryTable } from '../schema'
 
 export function listSavedQueries(workspaceId?: string): SavedQuery[] {

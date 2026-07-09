@@ -15,10 +15,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useDatabaseHierarchyLoader } from '@/hooks/useDatabaseHierarchyLoader'
 import { genId } from '@/lib/id'
 import { useConnectionStore } from '@/stores/connection'
-import { TAB_ACTION_LABELS, type TabActionDialogProps } from '../definitions'
+import { TAB_ACTION_LABELS, type TabActionDialogProps } from '../lib'
+import { useDatabaseHierarchyLoader } from './lib/hooks/useDatabaseHierarchyLoader'
 
 export function TabActionDialog({ open, mode, onOpenChange }: TabActionDialogProps) {
   const {

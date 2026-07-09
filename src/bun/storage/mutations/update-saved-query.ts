@@ -1,9 +1,9 @@
 import { eq, sql } from 'drizzle-orm'
 import { AppError } from '../../error'
-import type { SavedQuery, UpdateSavedQueryInput } from '../entities'
 import { getDb } from '../client'
-import { savedQueryTable } from '../schema'
+import type { SavedQuery, UpdateSavedQueryInput } from '../entities'
 import { getSavedQueryById } from '../queries/get-saved-query'
+import { savedQueryTable } from '../schema'
 
 export function updateSavedQuery(id: string, input: UpdateSavedQueryInput): SavedQuery {
   const existing = getSavedQueryById(id)

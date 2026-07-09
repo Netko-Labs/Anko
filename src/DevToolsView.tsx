@@ -1,3 +1,4 @@
+// conventions: >300 lines — flat DevTools panel of independent action sections; split into a devtools module when next touched
 import {
   IconBug,
   IconCode,
@@ -14,8 +15,8 @@ import {
   IconTrash,
   IconUpload,
 } from '@tabler/icons-react'
-import { ConfirmDialog } from '@/components/sidebar/dialogs/ConfirmDialog'
-import { ThemeProvider } from '@/components/theme/ThemeProvider'
+import { ConfirmDialog } from '@/components/sidebar/dialogs'
+import { ThemeProvider } from '@/components/theme/theme-provider'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { useDevToolsActions } from '@/hooks/useDevToolsActions'

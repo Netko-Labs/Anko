@@ -6,6 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Anko is a cross-platform SQL desktop client built with Electrobun (Bun), React, and shadcn/ui. It supports MySQL and PostgreSQL with an architecture designed for adding additional database connectors.
 
+## Conventions
+
+Folder-structure and code-style rules live in @docs/conventions.md — module anatomy (`lib/`, `hooks/`, barrels), scope ladder, backend layering, size/hook budgets, and state wiring rules. Follow them for every file you touch.
+
 ## Tech Stack
 
 - **Frontend**: React 19 + TypeScript + Vite + shadcn/ui + Tailwind CSS v4

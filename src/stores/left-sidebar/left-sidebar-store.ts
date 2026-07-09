@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { LeftSidebarStore } from './definitions/types'
+import type { LeftSidebarStore } from './lib/types'
 
 export const useLeftSidebarStore = create<LeftSidebarStore>((set) => ({
   open: true,
