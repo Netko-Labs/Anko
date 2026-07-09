@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import {
   checkForUpdate,
   fetchChangelogForVersion,
+  isPatchOnlyUpdate,
   isVersionSkipped,
   shouldRemindLater,
 } from '@/lib/updater'
@@ -20,37 +21,34 @@ export function useUpdateChecker() {
     hasChecked.current = true
 
     const timeoutId = setTimeout(async () => {
-      // Skip if user chose "remind later" within the last 24 hours
-      if (shouldRemindLater()) {
-        return
-      }
-
       const result = await checkForUpdate()
+      if (!result.available || !result.info || !result.update) return
 
-      if (result.available && result.info && result.update) {
-        // Skip if user previously skipped this version
-        if (isVersionSkipped(result.info.version)) {
-          return
-        }
-
-        // Fetch changelog from CHANGELOG.md for the new version
-        const changelogBody = await fetchChangelogForVersion(result.info.version)
-        const enrichedInfo = {
-          ...result.info,
-          body: changelogBody ?? result.info.body,
-        }
-
-        setUpdateAvailable(true, enrichedInfo, result.update)
-
-        toast('Update Available', {
-          description: `Version ${result.info.version} is ready to download`,
-          duration: 10000,
-          action: {
-            label: 'View Details',
-            onClick: () => setModalOpen(true),
-          },
-        })
+      // Fetch changelog from CHANGELOG.md for the new version
+      const changelogBody = await fetchChangelogForVersion(result.info.version)
+      const enrichedInfo = {
+        ...result.info,
+        body: changelogBody ?? result.info.body,
       }
+
+      // Always surface availability so the title-bar update button appears;
+      // the toast below is the only interrupting surface and stays gated.
+      setUpdateAvailable(true, enrichedInfo, result.update)
+
+      // Patch releases stay quiet — the title-bar button is enough.
+      if (isPatchOnlyUpdate(result.info.currentVersion, result.info.version)) return
+      // Respect "skip this version" and a recent "remind later" for the toast.
+      if (isVersionSkipped(result.info.version)) return
+      if (shouldRemindLater()) return
+
+      toast('Update Recommended', {
+        description: `Version ${result.info.version} is available`,
+        duration: 10000,
+        action: {
+          label: 'View Details',
+          onClick: () => setModalOpen(true),
+        },
+      })
     }, UPDATE_CHECK_DELAY)
 
     return () => clearTimeout(timeoutId)

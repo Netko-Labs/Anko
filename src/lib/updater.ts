@@ -100,6 +100,30 @@ function getSkippedVersions(): string[] {
   }
 }
 
+/**
+ * True when the update only bumps the patch component (same major.minor).
+ * Patch releases are surfaced passively (title-bar button) without a toast.
+ * Unparsable versions count as significant so real updates are never muted.
+ */
+export function isPatchOnlyUpdate(currentVersion: string, nextVersion: string): boolean {
+  const current = parseVersion(currentVersion)
+  const next = parseVersion(nextVersion)
+  if (!current || !next) return false
+
+  return current.major === next.major && current.minor === next.minor
+}
+
+function parseVersion(version: string): { major: number; minor: number; patch: number } | null {
+  const match = version.replace(/^v/, '').match(/^(\d+)\.(\d+)\.(\d+)/)
+  if (!match) return null
+
+  return {
+    major: Number.parseInt(match[1], 10),
+    minor: Number.parseInt(match[2], 10),
+    patch: Number.parseInt(match[3], 10),
+  }
+}
+
 export function setRemindLater(): void {
   localStorage.setItem(REMIND_LATER_KEY, Date.now().toString())
 }

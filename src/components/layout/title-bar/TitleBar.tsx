@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils'
 import { useConnectionStore } from '@/stores/connection'
 import type { TitleBarProps } from './lib'
 import { TitleBarSettingsMenu } from './title-bar-settings-menu/TitleBarSettingsMenu'
+import { TitleBarUpdateButton } from './title-bar-update-button/TitleBarUpdateButton'
 import { TitleBarWorkspaceSwitcher } from './title-bar-workspace-switcher/TitleBarWorkspaceSwitcher'
 
 export function TitleBar({ onToggleLeftSidebar, onToggleRightSidebar }: TitleBarProps) {
@@ -58,6 +59,7 @@ export function TitleBar({ onToggleLeftSidebar, onToggleRightSidebar }: TitleBar
 
       {/* Right section — search, settings, toggle right sidebar */}
       <div className="flex items-center h-full pr-1.5 gap-0">
+        <TitleBarUpdateButton />
         <TitleBarButton onClick={() => setCommandOpen(true)} tooltip="Search (⌘K)">
           <IconSearch className="size-3.5" />
         </TitleBarButton>
