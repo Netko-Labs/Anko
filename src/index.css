@@ -6,27 +6,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-.titlebar-drag {
-  -webkit-user-select: none;
-  user-select: none;
-  cursor: default;
-  /* mirin maps this to a native window-drag region (see DragHandler); only this
-     strip drags, so the title-bar buttons beside it stay clickable. */
-  -webkit-app-region: drag;
-}
-
-.titlebar-drag * {
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-/* Safety net: anything interactive that lands inside a drag region opts out. */
-.titlebar-drag button,
-.titlebar-drag a,
-.titlebar-drag [role="button"] {
-  -webkit-app-region: no-drag;
-}
-
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0 0 0);
@@ -167,6 +146,27 @@
     /* Disable bouncy scroll effect on macOS */
     overscroll-behavior: none;
   }
+}
+
+.titlebar-drag {
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: default;
+  /* Mirin maps this to a native window-drag region; only this strip drags, so
+     the title-bar buttons beside it stay clickable. */
+  -webkit-app-region: drag;
+}
+
+.titlebar-drag * {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Safety net: anything interactive that lands inside a drag region opts out. */
+.titlebar-drag button,
+.titlebar-drag a,
+.titlebar-drag [role="button"] {
+  -webkit-app-region: no-drag;
 }
 
 /* Custom scrollbar styling */

@@ -28,7 +28,7 @@ None / Describe impact
 
 ## Checklist
 
-- [ ] Types pass (`bun run tsc --noEmit`)
+- [ ] Types pass (`bun run typecheck`)
 - [ ] Lint passes (`bun run lint`)
 - [ ] Tested locally with `bun run dev`
 - [ ] No new dependencies added (or justified below)

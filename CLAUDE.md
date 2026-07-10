@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Anko is a cross-platform SQL desktop client built with Electrobun (Bun), React, and shadcn/ui. It supports MySQL and PostgreSQL with an architecture designed for adding additional database connectors.
+Anko is a cross-platform SQL desktop client built with Mirin, Bun, React, and
+shadcn/ui. It supports SQLite, MySQL, and PostgreSQL with an architecture
+designed for adding database connectors.
 
 ## Conventions
 
@@ -13,7 +15,7 @@ Folder-structure and code-style rules live in @docs/conventions.md — module an
 ## Tech Stack
 
 - **Frontend**: React 19 + TypeScript + Vite + shadcn/ui + Tailwind CSS v4
-- **Backend**: TypeScript (Bun via Electrobun)
+- **Backend**: TypeScript (Bun Worker via Mirin)
 - **Package Manager**: Bun
 - **Database Drivers**: Bun.SQL (built-in, MySQL + PostgreSQL)
 - **Local Storage**: bun:sqlite (encrypted connection storage)
@@ -25,7 +27,7 @@ Folder-structure and code-style rules live in @docs/conventions.md — module an
 # Install dependencies
 bun install
 
-# Run in development mode (Vite dev server + Electrobun)
+# Run in development mode (Vite + Mirin)
 bun start
 
 # Build frontend only
@@ -38,7 +40,7 @@ bun run build:app
 bun test
 
 # Type check frontend only
-bun run tsc --noEmit
+bun run typecheck
 
 # Add shadcn/ui component
 bunx --bun shadcn@latest add <component-name>
@@ -50,47 +52,29 @@ bunx --bun shadcn@latest add <component-name>
 
 ```
 anko/
-├── electrobun.config.ts              # Electrobun app configuration
+├── mirin.config.ts                   # Native windows, release, and CEF config
 ├── src/
-│   ├── bun/                          # Bun backend (main process)
-│   │   ├── index.ts                  # Main process entrypoint
-│   │   ├── state.ts                  # AppState management
-│   │   ├── error.ts                  # Error types
-│   │   ├── db/
-│   │   │   ├── connector.ts          # DatabaseConnector interface
-│   │   │   ├── mysql.ts              # MySQL connector (Bun.SQL)
-│   │   │   ├── postgres.ts           # PostgreSQL connector (Bun.SQL)
-│   │   │   └── query-utils.ts        # SQL parsing utils
-│   │   ├── storage/
-│   │   │   ├── index.ts              # Storage init
-│   │   │   ├── connections.ts        # Connection CRUD (bun:sqlite)
-│   │   │   ├── encryption.ts         # AES-256-GCM (node:crypto)
-│   │   │   ├── workspaces.ts         # Workspace management
-│   │   │   ├── query-history.ts      # Query history
-│   │   │   └── saved-queries.ts      # Saved queries
-│   │   └── rpc/
-│   │       ├── schema.ts             # RPC type re-export
-│   │       └── handlers.ts           # All RPC command handlers
-│   ├── shared/
-│   │   └── rpc-types.ts              # Shared RPC schema types
-│   ├── components/
-│   │   ├── ui/                       # shadcn/ui components
-│   │   ├── connection/               # Connection manager UI
-│   │   ├── editor/                   # Query editor
-│   │   ├── schema/                   # Schema browser (database tree)
-│   │   ├── results/                  # Query results table
-│   │   └── layout/                   # App layout components
-│   ├── stores/                       # Zustand state stores
-│   ├── entities/                     # TypeScript interfaces
-│   ├── lib/
-│   │   ├── rpc.ts                    # Electrobun RPC wrappers
-│   │   └── ...                       # Other utilities
+│   ├── bun/                          # Bun Worker backend
+│   │   ├── index.ts                  # Worker entrypoint and app lifecycle
+│   │   ├── state.ts                  # Process state and active connections
+│   │   ├── db/                       # Database connector implementations
+│   │   ├── rpc/                      # Mirin router and concern-based routes
+│   │   └── storage/                  # SQLite schema, queries, and mutations
+│   ├── shared/                       # Contracts shared by backend and UI
+│   ├── components/                   # Feature folders and shadcn primitives
+│   ├── stores/                       # Domain-scoped Zustand stores
+│   ├── hooks/                        # Reusable React hooks
+│   ├── lib/                          # Frontend adapters and pure utilities
 │   └── App.tsx
+├── docs/conventions.md               # Folder and code-style rules
+└── docs/releasing.md                 # Tag-based release runbook
 ```
 
 ### Frontend-Backend Communication
 
-The frontend communicates with the Bun backend via Electrobun RPC. Type-safe wrappers are in `src/lib/rpc.ts`:
+The frontend communicates with the Bun Worker through Mirin RPC. Type-safe
+wrappers are in `src/lib/rpc.ts`, while the router and routes live under
+`src/bun/rpc/`:
 
 ```typescript
 // Example: Execute a query
@@ -194,9 +178,10 @@ Table editing uses a pending changes pattern:
 
 ## Configuration Files
 
-- `electrobun.config.ts` - Electrobun app configuration (window, build, release)
+- `mirin.config.ts` - Mirin window, CEF, packaging, and update configuration
 - `components.json` - shadcn/ui configuration
 - `vite.config.ts` - Vite configuration with Tailwind and path aliases
+- `docs/releasing.md` - validated tag-based release process
 
 ## Commit Message Format
 
@@ -215,7 +200,7 @@ This project uses conventional commits with emojis. Format: `<emoji> <type>(<sco
 | 🏗️ | build | Build system |
 | 👷 | ci | CI/CD |
 | 🔒 | security | Security fix |
-| 🚀 | release | Release (triggers build) |
+| 🚀 | release | Release metadata; publishing is triggered by a version tag |
 
 **Examples:**
 ```

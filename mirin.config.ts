@@ -7,6 +7,11 @@ export default defineConfig({
   main: 'src/bun/index.ts',
   icon: 'icon.iconset',
 
+  // Keep production bundles lean. Add locales here when Anko ships translations.
+  cef: {
+    locales: ['en-US'],
+  },
+
   // Auto-updates from GitHub Releases. `mirin release` emits the artifacts;
   // the app polls .../releases/latest/download/stable-darwin-<arch>-update.json.
   release: {

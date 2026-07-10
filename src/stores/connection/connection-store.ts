@@ -387,7 +387,7 @@ export const useConnectionStore = create<ConnectionStore>()(
       ) =>
         set((draft) => {
           const tab = draft.queryTabs.find((t) => t.id === tabId)
-          if (!tab || !tab.editState) return
+          if (!tab?.editState) return
 
           storeLogger.debug('addCellEdit', { tabId, rowIndex, columnName, originalValue, newValue })
 
@@ -440,7 +440,7 @@ export const useConnectionStore = create<ConnectionStore>()(
       addNewRow: (tabId, newRow) =>
         set((draft) => {
           const tab = draft.queryTabs.find((t) => t.id === tabId)
-          if (!tab || !tab.editState) return
+          if (!tab?.editState) return
 
           tab.editState.pendingChanges.push({
             id: genId(),
@@ -456,7 +456,7 @@ export const useConnectionStore = create<ConnectionStore>()(
       markRowForDeletion: (tabId, rowIndex, primaryKeyValues, originalRow) =>
         set((draft) => {
           const tab = draft.queryTabs.find((t) => t.id === tabId)
-          if (!tab || !tab.editState) return
+          if (!tab?.editState) return
 
           storeLogger.debug('markRowForDeletion', { tabId, rowIndex, primaryKeyValues })
 
@@ -557,7 +557,7 @@ export const useConnectionStore = create<ConnectionStore>()(
       updateNewRowCell: (tabId, changeId, columnName, newValue) =>
         set((draft) => {
           const tab = draft.queryTabs.find((t) => t.id === tabId)
-          if (!tab || !tab.editState) return
+          if (!tab?.editState) return
 
           const change = tab.editState.pendingChanges.find(
             (c) => c.id === changeId && c.type === 'insert' && c.newRow,

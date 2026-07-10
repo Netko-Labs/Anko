@@ -1,64 +1,71 @@
 name: CI
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
     types: [opened, synchronize, ready_for_review, reopened]
+  schedule:
+    - cron: "43 9 * * 1"
+
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  BUN_VERSION: 1.3.14
+
 jobs:
-  lint-and-typecheck:
+  validate:
+    name: Validate
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
-          bun-version: latest
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Cache Bun packages
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Install dependencies
-        run: bun install
+        run: bun install --frozen-lockfile
 
-      - name: Lint
-        run: bun run lint
+      - name: Audit dependencies
+        run: bun audit
 
-      - name: Type check
-        run: bun run tsc --noEmit
+      - name: Lint and format
+        run: bun run check
 
-  build:
-    runs-on: blacksmith-4vcpu-ubuntu-2404
-    steps:
-      - uses: actions/checkout@v4
+      - name: Test
+        run: bun test
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Install dependencies
-        run: bun install
-
-      - name: Build frontend
+      - name: Typecheck and build frontend
         run: bun run build
 
   review:
-    needs: [lint-and-typecheck, build]
-    if: github.event.pull_request.draft == false
+    needs: validate
+    if: github.event_name == 'pull_request' && github.event.pull_request.draft == false
     runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions:
       contents: read
       pull-requests: write
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
           fetch-depth: 1
 
-      - uses: anthropics/claude-code-action@v1
+      - uses: anthropics/claude-code-action@536f2c32a39763739000b0e1ac69ca2647d97ce9 # v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
@@ -67,14 +74,12 @@ jobs:
 
             Review this PR focusing on:
             - Code quality and adherence to project conventions
-            - Security concerns (OWASP top 10, no secrets in code)
-            - Zustand selector best practices (no function calls during render, stable dependencies)
-            - Type safety (no `any`, no ts-ignore/ts-expect-error)
-            - Dependency changes (flag unnecessary new dependencies)
-            - React performance (proper useMemo/useCallback usage, stable references)
+            - Security concerns and accidental secret exposure
+            - Zustand selector stability and render behavior
+            - Type safety and dependency changes
+            - React performance
 
             Keep feedback actionable and concise. Use inline comments for specific issues.
-            If the PR looks good overall, approve it with `gh pr review --approve`.
-            If there are significant issues, request changes with `gh pr review --request-changes`.
+            Approve when it is ready; request changes for significant issues.
           claude_args: |
             --allowedTools "Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr review:*),Read,Glob,Grep"
