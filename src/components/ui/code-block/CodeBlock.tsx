@@ -1,15 +1,22 @@
-import ShikiHighlighter, { createJavaScriptRegexEngine } from 'react-shiki'
+import ShikiHighlighter, {
+  createHighlighterCore,
+  createJavaScriptRegexEngine,
+} from 'react-shiki/core'
 import { useTheme } from '@/components/theme/theme-provider'
 import { cn } from '@/lib/utils'
 
-// Pure-JS regex engine (no oniguruma WASM) so highlighting works in the offline
-// app:// bundle without fetching a .wasm asset. Created once, module-level.
-const engine = createJavaScriptRegexEngine()
+// Keep the offline highlighter limited to the languages and themes Anko uses.
+const highlighter = await createHighlighterCore({
+  langs: [import('@shikijs/langs/json'), import('@shikijs/langs/typescript')],
+  themes: [import('@shikijs/themes/dark-plus'), import('@shikijs/themes/light-plus')],
+  engine: createJavaScriptRegexEngine(),
+})
+
+type CodeLanguage = 'json' | 'typescript'
 
 interface CodeBlockProps {
   code: string
-  /** Shiki language id, e.g. 'json', 'typescript', 'sql'. */
-  language: string
+  language: CodeLanguage
   /** Wrap long lines (good for narrow detail panels) instead of scrolling. */
   wrap?: boolean
   className?: string
@@ -26,7 +33,7 @@ export function CodeBlock({ code, language, wrap = true, className }: CodeBlockP
     <ShikiHighlighter
       language={language}
       theme={resolvedTheme === 'dark' ? 'dark-plus' : 'light-plus'}
-      engine={engine}
+      highlighter={highlighter}
       addDefaultStyles={false}
       showLanguage={false}
       className={cn(

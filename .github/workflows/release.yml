@@ -2,390 +2,316 @@ name: Release
 
 on:
   push:
-    branches: [main]
+    tags: ["v*"]
+
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+
+env:
+  BUN_VERSION: 1.3.14
 
 jobs:
-  check-release:
-    runs-on: blacksmith-4vcpu-ubuntu-2404
-    outputs:
-      should_release: ${{ steps.check.outputs.should_release }}
-      version: ${{ steps.check.outputs.version }}
-    steps:
-      - name: Check commit message for release
-        id: check
-        run: |
-          COMMIT_MSG="${{ github.event.head_commit.message }}"
-          if [[ "$COMMIT_MSG" =~ ^🚀[[:space:]]release:[[:space:]]*(v[0-9]+\.[0-9]+\.[0-9]+) ]]; then
-            VERSION="${BASH_REMATCH[1]}"
-            echo "should_release=true" >> $GITHUB_OUTPUT
-            echo "version=$VERSION" >> $GITHUB_OUTPUT
-            echo "Detected release commit for version: $VERSION"
-          else
-            echo "should_release=false" >> $GITHUB_OUTPUT
-            echo "Not a release commit"
-          fi
-
-  lint-and-typecheck:
-    needs: check-release
-    if: needs.check-release.outputs.should_release == 'true'
-    runs-on: blacksmith-4vcpu-ubuntu-2404
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Install dependencies
-        run: bun install
-
-      - name: Lint
-        run: bun run lint
-
-      - name: Type check
-        run: bun run tsc --noEmit
-
-  generate-changelog:
-    needs: [check-release, lint-and-typecheck]
-    if: needs.check-release.outputs.should_release == 'true'
-    runs-on: blacksmith-4vcpu-ubuntu-2404
-    permissions:
-      contents: write
-    outputs:
-      changelog: ${{ steps.ai.outputs.text }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Get previous tag
-        id: prev_tag
-        run: |
-          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          echo "tag=$PREV_TAG" >> $GITHUB_OUTPUT
-
-      - name: Get commit log
-        id: commits
-        run: |
-          if [ -n "${{ steps.prev_tag.outputs.tag }}" ]; then
-            COMMITS=$(git log ${{ steps.prev_tag.outputs.tag }}..HEAD --pretty=format:"- %s (%h)" --no-merges)
-          else
-            COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges -20)
-          fi
-          echo "commits<<EOF" >> $GITHUB_OUTPUT
-          echo "$COMMITS" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Get release date
-        id: date
-        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
-
-      - name: Generate changelog with AI
-        id: ai
-        uses: vercel/ai-action@v2
-        with:
-          api-key: ${{ secrets.AI_GATEWAY_API_KEY }}
-          model: anthropic/claude-haiku-4-5
-          system: |
-            You are a changelog generator for Anko, a SQL desktop client application.
-            Your personality: A friendly geek who loves anime, gaming, and tech culture.
-            Write changelogs that are fun, witty, and sprinkled with clever puns or references.
-            Keep it lighthearted but informative - users should smile while learning what's new.
-            Avoid being cringe or trying too hard. Natural humor > forced jokes.
-          prompt: |
-            Generate a changelog entry for version ${{ needs.check-release.outputs.version }} released on ${{ steps.date.outputs.date }}.
-
-            Commits since last release (using conventional commits with emojis):
-            ${{ steps.commits.outputs.commits }}
-
-            Commit type mapping:
-            - ✨ feat = New Features (the good stuff!)
-            - 🐛 fix = Bug Fixes (squashed bugs)
-            - ⚡ perf = Performance (speed boosts)
-            - 🔒 security = Security (patches)
-            - ♻️ refactor, 💄 style, 🔧 chore = Under the Hood
-
-            Format as markdown:
-            ## [${{ needs.check-release.outputs.version }}] - ${{ steps.date.outputs.date }}
-
-            ### Highlights
-            (1-2 fun sentences about the coolest changes - hook the reader!)
-
-            ### New Features ✨
-            (from ✨ feat commits - make them sound exciting)
-
-            ### Improvements ⚡
-            (from ⚡ perf commits and notable refactors)
-
-            ### Bug Fixes 🐛
-            (from 🐛 fix commits - celebrate the squashed bugs)
-
-            ### Security 🔒
-            (from 🔒 security commits, if any)
-
-            Style guidelines:
-            - Be witty but not forced - natural humor wins
-            - Occasional puns welcome (database puns, anime references, gaming terms)
-            - Keep descriptions clear despite the fun tone
-            - Only include sections that have changes
-            - Skip 📝 docs, 👷 ci, 🔧 chore unless notable
-            - Use present tense ("Add" not "Added")
-            - Don't include commit hashes in output
-            - You can use emojis sparingly for flair
-
-            Output ONLY the markdown, nothing else.
-
-      - name: Update CHANGELOG.md
-        run: |
-          # Create temp file with new changelog entry
-          echo "${{ steps.ai.outputs.text }}" > new_entry.md
-          echo "" >> new_entry.md
-
-          # Insert after the marker
-          sed -i '/<!-- CHANGELOG_INSERT_MARKER -->/r new_entry.md' CHANGELOG.md
-
-          rm new_entry.md
-
-      - name: Commit changelog
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add CHANGELOG.md
-          git commit -m "docs: update changelog for ${{ needs.check-release.outputs.version }}" || echo "No changes to commit"
-          git push origin HEAD:main || echo "Nothing to push"
-
-      - name: Create and push tag
-        run: |
-          git tag ${{ needs.check-release.outputs.version }}
-          git push origin ${{ needs.check-release.outputs.version }}
-
-  create-release:
-    needs: [check-release, generate-changelog]
-    if: needs.check-release.outputs.should_release == 'true'
+  prepare-release:
+    name: Validate and create draft
     runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions:
       contents: write
     outputs:
       release_id: ${{ steps.create_release.outputs.id }}
+      version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 0
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Validate release version
+        id: version
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Invalid release tag: $RELEASE_TAG"
+            exit 1
+          fi
+          VERSION="${RELEASE_TAG#v}"
+          PACKAGE_VERSION=$(bun -e 'console.log(require("./package.json").version)')
+          if [[ "$VERSION" != "$PACKAGE_VERSION" ]]; then
+            echo "::error::Tag $RELEASE_TAG does not match package.json $PACKAGE_VERSION"
+            exit 1
+          fi
+          git fetch origin main --no-tags
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::Tag $RELEASE_TAG does not point to a commit merged into main"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Bun packages
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Audit dependencies
+        run: bun audit
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Test
+        run: bun test
+
+      - name: Collect release commits
+        id: commits
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          PREVIOUS_TAG=$(git tag --sort=-version:refname | awk -v current="$RELEASE_TAG" '$0 != current { print; exit }')
+          if [[ -n "$PREVIOUS_TAG" ]]; then
+            COMMITS=$(git log "$PREVIOUS_TAG..$RELEASE_TAG" --pretty=format:'- %s (%h)' --no-merges)
+          else
+            COMMITS=$(git log "$RELEASE_TAG" --pretty=format:'- %s (%h)' --no-merges -20)
+          fi
+          DELIMITER="COMMITS_$(openssl rand -hex 8)"
+          {
+            echo "commits<<$DELIMITER"
+            printf '%s\n' "$COMMITS"
+            echo "$DELIMITER"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Generate changelog
+        id: changelog
+        continue-on-error: true
+        uses: vercel/ai-action@bd265252c9d1d8295ceda28dadb56ad9321c8ccc # v2
+        with:
+          api-key: ${{ secrets.AI_GATEWAY_API_KEY }}
+          model: anthropic/claude-haiku-4-5
+          system: |
+            You write concise release notes for Anko, a cross-platform SQL desktop client.
+            Be friendly and lightly playful while keeping every change technically clear.
+          prompt: |
+            Write release notes for Anko ${{ github.ref_name }}.
+
+            Commits:
+            ${{ steps.commits.outputs.commits }}
+
+            Use these sections only when relevant:
+            - Highlights
+            - New Features
+            - Improvements
+            - Bug Fixes
+            - Security
+
+            Use present tense, omit commit hashes, and output only Markdown.
 
       - name: Create draft release
         id: create_release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3
         with:
-          tag_name: ${{ needs.check-release.outputs.version }}
+          tag_name: ${{ github.ref_name }}
+          name: Anko ${{ github.ref_name }}
+          body: ${{ steps.changelog.outputs.text || steps.commits.outputs.commits }}
           draft: true
-          body: ${{ needs.generate-changelog.outputs.changelog }}
+          prerelease: ${{ contains(github.ref_name, '-') }}
 
   build-macos:
-    name: Build macOS (.dmg)
-    needs: [check-release, create-release]
-    if: needs.check-release.outputs.should_release == 'true'
+    name: Build macOS
+    needs: prepare-release
+    runs-on: blacksmith-6vcpu-macos-15
     permissions:
       contents: write
-    runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
-          bun-version: latest
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Cache Bun packages
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Cache Mirin CEF
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: ~/.mirinjs/cef
+          key: mirin-cef-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('bun.lock') }}
+          restore-keys: mirin-cef-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Import Apple certificate
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
         run: |
-          CERTIFICATE_PATH=$RUNNER_TEMP/certificate.p12
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          CERTIFICATE_PATH="$RUNNER_TEMP/certificate.p12"
+          KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
           KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
-
-          # Decode certificate
-          echo "$APPLE_CERTIFICATE" | base64 --decode > "$CERTIFICATE_PATH"
-
-          # Create temporary keychain
+          printf '%s' "$APPLE_CERTIFICATE" | base64 --decode > "$CERTIFICATE_PATH"
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-
-          # Import certificate
           security import "$CERTIFICATE_PATH" -P "$APPLE_CERTIFICATE_PASSWORD" \
             -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
           security set-key-partition-list -S apple-tool:,apple: \
             -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-
-          # Add to search list
           security list-keychains -d user -s "$KEYCHAIN_PATH" login.keychain-db
 
       - name: Install dependencies
-        run: bun install
+        run: bun install --frozen-lockfile
 
-      - name: Set version to match the release tag
-        run: |
-          V="${{ needs.check-release.outputs.version }}"
-          npm version "${V#v}" --no-git-tag-version --allow-same-version
-
-      - name: Build, sign, notarize + emit update artifacts
+      - name: Build, sign, notarize, and package
         env:
-          # mirin release: codesign with the Developer ID, then notarize + staple
-          # before packing, so downloaded updates pass Gatekeeper.
+          MIRIN_APP_VERSION: ${{ needs.prepare-release.outputs.version }}
           MIRIN_SIGN_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
           MIRIN_NOTARY_APPLE_ID: ${{ secrets.APPLE_ID }}
           MIRIN_NOTARY_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           MIRIN_NOTARY_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: bun run release
 
-      - name: Upload artifacts to release
+      - name: Upload release assets
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # build/release/ holds the manifest, the full .tar.zst bundle, and a
-          # delta patch from the previous release. The app polls these via
-          # .../releases/latest/download (mirin.config.ts release.baseUrl).
-          if ls build/release/* 1>/dev/null 2>&1; then
-            for file in build/release/*; do
-              [ -f "$file" ] && gh release upload ${{ needs.check-release.outputs.version }} "$file" --repo ${{ github.repository }} --clobber
-            done
-          else
-            echo "::error::No artifacts found in build/release/"
-            exit 1
-          fi
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: bash .github/scripts/upload-release-assets.sh
 
       - name: Cleanup keychain
         if: always()
-        run: security delete-keychain $RUNNER_TEMP/app-signing.keychain-db 2>/dev/null || true
+        run: security delete-keychain "$RUNNER_TEMP/app-signing.keychain-db" 2>/dev/null || true
 
   build-windows:
-    name: Build Windows (.exe installer)
-    needs: [check-release, create-release]
-    if: needs.check-release.outputs.should_release == 'true'
+    name: Build Windows
+    needs: prepare-release
+    runs-on: blacksmith-4vcpu-windows-2025
     permissions:
       contents: write
-    runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
-          bun-version: latest
+          bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Install installer tools (Inno Setup, NSIS, rcedit)
+      - name: Cache Bun packages
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Cache Mirin CEF
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: ~/.mirinjs/cef
+          key: mirin-cef-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('bun.lock') }}
+          restore-keys: mirin-cef-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Install Windows packaging tools
         shell: pwsh
         run: |
-          # Inno Setup (modern installer, preferred), NSIS (fallback), rcedit
-          # (embeds the app icon into the exe — Bun's --windows-icon is a no-op).
-          choco install innosetup nsis rcedit -y
-          "C:\Program Files (x86)\Inno Setup 6" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          "C:\Program Files (x86)\NSIS" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          $inno = "C:\Program Files (x86)\Inno Setup 6"
+          if (-not (Test-Path "$inno\ISCC.exe")) { choco install innosetup -y }
+          if (-not (Get-Command rcedit -ErrorAction SilentlyContinue)) { choco install rcedit -y }
+          $inno | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Install dependencies
-        # Pulls the prebuilt @mirinjs/win32-x64 (no Rust toolchain needed); the
-        # Windows CEF runtime is downloaded on first `mirin release`.
-        run: bun install
+        run: bun install --frozen-lockfile
 
-      - name: Set version to match the release tag
-        shell: bash
-        run: |
-          V="${{ needs.check-release.outputs.version }}"
-          npm version "${V#v}" --no-git-tag-version --allow-same-version
-
-      - name: Build + emit update artifacts
-        # mirin release → build/release/: the .zip installer, the .tar.zst updater
-        # bundle, and the win32 update manifest (no codesign on Windows).
+      - name: Build and package
+        env:
+          MIRIN_APP_VERSION: ${{ needs.prepare-release.outputs.version }}
         run: bun run release
 
-      - name: Upload artifacts to release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload release assets
         shell: bash
-        run: |
-          if ls build/release/* 1>/dev/null 2>&1; then
-            for file in build/release/*; do
-              [ -f "$file" ] && gh release upload ${{ needs.check-release.outputs.version }} "$file" --repo ${{ github.repository }} --clobber
-            done
-          else
-            echo "::error::No artifacts found in build/release/"
-            exit 1
-          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: bash .github/scripts/upload-release-assets.sh
 
   build-linux:
-    name: Build Linux (AppImage/deb/rpm + updater)
-    needs: [check-release, create-release]
-    if: needs.check-release.outputs.should_release == 'true'
+    name: Build Linux
+    needs: prepare-release
+    runs-on: blacksmith-8vcpu-ubuntu-2404
     permissions:
       contents: write
-    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
-          bun-version: latest
+          bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Install packaging tools
-        # fpm (deb + rpm, needs ruby + rpm/rpmbuild), appimagetool (AppImage,
-        # invoked with --appimage-extract-and-run since CI runners lack FUSE),
-        # squashfs-tools (mksquashfs for the AppImage payload).
+      - name: Cache Bun packages
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Cache Mirin CEF
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: ~/.mirinjs/cef
+          key: mirin-cef-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('bun.lock') }}
+          restore-keys: mirin-cef-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Install Linux packaging tools
         run: |
           sudo apt-get update
           sudo apt-get install -y ruby ruby-dev build-essential squashfs-tools rpm
-          sudo gem install --no-document fpm
+          sudo gem install --no-document fpm -v 1.17.0
           sudo curl -fsSL -o /usr/local/bin/appimagetool \
+            --proto '=https' --proto-redir '=https' --retry 3 \
             https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          echo "a6d71e2b6cd66f8e8d16c37ad164658985e0cf5fcaa950c90a482890cb9d13e0  /usr/local/bin/appimagetool" \
+            | sha256sum --check --strict
           sudo chmod +x /usr/local/bin/appimagetool
 
       - name: Install dependencies
-        # Pulls the prebuilt @mirinjs/linux-x64 (no Rust toolchain needed); the
-        # Linux CEF runtime is downloaded on first `mirin release`.
-        run: bun install
+        run: bun install --frozen-lockfile
 
-      - name: Set version to match the release tag
-        run: |
-          V="${{ needs.check-release.outputs.version }}"
-          npm version "${V#v}" --no-git-tag-version --allow-same-version
-
-      - name: Build + emit update artifacts + packages
-        # mirin release → build/release/: the linux update manifest + .tar.zst
-        # updater bundle, plus the AppImage / .deb / .rpm packages.
+      - name: Build and package
+        env:
+          MIRIN_APP_VERSION: ${{ needs.prepare-release.outputs.version }}
         run: bun run release
 
-      - name: Upload artifacts to release
+      - name: Upload release assets
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if ls build/release/* 1>/dev/null 2>&1; then
-            for file in build/release/*; do
-              [ -f "$file" ] && gh release upload ${{ needs.check-release.outputs.version }} "$file" --repo ${{ github.repository }} --clobber
-            done
-          else
-            echo "::error::No artifacts found in build/release/"
-            exit 1
-          fi
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: bash .github/scripts/upload-release-assets.sh
 
   publish-release:
-    needs: [check-release, create-release, build-macos, build-windows, build-linux]
-    if: needs.check-release.outputs.should_release == 'true'
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    name: Publish release
+    needs: [prepare-release, build-macos, build-windows, build-linux]
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     permissions:
       contents: write
     steps:
-      - name: Publish release
-        uses: actions/github-script@v7
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             await github.rest.repos.updateRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              release_id: ${{ needs.create-release.outputs.release_id }},
+              release_id: ${{ needs.prepare-release.outputs.release_id }},
               draft: false
             })
