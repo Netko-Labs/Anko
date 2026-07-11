@@ -1,20 +1,20 @@
 # Releasing
 
-Anko releases are built from version tags on commits already merged into
-`main`. The tag and `package.json` version must match so every target receives
-the same immutable version.
+Anko releases are built automatically from release commits pushed to `main`.
+Never create or push release tags manually. The workflow creates the matching
+GitHub tag after validating the release commit and `package.json` version.
 
 1. Update `package.json` and the changelog-worthy code on `main`.
 2. Run `bun install --frozen-lockfile`, `bun run check`, `bun run typecheck`,
    `bun test`, and `bun run build`.
-3. Merge the validated change.
-4. Create and push the matching tag, for example:
+3. Commit the version change with the exact release subject, for example:
 
 ```bash
-git tag v0.8.2
-git push origin v0.8.2
+git commit -m "🚀 release: v0.8.3"
+git push origin main
 ```
 
-The release workflow validates the tag, generates release notes, creates a draft,
-builds macOS/Windows/Linux concurrently on Blacksmith, uploads each platform's
-artifacts in parallel, and publishes only after every target succeeds.
+The release workflow validates that the commit subject and package version match,
+creates the tag and draft release, generates release notes, builds macOS/Windows/
+Linux concurrently, uploads each platform's artifacts, and publishes only after
+every target succeeds.

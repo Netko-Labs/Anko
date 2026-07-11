@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
 
 permissions:
   contents: read
@@ -17,12 +17,14 @@ env:
 jobs:
   prepare-release:
     name: Validate and create draft
+    if: "${{ startsWith(github.event.head_commit.message, '🚀 release: v') }}"
     runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions:
       contents: write
     outputs:
       release_id: ${{ steps.create_release.outputs.id }}
       version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
         with:
@@ -34,25 +36,28 @@ jobs:
 
       - name: Validate release version
         id: version
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
         run: |
-          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
-            echo "::error::Invalid release tag: $RELEASE_TAG"
+          RELEASE_SUBJECT=$(git log -1 --pretty=%s)
+          if [[ ! "$RELEASE_SUBJECT" =~ ^🚀\ release:\ (v[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?)$ ]]; then
+            echo "::error::Release commit must be exactly: 🚀 release: v<package-version>"
             exit 1
           fi
+          RELEASE_TAG="${BASH_REMATCH[1]}"
           VERSION="${RELEASE_TAG#v}"
           PACKAGE_VERSION=$(bun -e 'console.log(require("./package.json").version)')
           if [[ "$VERSION" != "$PACKAGE_VERSION" ]]; then
-            echo "::error::Tag $RELEASE_TAG does not match package.json $PACKAGE_VERSION"
+            echo "::error::Release commit $RELEASE_TAG does not match package.json $PACKAGE_VERSION"
             exit 1
           fi
-          git fetch origin main --no-tags
-          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
-            echo "::error::Tag $RELEASE_TAG does not point to a commit merged into main"
-            exit 1
+          if git rev-parse --verify --quiet "refs/tags/$RELEASE_TAG" >/dev/null; then
+            TAG_COMMIT=$(git rev-list -n 1 "$RELEASE_TAG")
+            if [[ "$TAG_COMMIT" != "$GITHUB_SHA" ]]; then
+              echo "::error::Tag $RELEASE_TAG already points to $TAG_COMMIT"
+              exit 1
+            fi
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
 
       - name: Cache Bun packages
         uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
@@ -84,13 +89,13 @@ jobs:
       - name: Collect release commits
         id: commits
         env:
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
         run: |
           PREVIOUS_TAG=$(git tag --sort=-version:refname | awk -v current="$RELEASE_TAG" '$0 != current { print; exit }')
           if [[ -n "$PREVIOUS_TAG" ]]; then
-            COMMITS=$(git log "$PREVIOUS_TAG..$RELEASE_TAG" --pretty=format:'- %s (%h)' --no-merges)
+            COMMITS=$(git log "$PREVIOUS_TAG..$GITHUB_SHA" --pretty=format:'- %s (%h)' --no-merges)
           else
-            COMMITS=$(git log "$RELEASE_TAG" --pretty=format:'- %s (%h)' --no-merges -20)
+            COMMITS=$(git log "$GITHUB_SHA" --pretty=format:'- %s (%h)' --no-merges -20)
           fi
           DELIMITER="COMMITS_$(openssl rand -hex 8)"
           {
@@ -110,7 +115,7 @@ jobs:
             You write concise release notes for Anko, a cross-platform SQL desktop client.
             Be friendly and lightly playful while keeping every change technically clear.
           prompt: |
-            Write release notes for Anko ${{ github.ref_name }}.
+            Write release notes for Anko ${{ steps.version.outputs.tag }}.
 
             Commits:
             ${{ steps.commits.outputs.commits }}
@@ -128,11 +133,12 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3
         with:
-          tag_name: ${{ github.ref_name }}
-          name: Anko ${{ github.ref_name }}
+          tag_name: ${{ steps.version.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: Anko ${{ steps.version.outputs.tag }}
           body: ${{ steps.changelog.outputs.text || steps.commits.outputs.commits }}
           draft: true
-          prerelease: ${{ contains(github.ref_name, '-') }}
+          prerelease: ${{ contains(steps.version.outputs.tag, '-') }}
 
   build-macos:
     name: Build macOS
@@ -185,13 +191,14 @@ jobs:
       - name: Build, sign, notarize, and package
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.prepare-release.outputs.tag }}
           MIRIN_APP_VERSION: ${{ needs.prepare-release.outputs.version }}
           MIRIN_SIGN_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
           MIRIN_NOTARY_APPLE_ID: ${{ secrets.APPLE_ID }}
           MIRIN_NOTARY_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           MIRIN_NOTARY_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
-          export MIRIN_RELEASE_NOTES="$(gh release view "$GITHUB_REF_NAME" --json body --jq .body)"
+          export MIRIN_RELEASE_NOTES="$(gh release view "$RELEASE_TAG" --json body --jq .body)"
           test -n "$MIRIN_RELEASE_NOTES" || { echo "::error::Release notes are empty"; exit 1; }
           bun run release
 
@@ -205,7 +212,7 @@ jobs:
       - name: Upload release assets
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ needs.prepare-release.outputs.tag }}
         run: bash .github/scripts/upload-release-assets.sh
 
       - name: Cleanup keychain
@@ -261,10 +268,11 @@ jobs:
       - name: Build and package
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.prepare-release.outputs.tag }}
           MIRIN_APP_VERSION: ${{ needs.prepare-release.outputs.version }}
         shell: pwsh
         run: |
-          $env:MIRIN_RELEASE_NOTES = (gh release view $env:GITHUB_REF_NAME --json body --jq .body | Out-String).TrimEnd()
+          $env:MIRIN_RELEASE_NOTES = (gh release view $env:RELEASE_TAG --json body --jq .body | Out-String).TrimEnd()
           if ([string]::IsNullOrWhiteSpace($env:MIRIN_RELEASE_NOTES)) {
             throw "Release notes are empty"
           }
@@ -281,7 +289,7 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ needs.prepare-release.outputs.tag }}
         run: bash .github/scripts/upload-release-assets.sh
 
   build-linux:
@@ -341,9 +349,10 @@ jobs:
       - name: Build and package
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.prepare-release.outputs.tag }}
           MIRIN_APP_VERSION: ${{ needs.prepare-release.outputs.version }}
         run: |
-          export MIRIN_RELEASE_NOTES="$(gh release view "$GITHUB_REF_NAME" --json body --jq .body)"
+          export MIRIN_RELEASE_NOTES="$(gh release view "$RELEASE_TAG" --json body --jq .body)"
           test -n "$MIRIN_RELEASE_NOTES" || { echo "::error::Release notes are empty"; exit 1; }
           bun run release
 
@@ -357,7 +366,7 @@ jobs:
       - name: Upload release assets
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ needs.prepare-release.outputs.tag }}
         run: bash .github/scripts/upload-release-assets.sh
 
   publish-release:
