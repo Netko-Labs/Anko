@@ -6,6 +6,49 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.8.2] - 2026-07-11
+
+### Highlights
+
+Anko can now act as a secure local MCP database server. LLM clients can inspect
+schemas and run read-only queries automatically, while connection access and
+dangerous SQL remain under your control in the Anko UI.
+
+### New Features
+
+- **Authenticated MCP access** - Connect local LLM clients over Streamable HTTP
+  or the bundled `anko-mcp` stdio bridge.
+- **Database tools** - List saved connections, open approved connections, browse
+  databases, schemas, tables, and columns, and execute SQL.
+- **Approval workflow** - Opening saved connections and every dangerous query
+  require a fresh approval in Anko. Requests display the client, connection,
+  database, risk reasons, and exact SQL.
+- **MCP settings** - Enable or disable the server, choose the port, reveal or
+  rotate the bearer token, copy connection commands, and install the stdio bridge.
+- **MCP query history** - MCP requests appear in query history with their source
+  and approval status.
+
+### Security
+
+- The MCP server binds only to `127.0.0.1`, validates Host and Origin headers,
+  and requires a random 256-bit bearer token.
+- Saved database credentials never leave Anko. MCP clients receive only public
+  connection metadata.
+- Automatic reads are parsed, row-limited, timed out, and executed with
+  database-enforced read-only protections. All other SQL fails closed into the
+  approval flow.
+
+### Improvements
+
+- Added Linux arm64 packages and Windows ARM compatibility builds alongside the
+  existing macOS arm64, Linux x64, and Windows x64 releases.
+- Added native approval notifications and packaged-app launch verification across
+  every supported release target.
+
+### Bug Fixes
+
+- Update dialogs now receive and safely render the Markdown release description.
+
 ## [v0.7.3] - 2026-07-08
 
 ### Highlights
@@ -405,4 +448,3 @@ Anko's initial release brings a fully functional SQL desktop client with core da
 ### New Features
 - Auto-update functionality to keep Anko current with the latest improvements
 - Commitlint integration for maintaining code quality standards
-
