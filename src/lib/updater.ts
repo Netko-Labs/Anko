@@ -31,8 +31,8 @@ export async function checkForUpdate(): Promise<{
         info: {
           version: result.version,
           currentVersion: result.currentVersion,
-          body: undefined,
-          date: undefined,
+          body: result.body,
+          date: result.date,
         },
       }
     }

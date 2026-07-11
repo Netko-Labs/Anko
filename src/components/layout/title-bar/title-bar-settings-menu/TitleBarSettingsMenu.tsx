@@ -40,7 +40,7 @@ export function TitleBarSettingsMenu() {
         const changelogBody = await fetchChangelogForVersion(result.info.version)
         const enrichedInfo = {
           ...result.info,
-          body: changelogBody ?? result.info.body,
+          body: result.info.body ?? changelogBody,
         }
 
         setUpdateAvailable(true, enrichedInfo, result.update)

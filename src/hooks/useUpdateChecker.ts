@@ -28,7 +28,7 @@ export function useUpdateChecker() {
       const changelogBody = await fetchChangelogForVersion(result.info.version)
       const enrichedInfo = {
         ...result.info,
-        body: changelogBody ?? result.info.body,
+        body: result.info.body ?? changelogBody,
       }
 
       // Always surface availability so the title-bar update button appears;

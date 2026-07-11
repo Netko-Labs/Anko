@@ -41,6 +41,8 @@ export function systemRoutes() {
           currentVersion: app.updater.currentVersion || APP_VERSION,
           version: info?.version ?? '',
           updateAvailable: !!info,
+          body: readOptionalString(info, 'body'),
+          date: readOptionalString(info, 'date'),
           error: '',
         }
       } catch (e) {
@@ -171,4 +173,10 @@ export function systemRoutes() {
       await win.setAlwaysOnTop(true)
     }),
   }
+}
+
+function readOptionalString(value: unknown, key: string): string | undefined {
+  if (typeof value !== 'object' || value === null) return undefined
+  const field = (value as Record<string, unknown>)[key]
+  return typeof field === 'string' && field.length > 0 ? field : undefined
 }

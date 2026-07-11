@@ -159,6 +159,8 @@ export interface UpdateCheckResult {
   currentVersion: string
   version: string
   updateAvailable: boolean
+  body?: string
+  date?: string
   error: string
 }
 

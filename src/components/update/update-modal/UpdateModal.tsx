@@ -82,9 +82,9 @@ export function UpdateModal() {
           <div className="max-h-48 overflow-y-auto rounded-md border border-border bg-muted/50 p-3">
             <p className="mb-2 text-xs font-medium text-foreground">What's New</p>
             <div
-              className="prose prose-sm prose-invert max-w-none text-xs text-muted-foreground"
-              // biome-ignore lint/security/noDangerouslySetInnerHtml: GitHub release body is trusted
-              // biome-ignore lint/style/useNamingConvention: GitHub release body is trusted
+              className="space-y-2 text-xs text-muted-foreground [&_a]:text-primary [&_a]:underline [&_code]:rounded [&_code]:bg-background/70 [&_code]:px-1 [&_h2]:text-sm [&_h2]:font-semibold [&_h2]:text-foreground [&_h3]:font-medium [&_h3]:text-foreground [&_li]:ml-4 [&_ul]:list-disc [&_ul]:space-y-1"
+              // biome-ignore lint/security/noDangerouslySetInnerHtml: release markdown is escaped before rendering
+              // biome-ignore lint/style/useNamingConvention: React API name
               dangerouslySetInnerHTML={{ __html: formatChangelog(updateInfo.body) }}
             />
           </div>
@@ -138,15 +138,63 @@ export function UpdateModal() {
 }
 
 function formatChangelog(body: string): string {
-  // Convert markdown-style formatting to HTML
-  return body
-    .replace(/^### (.+)$/gm, '<h4 class="font-medium mt-2 mb-1">$1</h4>')
-    .replace(/^## (.+)$/gm, '<h3 class="font-semibold mt-3 mb-1">$1</h3>')
-    .replace(/^# (.+)$/gm, '<h2 class="font-bold mt-3 mb-2">$1</h2>')
-    .replace(/^\* (.+)$/gm, '<li>$1</li>')
-    .replace(/^- (.+)$/gm, '<li>$1</li>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/`(.+?)`/g, '<code class="bg-muted px-1 rounded">$1</code>')
-    .replace(/\n/g, '<br />')
+  const html: string[] = []
+  let listOpen = false
+
+  const closeList = () => {
+    if (!listOpen) return
+    html.push('</ul>')
+    listOpen = false
+  }
+
+  for (const rawLine of body.split(/\r?\n/)) {
+    const line = rawLine.trim()
+    if (!line) {
+      closeList()
+      continue
+    }
+
+    const listMatch = line.match(/^[-*]\s+(.+)$/)
+    if (listMatch) {
+      if (!listOpen) {
+        html.push('<ul>')
+        listOpen = true
+      }
+      html.push(`<li>${formatInlineMarkdown(listMatch[1])}</li>`)
+      continue
+    }
+
+    closeList()
+    const heading = line.match(/^(#{1,4})\s+(.+)$/)
+    if (heading) {
+      const level = Math.min(heading[1].length + 1, 4)
+      html.push(`<h${level}>${formatInlineMarkdown(heading[2])}</h${level}>`)
+      continue
+    }
+
+    html.push(`<p>${formatInlineMarkdown(line)}</p>`)
+  }
+
+  closeList()
+  return html.join('')
+}
+
+function formatInlineMarkdown(value: string): string {
+  return escapeHtml(value)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    .replace(
+      /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
+      '<a href="$2" target="_blank" rel="noreferrer">$1</a>',
+    )
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
 }
