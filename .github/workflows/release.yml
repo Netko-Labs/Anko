@@ -184,12 +184,16 @@ jobs:
 
       - name: Build, sign, notarize, and package
         env:
+          GH_TOKEN: ${{ github.token }}
           MIRIN_APP_VERSION: ${{ needs.prepare-release.outputs.version }}
           MIRIN_SIGN_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
           MIRIN_NOTARY_APPLE_ID: ${{ secrets.APPLE_ID }}
           MIRIN_NOTARY_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           MIRIN_NOTARY_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: bun run release
+        run: |
+          export MIRIN_RELEASE_NOTES="$(gh release view "$GITHUB_REF_NAME" --json body --jq .body)"
+          test -n "$MIRIN_RELEASE_NOTES" || { echo "::error::Release notes are empty"; exit 1; }
+          bun run release
 
       - name: Verify bundled MCP bridge
         run: |
@@ -256,8 +260,15 @@ jobs:
 
       - name: Build and package
         env:
+          GH_TOKEN: ${{ github.token }}
           MIRIN_APP_VERSION: ${{ needs.prepare-release.outputs.version }}
-        run: bun run release
+        shell: pwsh
+        run: |
+          $env:MIRIN_RELEASE_NOTES = (gh release view $env:GITHUB_REF_NAME --json body --jq .body | Out-String).TrimEnd()
+          if ([string]::IsNullOrWhiteSpace($env:MIRIN_RELEASE_NOTES)) {
+            throw "Release notes are empty"
+          }
+          bun run release
 
       - name: Verify bundled MCP bridge
         shell: bash
@@ -329,8 +340,12 @@ jobs:
 
       - name: Build and package
         env:
+          GH_TOKEN: ${{ github.token }}
           MIRIN_APP_VERSION: ${{ needs.prepare-release.outputs.version }}
-        run: bun run release
+        run: |
+          export MIRIN_RELEASE_NOTES="$(gh release view "$GITHUB_REF_NAME" --json body --jq .body)"
+          test -n "$MIRIN_RELEASE_NOTES" || { echo "::error::Release notes are empty"; exit 1; }
+          bun run release
 
       - name: Verify bundled MCP bridge
         run: |

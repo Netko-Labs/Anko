@@ -22,6 +22,7 @@ export default defineConfig({
   release: {
     baseUrl: 'https://github.com/Netko-Labs/Anko/releases/latest/download',
     channel: 'stable',
+    notes: process.env.MIRIN_RELEASE_NOTES,
   },
 
   // `mirin release` also emits a drag-to-Applications .dmg installer (signed +
