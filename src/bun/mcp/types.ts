@@ -5,7 +5,7 @@ export const MCP_APPROVAL_TIMEOUT_MS = 120_000
 export const MCP_QUERY_TIMEOUT_MS = 60_000
 export const DEFAULT_MCP_MAX_ROWS = 200
 export const MAX_MCP_ROWS = 1_000
-export const MCP_BRIDGE_VERSION = '0.8.1'
+export const MCP_BRIDGE_VERSION = '0.8.2'
 
 export type McpApprovalKind = 'open_connection' | 'execute_query'
 export type McpApprovalStatus = 'approved' | 'rejected' | 'timed_out'

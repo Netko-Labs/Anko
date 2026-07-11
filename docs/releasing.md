@@ -11,8 +11,8 @@ the same immutable version.
 4. Create and push the matching tag, for example:
 
 ```bash
-git tag v0.8.1
-git push origin v0.8.1
+git tag v0.8.2
+git push origin v0.8.2
 ```
 
 The release workflow validates the tag, generates release notes, creates a draft,

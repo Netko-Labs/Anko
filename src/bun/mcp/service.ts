@@ -204,7 +204,7 @@ export class AnkoMcpService {
 
   private createProtocolServer(): McpServer {
     const server = new McpServer(
-      { name: 'anko', version: '0.8.1' },
+      { name: 'anko', version: '0.8.2' },
       {
         instructions:
           'Use list_connections before schema tools. Open a saved connection before querying it. Read results are capped at 1000 rows.',
