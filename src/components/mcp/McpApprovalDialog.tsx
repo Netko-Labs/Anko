@@ -1,6 +1,7 @@
 import { IconAlertTriangle, IconDatabase } from '@tabler/icons-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { CodeBlock } from '@/components/ui/code-block/CodeBlock'
 import {
   Dialog,
   DialogContent,
@@ -64,9 +65,9 @@ export function McpApprovalDialog() {
             </div>
 
             {request.sql && (
-              <pre className="max-h-64 overflow-auto rounded-md border border-border bg-muted/50 p-3 font-mono text-[11px] whitespace-pre-wrap">
-                {request.sql}
-              </pre>
+              <div className="max-h-64 overflow-auto rounded-md border border-border bg-muted/50 p-3">
+                <CodeBlock code={request.sql} language="sql" className="text-[11px]" />
+              </div>
             )}
 
             <DialogFooter>

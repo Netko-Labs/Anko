@@ -7,12 +7,16 @@ import { cn } from '@/lib/utils'
 
 // Keep the offline highlighter limited to the languages and themes Anko uses.
 const highlighter = await createHighlighterCore({
-  langs: [import('@shikijs/langs/json'), import('@shikijs/langs/typescript')],
+  langs: [
+    import('@shikijs/langs/json'),
+    import('@shikijs/langs/typescript'),
+    import('@shikijs/langs/sql'),
+  ],
   themes: [import('@shikijs/themes/dark-plus'), import('@shikijs/themes/light-plus')],
   engine: createJavaScriptRegexEngine(),
 })
 
-type CodeLanguage = 'json' | 'typescript'
+type CodeLanguage = 'json' | 'typescript' | 'sql'
 
 interface CodeBlockProps {
   code: string
