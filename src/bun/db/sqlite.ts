@@ -21,10 +21,12 @@ import {
 
 export class SqliteConnector implements DatabaseConnector {
   private sql: InstanceType<typeof SQL>
+  private readOnlySql: InstanceType<typeof SQL>
   private typeCache = new TypeMapCache()
 
-  private constructor(sql: InstanceType<typeof SQL>) {
+  private constructor(sql: InstanceType<typeof SQL>, readOnlySql: InstanceType<typeof SQL>) {
     this.sql = sql
+    this.readOnlySql = readOnlySql
   }
 
   static async connect(config: ConnectionConfig): Promise<SqliteConnector> {
@@ -36,11 +38,19 @@ export class SqliteConnector implements DatabaseConnector {
         adapter: 'sqlite',
         filename,
       })
+      const readOnlySql =
+        filename === ':memory:'
+          ? sql
+          : new SQL({
+              adapter: 'sqlite',
+              filename,
+              readonly: true,
+            })
 
       // Test the connection
       await sql`SELECT 1`
 
-      return new SqliteConnector(sql)
+      return new SqliteConnector(sql, readOnlySql)
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e)
       throw AppError.database(`Failed to open SQLite database "${config.host}" - ${msg}`)
@@ -51,19 +61,57 @@ export class SqliteConnector implements DatabaseConnector {
     query: string,
     _database?: string,
     _context?: string,
+    signal?: AbortSignal,
   ): Promise<QueryResult> {
     // SQLite has no database/schema switching
-    const result = await this.execute(query)
+    const result = await this.executeOnSql(this.sql, query, signal)
     result.original_query = query
     result.executed_query = query
     return result
   }
 
+  async executeReadOnlyWithContext(
+    query: string,
+    _database?: string,
+    _context?: string,
+    signal?: AbortSignal,
+  ): Promise<QueryResult> {
+    if (this.readOnlySql === this.sql) {
+      return this.sql.begin(async (transaction) => {
+        await transaction.unsafe('PRAGMA query_only = ON')
+        try {
+          return this.executeOnSql(
+            transaction as unknown as InstanceType<typeof SQL>,
+            query,
+            signal,
+          )
+        } finally {
+          await transaction.unsafe('PRAGMA query_only = OFF')
+        }
+      })
+    }
+    return this.readOnlySql.begin(async (transaction) =>
+      this.executeOnSql(transaction as unknown as InstanceType<typeof SQL>, query, signal),
+    )
+  }
+
   async execute(query: string): Promise<QueryResult> {
+    return this.executeOnSql(this.sql, query)
+  }
+
+  private async executeOnSql(
+    sql: InstanceType<typeof SQL>,
+    query: string,
+    signal?: AbortSignal,
+  ): Promise<QueryResult> {
     const start = performance.now()
 
     try {
-      const rows = await this.sql.unsafe(query)
+      const pending = sql.unsafe(query)
+      const cancel = () => pending.cancel()
+      signal?.addEventListener('abort', cancel, { once: true })
+      if (signal?.aborted) pending.cancel()
+      const rows = await pending.finally(() => signal?.removeEventListener('abort', cancel))
       const executionTimeMs = Math.round(performance.now() - start)
 
       if (Array.isArray(rows)) {
@@ -246,6 +294,7 @@ export class SqliteConnector implements DatabaseConnector {
   }
 
   async close(): Promise<void> {
+    if (this.readOnlySql !== this.sql) await this.readOnlySql.close()
     await this.sql.close()
   }
 }

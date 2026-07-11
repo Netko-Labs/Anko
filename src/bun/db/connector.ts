@@ -83,7 +83,18 @@ export interface ErdSchema {
 
 export interface DatabaseConnector {
   execute(query: string): Promise<QueryResult>
-  executeWithContext(query: string, database?: string, context?: string): Promise<QueryResult>
+  executeWithContext(
+    query: string,
+    database?: string,
+    context?: string,
+    signal?: AbortSignal,
+  ): Promise<QueryResult>
+  executeReadOnlyWithContext(
+    query: string,
+    database?: string,
+    context?: string,
+    signal?: AbortSignal,
+  ): Promise<QueryResult>
   getDatabases(): Promise<SchemaInfo[]>
   getSchemas(database: string): Promise<SchemaInfo[]>
   getTables(database: string, schema: string): Promise<TableInfo[]>

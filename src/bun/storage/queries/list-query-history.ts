@@ -30,5 +30,7 @@ export function listQueryHistory(connectionId?: string, limit?: number): QueryHi
     rowCount: row.rowCount ?? null,
     success: row.success,
     errorMessage: row.errorMessage ?? null,
+    source: row.source,
+    approvalStatus: row.approvalStatus ?? null,
   }))
 }

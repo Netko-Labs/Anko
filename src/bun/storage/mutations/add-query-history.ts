@@ -25,6 +25,8 @@ export function addQueryHistory(input: AddQueryHistoryInput): QueryHistoryEntry 
       rowCount: input.rowCount ?? null,
       success: input.success,
       errorMessage: input.errorMessage ?? null,
+      source: input.source ?? 'ui',
+      approvalStatus: input.approvalStatus ?? null,
     })
     .run()
 

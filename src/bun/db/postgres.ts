@@ -150,6 +150,7 @@ export class PostgresConnector implements DatabaseConnector {
     query: string,
     database?: string,
     schema?: string,
+    signal?: AbortSignal,
   ): Promise<QueryResult> {
     const pool = database ? await this.getPool(database) : await this.getDefaultPool()
 
@@ -163,10 +164,26 @@ export class PostgresConnector implements DatabaseConnector {
       executedQuery = query
     }
 
-    const result = await this.executeOnPool(pool, query)
+    const result = await this.executeOnPool(pool, query, signal)
     result.original_query = query
     result.executed_query = executedQuery
     return result
+  }
+
+  async executeReadOnlyWithContext(
+    query: string,
+    database?: string,
+    schema?: string,
+    signal?: AbortSignal,
+  ): Promise<QueryResult> {
+    const pool = database ? await this.getPool(database) : await this.getDefaultPool()
+    return pool.begin('read only', async (transaction) => {
+      if (schema) {
+        const quotedSchema = `"${schema.replace(/"/g, '""')}"`
+        await transaction.unsafe(`SET LOCAL search_path TO ${quotedSchema}`)
+      }
+      return this.executeOnPool(transaction as unknown as InstanceType<typeof SQL>, query, signal)
+    })
   }
 
   async execute(query: string): Promise<QueryResult> {
@@ -174,11 +191,19 @@ export class PostgresConnector implements DatabaseConnector {
     return this.executeOnPool(pool, query)
   }
 
-  private async executeOnPool(pool: InstanceType<typeof SQL>, query: string): Promise<QueryResult> {
+  private async executeOnPool(
+    pool: InstanceType<typeof SQL>,
+    query: string,
+    signal?: AbortSignal,
+  ): Promise<QueryResult> {
     const start = performance.now()
 
     try {
-      const rows = await pool.unsafe(query)
+      const pending = pool.unsafe(query)
+      const cancel = () => pending.cancel()
+      signal?.addEventListener('abort', cancel, { once: true })
+      if (signal?.aborted) pending.cancel()
+      const rows = await pending.finally(() => signal?.removeEventListener('abort', cancel))
       const executionTimeMs = Math.round(performance.now() - start)
 
       if (Array.isArray(rows)) {

@@ -38,13 +38,40 @@ export const useConnectionStore = create<ConnectionStore>()(
 
       // Active connections
       activeConnections: [],
+      setActiveConnections: (connections) =>
+        set((draft) => {
+          const previous = new Map(
+            draft.activeConnections.map((connection) => [connection.id, connection]),
+          )
+          draft.activeConnections = connections.map((connection) => ({
+            ...connection,
+            selectedDatabase:
+              previous.get(connection.id)?.selectedDatabase ?? connection.selectedDatabase,
+          }))
+          const runtimeIds = new Set(connections.map((connection) => connection.connectionId))
+          for (const connectionId of Object.keys(draft.schemaCache)) {
+            if (!runtimeIds.has(connectionId)) delete draft.schemaCache[connectionId]
+          }
+          for (const connection of draft.activeConnections) {
+            draft.schemaCache[connection.connectionId] ??= {
+              databases: [],
+              schemas: {},
+              tables: {},
+              columns: {},
+            }
+          }
+        }),
       addActiveConnection: (connection) =>
         set((draft) => {
           storeLogger.debug('addActiveConnection', {
             connectionId: connection.connectionId,
             name: connection.info.name,
           })
-          draft.activeConnections.push(connection)
+          const existingIndex = draft.activeConnections.findIndex(
+            (item) => item.id === connection.id,
+          )
+          if (existingIndex >= 0) draft.activeConnections[existingIndex] = connection
+          else draft.activeConnections.push(connection)
           // Initialize empty schema cache for the connection
           draft.schemaCache[connection.connectionId] = {
             databases: [],

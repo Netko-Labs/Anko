@@ -23,12 +23,14 @@ import { openDevToolsWindow } from '@/lib/rpc'
 import { resolveToast } from '@/lib/toast-utils'
 import { checkForUpdate, fetchChangelogForVersion } from '@/lib/updater'
 import { cn } from '@/lib/utils'
+import { useMcpStore } from '@/stores/mcp'
 import { useUpdateStore } from '@/stores/update'
 
 export function TitleBarSettingsMenu() {
   const { theme, setTheme } = useTheme()
   const setUpdateAvailable = useUpdateStore((s) => s.setUpdateAvailable)
   const setModalOpen = useUpdateStore((s) => s.setModalOpen)
+  const setSettingsOpen = useMcpStore((s) => s.setSettingsOpen)
 
   const handleCheckForUpdates = useCallback(async () => {
     const toastId = toast.loading('Checking for updates...')
@@ -80,7 +82,7 @@ export function TitleBarSettingsMenu() {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" sideOffset={4} className="min-w-44 z-100">
-        <DropdownMenuItem onClick={() => toast.info('Settings coming soon')}>
+        <DropdownMenuItem onClick={() => setSettingsOpen(true)}>
           <IconSettings className="size-4 mr-2" />
           Settings
         </DropdownMenuItem>

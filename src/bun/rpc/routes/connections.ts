@@ -3,7 +3,6 @@ import type { ConnectionConfig } from '../../../shared/rpc-types'
 import type { AppState } from '../../state'
 import {
   deleteConnection,
-  getConnectionConfig,
   listConnections,
   removeConnectionFromAllWorkspaces,
   saveConnection,
@@ -13,9 +12,8 @@ import {
 /** Live-connection lifecycle plus persisted connection CRUD. */
 export function connectionRoutes(state: AppState) {
   return {
-    connect: rpc.mutation(async ({ config }: { config: ConnectionConfig }) =>
-      state.connect(config),
-    ),
+    connectSavedConnection: rpc.mutation(async ({ id }: { id: string }) => state.connectSaved(id)),
+    listActiveConnections: rpc.query(() => state.getActiveConnections()),
     disconnect: rpc.mutation(async ({ connectionId }: { connectionId: string }) => {
       await state.disconnect(connectionId)
     }),
@@ -40,6 +38,5 @@ export function connectionRoutes(state: AppState) {
       removeConnectionFromAllWorkspaces(id)
       deleteConnection(id)
     }),
-    getConnectionConfig: rpc.query(({ id }: { id: string }) => getConnectionConfig(id)),
   }
 }

@@ -13,11 +13,12 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { connectSaved } from '@/lib/connect'
 import { formatErrorMessage } from '@/lib/error-utils'
-import { connect, deleteConnection, getConnectionConfig } from '@/lib/rpc'
+import { deleteConnection } from '@/lib/rpc'
 import { ensureMinimumToastDuration, resolveToast } from '@/lib/toast-utils'
 import { useConnectionStore } from '@/stores/connection'
-import type { ActiveConnection, ConnectionInfo } from '@/types'
+import type { ConnectionInfo } from '@/types'
 import { ConnectionDialog } from '../connection-dialog'
 import type { ConnectionListProps } from '../lib'
 import { ConnectionListItem } from './connection-list-item'
@@ -84,17 +85,7 @@ export function ConnectionList({ onConnectionSelect }: ConnectionListProps) {
     })
 
     try {
-      const config = await getConnectionConfig(info.id)
-      const connectionId = await connect(config)
-
-      const active: ActiveConnection = {
-        id: info.id,
-        connectionId,
-        info,
-        selectedDatabase: info.database,
-      }
-
-      useConnectionStore.getState().addActiveConnection(active)
+      const active = await connectSaved(info)
       onConnectionSelect(active)
 
       // Ensure minimum toast display time before showing success

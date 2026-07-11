@@ -1,8 +1,10 @@
 import { rpc } from 'mirinjs/rpc'
+import type { AnkoMcpService } from '../mcp/service'
 import type { AppState } from '../state'
 import { connectionRoutes } from './routes/connections'
 import { dataRoutes } from './routes/data'
 import { libraryRoutes } from './routes/library'
+import { mcpRoutes } from './routes/mcp'
 import { systemRoutes } from './routes/system'
 import { workspaceRoutes } from './routes/workspaces'
 
@@ -12,12 +14,13 @@ import { workspaceRoutes } from './routes/workspaces'
  * grouped by concern under `./routes/` and composed here — this file stays a
  * thin composition root.
  */
-export function createRouter(state: AppState) {
+export function createRouter(state: AppState, mcp: AnkoMcpService) {
   return rpc.router({
     ...connectionRoutes(state),
     ...dataRoutes(state),
     ...workspaceRoutes(),
     ...libraryRoutes(),
+    ...mcpRoutes(mcp),
     ...systemRoutes(),
   })
 }

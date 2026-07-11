@@ -1,6 +1,7 @@
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { app, menu } from 'mirinjs'
+import { app, menu, notification } from 'mirinjs'
+import { AnkoMcpService } from './mcp/service'
 import { createRouter } from './rpc/router'
 import { AppState } from './state'
 import { getWindowState, saveWindowState } from './storage'
@@ -25,7 +26,23 @@ state.initializeStorage(appDataDir)
 console.log(`[Anko] Storage initialized at: ${appDataDir}`)
 
 // ---- RPC ----
-app.serve(createRouter(state))
+const mcp = new AnkoMcpService(state, appDataDir)
+const served = app.serve(createRouter(state, mcp))
+mcp.setEvents({
+  approvalRequested: (request) => served.rpc.mcpApprovalRequested.broadcast(request),
+  statusChanged: (settings) => served.rpc.mcpStatusChanged.broadcast(settings),
+  connectionChanged: () => served.rpc.mcpConnectionChanged.broadcast(),
+  historyAdded: (entry) => served.rpc.mcpHistoryAdded.broadcast(entry),
+  notifyApproval: (request) => {
+    notification.show({
+      title: 'Anko approval required',
+      body:
+        request.kind === 'open_connection'
+          ? `${request.clientName} wants to open ${request.connectionName}`
+          : `${request.clientName} wants to run SQL on ${request.connectionName}`,
+    })
+  },
+})
 
 // ---- Main window (manual open so we can restore the saved frame) ----
 app.on('ready', async () => {
@@ -47,6 +64,9 @@ app.on('ready', async () => {
     height: saved.height,
   })
   console.log(`[Anko] Main window opened at ${saved.x},${saved.y} ${saved.width}x${saved.height}`)
+  mcp.setWindowFocused(true)
+  win.on('focus', () => mcp.setWindowFocused(true))
+  win.on('blur', () => mcp.setWindowFocused(false))
 
   // Restore maximized state once the window has settled.
   if (saved.isMaximized) {
@@ -78,6 +98,10 @@ app.on('ready', async () => {
   }, 2000)
 
   win.on('closed', () => clearInterval(saveInterval))
+})
+
+app.on('ready', () => {
+  void mcp.initialize()
 })
 
 // ---- Application menu ----
@@ -122,5 +146,6 @@ app.on('ready', () => {
 })
 
 app.on('window-all-closed', () => {
+  void mcp.stop()
   app.quit()
 })

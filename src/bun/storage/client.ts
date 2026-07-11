@@ -92,9 +92,14 @@ function createTables(sqlite: Database) {
       execution_time_ms INTEGER,
       row_count INTEGER,
       success INTEGER NOT NULL DEFAULT 1,
-      error_message TEXT
+      error_message TEXT,
+      source TEXT NOT NULL DEFAULT 'ui',
+      approval_status TEXT
     )
   `)
+
+  ensureColumn(sqlite, 'query_history', 'source', "TEXT NOT NULL DEFAULT 'ui'")
+  ensureColumn(sqlite, 'query_history', 'approval_status', 'TEXT')
 
   sqlite.exec(`
     CREATE INDEX IF NOT EXISTS idx_query_history_executed_at
@@ -147,4 +152,11 @@ function createTables(sqlite: Database) {
       value TEXT NOT NULL
     )
   `)
+}
+
+function ensureColumn(sqlite: Database, table: string, column: string, definition: string) {
+  const columns = sqlite.query(`PRAGMA table_info(${table})`).all() as { name: string }[]
+  if (!columns.some((item) => item.name === column)) {
+    sqlite.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`)
+  }
 }

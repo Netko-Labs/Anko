@@ -50,6 +50,12 @@ export const queryHistoryTable = sqliteTable(
     rowCount: integer('row_count'),
     success: integer('success', { mode: 'boolean' }).notNull().default(true),
     errorMessage: text('error_message'),
+    source: text('source', { enum: ['ui', 'mcp'] })
+      .notNull()
+      .default('ui'),
+    approvalStatus: text('approval_status', {
+      enum: ['not_required', 'approved', 'rejected', 'timed_out'],
+    }),
   },
   (table) => [index('idx_query_history_executed_at').on(table.executedAt)],
 )

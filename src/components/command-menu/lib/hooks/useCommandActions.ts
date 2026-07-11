@@ -1,10 +1,10 @@
 import { useCallback } from 'react'
 import { toast } from 'sonner'
+import { connectSaved } from '@/lib/connect'
 import { formatErrorMessage } from '@/lib/error-utils'
-import { connect, getConnectionConfig } from '@/lib/rpc'
 import { ensureMinimumToastDuration, resolveToast } from '@/lib/toast-utils'
 import { useConnectionStore } from '@/stores/connection'
-import type { ActiveConnection, ConnectionInfo } from '@/types'
+import type { ConnectionInfo } from '@/types'
 import type { CommandActions, CommandDatabaseItem, CommandTableItem } from '..'
 
 /**
@@ -24,15 +24,7 @@ export function useCommandActions(onOpenChange: (open: boolean) => void): Comman
         description: `Connecting to "${info.name}"`,
       })
       try {
-        const config = await getConnectionConfig(info.id)
-        const connectionId = await connect(config)
-        const active: ActiveConnection = {
-          id: info.id,
-          connectionId,
-          info,
-          selectedDatabase: info.database,
-        }
-        useConnectionStore.getState().addActiveConnection(active)
+        await connectSaved(info)
         await ensureMinimumToastDuration(startTime)
         resolveToast.success(toastId, 'Connected', {
           description: `Successfully connected to "${info.name}"`,

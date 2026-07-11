@@ -21,6 +21,13 @@ export interface ConnectionInfo {
   driver: 'mysql' | 'postgresql' | 'sqlite'
 }
 
+export interface ActiveConnectionInfo {
+  id: string
+  connectionId: string
+  info: ConnectionInfo
+  selectedDatabase?: string
+}
+
 export interface SchemaInfo {
   name: string
 }
@@ -110,6 +117,8 @@ export interface AddQueryHistoryInput {
   rowCount: number | null
   success: boolean
   errorMessage: string | null
+  source?: 'ui' | 'mcp'
+  approvalStatus?: 'not_required' | 'approved' | 'rejected' | 'timed_out' | null
 }
 
 export interface QueryHistoryEntry {
@@ -123,6 +132,8 @@ export interface QueryHistoryEntry {
   rowCount: number | null
   success: boolean
   errorMessage: string | null
+  source: 'ui' | 'mcp'
+  approvalStatus: 'not_required' | 'approved' | 'rejected' | 'timed_out' | null
 }
 
 export interface CreateSavedQueryInput {

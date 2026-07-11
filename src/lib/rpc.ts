@@ -1,8 +1,10 @@
 // conventions: >300 lines — typed RPC wrappers for every backend command; split by domain (connections, schema, queries, workspaces) re-exported from here when next touched
 import { client } from 'mirinjs/client'
+import type { McpApprovalRequest, McpSettings } from '@/bun/mcp/types'
 import type { Router } from '@/bun/rpc/router'
 import type { UpdateCheckResult, UpdateDownloadStatus } from '@/shared/rpc-types'
 import type {
+  ActiveConnection,
   AddQueryHistoryInput,
   ColumnDetail,
   ConnectionConfig,
@@ -22,6 +24,15 @@ import { rpcLogger } from './debug'
 
 // Typed client over mirin's RPC transport (window.mirin WebSocket to the worker).
 const api = client<Router>()
+
+export const mcpEvents = {
+  onApprovalRequested: (listener: (request: McpApprovalRequest) => void) =>
+    api.mcpApprovalRequested.on(listener),
+  onStatusChanged: (listener: (settings: McpSettings) => void) => api.mcpStatusChanged.on(listener),
+  onConnectionChanged: (listener: () => void) => api.mcpConnectionChanged.on(listener),
+  onHistoryAdded: (listener: (entry: QueryHistoryEntry) => void) =>
+    api.mcpHistoryAdded.on(listener),
+}
 
 /**
  * Tracked request wrapper that logs command name, params, and duration.
@@ -43,8 +54,40 @@ async function trackedRequest<T>(command: string, fn: () => Promise<T> | T): Pro
 }
 
 // Connection commands
-export async function connect(config: ConnectionConfig): Promise<string> {
-  return trackedRequest('connect', () => api.connect({ config }))
+export async function connectSavedConnection(id: string): Promise<ActiveConnection> {
+  return trackedRequest('connectSavedConnection', () => api.connectSavedConnection({ id }))
+}
+
+export async function listActiveConnections(): Promise<ActiveConnection[]> {
+  return trackedRequest('listActiveConnections', () => api.listActiveConnections({}))
+}
+
+export async function getMcpSettings(): Promise<McpSettings> {
+  return trackedRequest('getMcpSettings', () => api.getMcpSettings({}))
+}
+
+export async function setMcpEnabled(enabled: boolean): Promise<McpSettings> {
+  return trackedRequest('setMcpEnabled', () => api.setMcpEnabled({ enabled }))
+}
+
+export async function setMcpPort(port: number): Promise<McpSettings> {
+  return trackedRequest('setMcpPort', () => api.setMcpPort({ port }))
+}
+
+export async function rotateMcpToken(): Promise<McpSettings> {
+  return trackedRequest('rotateMcpToken', () => api.rotateMcpToken({}))
+}
+
+export async function listPendingMcpApprovals(): Promise<McpApprovalRequest[]> {
+  return trackedRequest('listPendingMcpApprovals', () => api.listPendingMcpApprovals({}))
+}
+
+export async function resolveMcpApproval(id: string, approved: boolean): Promise<boolean> {
+  return trackedRequest('resolveMcpApproval', () => api.resolveMcpApproval({ id, approved }))
+}
+
+export async function installMcpBridge(): Promise<McpSettings> {
+  return trackedRequest('installMcpBridge', () => api.installMcpBridge({}))
 }
 
 export async function disconnect(connectionId: string): Promise<void> {
@@ -142,10 +185,6 @@ export async function listConnections(): Promise<ConnectionInfo[]> {
 
 export async function deleteConnection(id: string): Promise<void> {
   return trackedRequest('deleteConnection', () => api.deleteConnection({ id }))
-}
-
-export async function getConnectionConfig(id: string): Promise<ConnectionConfig> {
-  return trackedRequest('getConnectionConfig', () => api.getConnectionConfig({ id }))
 }
 
 // Workspace commands

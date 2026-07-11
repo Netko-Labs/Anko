@@ -10,6 +10,7 @@ import {
 } from '@tabler/icons-react'
 import { useCallback, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
+import { Badge } from '@/components/ui/badge'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -248,6 +249,19 @@ function HistoryEntry({
             </span>
             {entry.executionTimeMs !== null && (
               <span className="text-muted-foreground/80">{entry.executionTimeMs}ms</span>
+            )}
+            {entry.source === 'mcp' && (
+              <Badge
+                variant="outline"
+                className="ml-auto h-4 rounded-sm px-1 text-[9px]"
+                title={
+                  entry.approvalStatus
+                    ? `MCP approval: ${entry.approvalStatus.replace('_', ' ')}`
+                    : 'MCP query'
+                }
+              >
+                MCP
+              </Badge>
             )}
             {entry.rowCount !== null && entry.success && (
               <span className="text-muted-foreground/80">{entry.rowCount} rows</span>

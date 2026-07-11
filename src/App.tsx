@@ -4,6 +4,7 @@ import { CloseAppDialog, getCloseAppPreference } from '@/components/layout/close
 import { RightSidebar } from '@/components/layout/right-sidebar'
 import { TabContainer } from '@/components/layout/tabs'
 import { TitleBar } from '@/components/layout/title-bar'
+import { McpController } from '@/components/mcp/McpController'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { ThemeProvider } from '@/components/theme/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
@@ -197,6 +198,7 @@ function App() {
           onCancel={() => setShowCloseDialog(false)}
         />
         <UpdateModal />
+        <McpController />
       </ThemeProvider>
     </ErrorBoundary>
   )

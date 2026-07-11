@@ -5,7 +5,7 @@ import type { ConnectionConfig } from '../entities'
 import { connectionTable } from '../schema'
 
 export function updateConnection(id: string, config: ConnectionConfig): void {
-  const encryptedPassword = encrypt(config.password)
+  const encryptedPassword = config.password ? encrypt(config.password) : undefined
 
   getDb()
     .update(connectionTable)
@@ -14,7 +14,7 @@ export function updateConnection(id: string, config: ConnectionConfig): void {
       host: config.host,
       port: config.port,
       username: config.username,
-      encryptedPassword: encryptedPassword,
+      ...(encryptedPassword ? { encryptedPassword } : {}),
       databaseName: config.database ?? null,
       driver: config.driver,
       updatedAt: sql`CURRENT_TIMESTAMP`,

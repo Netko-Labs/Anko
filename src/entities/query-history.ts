@@ -10,6 +10,8 @@ export interface QueryHistoryEntry {
   rowCount: number | null
   success: boolean
   errorMessage: string | null
+  source: 'ui' | 'mcp'
+  approvalStatus: 'not_required' | 'approved' | 'rejected' | 'timed_out' | null
 }
 
 /** Input for adding a new history entry */
@@ -22,4 +24,6 @@ export interface AddQueryHistoryInput {
   rowCount: number | null
   success: boolean
   errorMessage: string | null
+  source?: 'ui' | 'mcp'
+  approvalStatus?: 'not_required' | 'approved' | 'rejected' | 'timed_out' | null
 }

@@ -1,12 +1,20 @@
+import type { ActiveConnectionInfo, ConnectionInfo } from '../shared/rpc-types'
 import type { ConnectionConfig, DatabaseConnector } from './db/connector'
 import { MySqlConnector } from './db/mysql'
 import { PostgresConnector } from './db/postgres'
 import { SqliteConnector } from './db/sqlite'
 import { AppError } from './error'
-import { initializeDb } from './storage'
+import { getConnection, getConnectionConfig, initializeDb } from './storage'
+
+interface LiveConnection {
+  connector: DatabaseConnector
+  savedConnectionId: string
+  info: ConnectionInfo
+}
 
 export class AppState {
-  private connections = new Map<string, DatabaseConnector>()
+  private connections = new Map<string, LiveConnection>()
+  private runtimeIdBySavedId = new Map<string, string>()
   private storageReady = false
 
   initializeStorage(appDataDir: string) {
@@ -24,11 +32,27 @@ export class AppState {
     return PostgresConnector.connect(config)
   }
 
-  async connect(config: ConnectionConfig): Promise<string> {
+  async connectSaved(savedConnectionId: string): Promise<ActiveConnectionInfo> {
+    const existingRuntimeId = this.runtimeIdBySavedId.get(savedConnectionId)
+    if (existingRuntimeId) return this.describeConnection(existingRuntimeId)
+
+    const saved = getConnection(savedConnectionId)
+    if (!saved) throw AppError.notFound(`Connection not found: ${savedConnectionId}`)
+    const config = getConnectionConfig(savedConnectionId)
     const connector = await this.createConnector(config)
     const connectionId = crypto.randomUUID()
-    this.connections.set(connectionId, connector)
-    return connectionId
+    const info: ConnectionInfo = {
+      id: saved.id,
+      name: saved.name,
+      host: saved.host,
+      port: saved.port,
+      username: saved.username,
+      database: saved.databaseName ?? undefined,
+      driver: saved.driver,
+    }
+    this.connections.set(connectionId, { connector, savedConnectionId, info })
+    this.runtimeIdBySavedId.set(savedConnectionId, connectionId)
+    return this.describeConnection(connectionId)
   }
 
   /** Open a throwaway connection to validate a config, then close it. */
@@ -38,16 +62,43 @@ export class AppState {
   }
 
   async disconnect(connectionId: string): Promise<void> {
-    const connector = this.connections.get(connectionId)
-    if (connector) {
-      await connector.close()
+    const live = this.connections.get(connectionId)
+    if (live) {
+      await live.connector.close()
       this.connections.delete(connectionId)
+      this.runtimeIdBySavedId.delete(live.savedConnectionId)
     }
   }
 
   getConnection(connectionId: string): DatabaseConnector {
-    const connector = this.connections.get(connectionId)
-    if (!connector) throw AppError.connectionNotFound(connectionId)
-    return connector
+    const live = this.connections.get(connectionId)
+    if (!live) throw AppError.connectionNotFound(connectionId)
+    return live.connector
+  }
+
+  getConnectionBySavedId(savedConnectionId: string): DatabaseConnector {
+    const runtimeId = this.runtimeIdBySavedId.get(savedConnectionId)
+    if (!runtimeId) throw AppError.connectionNotFound(savedConnectionId)
+    return this.getConnection(runtimeId)
+  }
+
+  getActiveConnections(): ActiveConnectionInfo[] {
+    return [...this.connections.keys()].map((runtimeId) => this.describeConnection(runtimeId))
+  }
+
+  getActiveConnection(savedConnectionId: string): ActiveConnectionInfo | undefined {
+    const runtimeId = this.runtimeIdBySavedId.get(savedConnectionId)
+    return runtimeId ? this.describeConnection(runtimeId) : undefined
+  }
+
+  private describeConnection(runtimeId: string): ActiveConnectionInfo {
+    const live = this.connections.get(runtimeId)
+    if (!live) throw AppError.connectionNotFound(runtimeId)
+    return {
+      id: live.savedConnectionId,
+      connectionId: runtimeId,
+      info: live.info,
+      selectedDatabase: live.info.database,
+    }
   }
 }

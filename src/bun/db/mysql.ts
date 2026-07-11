@@ -57,36 +57,65 @@ export class MySqlConnector implements DatabaseConnector {
 
   async executeWithContext(
     query: string,
-    _database?: string,
+    database?: string,
     context?: string,
+    signal?: AbortSignal,
   ): Promise<QueryResult> {
     let executedQuery: string
+    const targetDatabase = database ?? context
 
-    if (context) {
+    if (targetDatabase) {
       // Execute USE database first
       try {
-        await this.sql.unsafe(`USE \`${context}\``)
+        await this.sql.unsafe(`USE \`${targetDatabase.replace(/`/g, '``')}\``)
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : String(e)
-        throw AppError.database(`Failed to switch to database '${context}': ${msg}`)
+        throw AppError.database(`Failed to switch to database '${targetDatabase}': ${msg}`)
       }
-      executedQuery = `USE \`${context}\`;\n${query}`
+      executedQuery = `USE \`${targetDatabase.replace(/`/g, '``')}\`;\n${query}`
     } else {
       executedQuery = query
     }
 
-    const result = await this.execute(query)
+    const result = await this.executeOnSql(this.sql, query, signal)
     result.original_query = query
     result.executed_query = executedQuery
     return result
   }
 
+  async executeReadOnlyWithContext(
+    query: string,
+    database?: string,
+    context?: string,
+    signal?: AbortSignal,
+  ): Promise<QueryResult> {
+    const targetDatabase = database ?? context
+    return this.sql.begin('read only', async (transaction) => {
+      if (targetDatabase) {
+        await transaction.unsafe(`USE \`${targetDatabase.replace(/`/g, '``')}\``)
+      }
+      return this.executeOnSql(transaction as unknown as InstanceType<typeof SQL>, query, signal)
+    })
+  }
+
   async execute(query: string): Promise<QueryResult> {
+    return this.executeOnSql(this.sql, query)
+  }
+
+  private async executeOnSql(
+    sql: InstanceType<typeof SQL>,
+    query: string,
+    signal?: AbortSignal,
+  ): Promise<QueryResult> {
     const start = performance.now()
 
     try {
       // Try executing as a query that returns rows
-      const rows = await this.sql.unsafe(query)
+      const pending = sql.unsafe(query)
+      const cancel = () => pending.cancel()
+      signal?.addEventListener('abort', cancel, { once: true })
+      if (signal?.aborted) pending.cancel()
+      const rows = await pending.finally(() => signal?.removeEventListener('abort', cancel))
       const executionTimeMs = Math.round(performance.now() - start)
 
       // Check if this is a result set (SELECT) or an execute result (INSERT/UPDATE/DELETE)
@@ -140,7 +169,7 @@ export class MySqlConnector implements DatabaseConnector {
     } catch (e: unknown) {
       // If the first attempt fails, try as a non-query (for statements like CREATE, DROP, etc.)
       try {
-        const result = await this.sql.unsafe(query)
+        const result = await sql.unsafe(query)
         const executionTimeMs = Math.round(performance.now() - start)
         return {
           columns: [],

@@ -3,8 +3,9 @@ import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { connectSaved } from '@/lib/connect'
 import { formatErrorMessage } from '@/lib/error-utils'
-import { connect, deleteConnection, getConnectionConfig } from '@/lib/rpc'
+import { deleteConnection } from '@/lib/rpc'
 import { ensureMinimumToastDuration, resolveToast } from '@/lib/toast-utils'
 import { useConnectionStore } from '@/stores/connection'
 import type { ActiveConnection, ConnectionInfo } from '@/types'
@@ -70,23 +71,7 @@ export function DatabasesPanel({
     })
 
     try {
-      const config = await getConnectionConfig(info.id)
-      const connectionId = await connect(config)
-
-      // Restore the database that was selected when the session was saved.
-      const pending = useConnectionStore
-        .getState()
-        .pendingReconnect.find((p) => p.connectionId === info.id)
-
-      const active: ActiveConnection = {
-        id: info.id,
-        connectionId,
-        info,
-        selectedDatabase: pending?.selectedDatabase ?? info.database,
-      }
-
-      useConnectionStore.getState().addActiveConnection(active)
-      useConnectionStore.getState().removePendingReconnect(info.id)
+      const active = await connectSaved(info)
       onConnectionSelect?.(active)
 
       // Ensure toast displays for minimum duration

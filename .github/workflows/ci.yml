@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
   pull_request:
@@ -83,3 +84,69 @@ jobs:
             Approve when it is ready; request changes for significant issues.
           claude_args: |
             --allowedTools "Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr review:*),Read,Glob,Grep"
+
+  package-smoke:
+    name: Package ${{ matrix.label }}
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: macOS arm64
+            runner: blacksmith-6vcpu-macos-15
+            os: macos
+          - label: Windows x64
+            runner: blacksmith-4vcpu-windows-2025
+            os: windows
+          - label: Windows arm64
+            runner: windows-11-arm
+            os: windows
+          - label: Linux x64
+            runner: blacksmith-8vcpu-ubuntu-2404
+            os: linux
+            appimage_arch: x86_64
+            appimage_sha256: a6d71e2b6cd66f8e8d16c37ad164658985e0cf5fcaa950c90a482890cb9d13e0
+          - label: Linux arm64
+            runner: ubuntu-24.04-arm
+            os: linux
+            appimage_arch: aarch64
+            appimage_sha256: 1b00524ba8c6b678dc15ef88a5c25ec24def36cdfc7e3abb32ddcd068e8007fe
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install Windows build tools
+        if: matrix.os == 'windows'
+        shell: pwsh
+        run: |
+          if (-not (Get-Command rcedit -ErrorAction SilentlyContinue)) { choco install rcedit -y }
+
+      - name: Install Linux packaging tools
+        if: matrix.os == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ruby ruby-dev build-essential squashfs-tools rpm
+          sudo gem install --no-document fpm -v 1.17.0
+          sudo curl -fsSL -o /usr/local/bin/appimagetool \
+            --proto '=https' --proto-redir '=https' --retry 3 \
+            https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${{ matrix.appimage_arch }}.AppImage
+          echo "${{ matrix.appimage_sha256 }}  /usr/local/bin/appimagetool" \
+            | sha256sum --check --strict
+          sudo chmod +x /usr/local/bin/appimagetool
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build packaged app
+        run: bun run build:app
+
+      - name: Verify bundled MCP bridge
+        shell: bash
+        run: |
+          BRIDGE=$(find build -type f -path '*/sidecars/anko-mcp' ! -path 'build/sidecars/*' -print -quit)
+          test -n "$BRIDGE" || { echo "::error::anko-mcp sidecar is missing"; exit 1; }
+          echo "Bundled MCP bridge: $BRIDGE"

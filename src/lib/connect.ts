@@ -3,7 +3,7 @@
  * command menu, and the "reconnect" affordances on restored session tabs.
  */
 
-import { connect, getConnectionConfig } from '@/lib/rpc'
+import { connectSavedConnection } from '@/lib/rpc'
 import { useConnectionStore } from '@/stores/connection'
 import type { ActiveConnection, ConnectionInfo } from '@/types'
 
@@ -19,13 +19,11 @@ export async function connectSaved(info: ConnectionInfo): Promise<ActiveConnecti
   const existing = store.activeConnections.find((c) => c.id === info.id)
   if (existing) return existing
 
-  const config = await getConnectionConfig(info.id)
-  const connectionId = await connect(config)
+  const connected = await connectSavedConnection(info.id)
 
   const pending = store.pendingReconnect.find((p) => p.connectionId === info.id)
   const active: ActiveConnection = {
-    id: info.id,
-    connectionId,
+    ...connected,
     info,
     selectedDatabase: pending?.selectedDatabase ?? info.database,
   }

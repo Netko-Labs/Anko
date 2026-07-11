@@ -27,6 +27,7 @@ export interface ConnectionStore {
 
   // Active connections (connected)
   activeConnections: ActiveConnection[]
+  setActiveConnections: (connections: ActiveConnection[]) => void
   addActiveConnection: (connection: ActiveConnection) => void
   removeActiveConnection: (id: string) => void
   setSelectedDatabase: (connectionId: string, database: string) => void

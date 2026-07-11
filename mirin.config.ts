@@ -1,11 +1,16 @@
 import { defineConfig } from 'mirinjs/config'
 
+const mcpBridgeBinary = `build/sidecars/anko-mcp${process.platform === 'win32' ? '.exe' : ''}`
+
 export default defineConfig({
   id: 'dev.netko.anko',
   name: 'Anko',
   publisher: 'Netko Labs',
   main: 'src/bun/index.ts',
   icon: 'icon.iconset',
+  sidecars: {
+    'anko-mcp': mcpBridgeBinary,
+  },
 
   // Keep production bundles lean. Add locales here when Anko ships translations.
   cef: {

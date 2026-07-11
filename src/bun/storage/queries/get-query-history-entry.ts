@@ -19,5 +19,7 @@ export function getQueryHistoryEntry(id: string): QueryHistoryEntry | null {
     rowCount: row.rowCount ?? null,
     success: row.success,
     errorMessage: row.errorMessage ?? null,
+    source: row.source,
+    approvalStatus: row.approvalStatus ?? null,
   }
 }

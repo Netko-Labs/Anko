@@ -14,6 +14,7 @@ import { CommandMenu } from '@/components/command-menu'
 import { hasCustomControls } from '@/lib/platform'
 import { cn } from '@/lib/utils'
 import { useConnectionStore } from '@/stores/connection'
+import { useMcpStore } from '@/stores/mcp'
 import type { TitleBarProps } from './lib'
 import { TitleBarSettingsMenu } from './title-bar-settings-menu/TitleBarSettingsMenu'
 import { TitleBarUpdateButton } from './title-bar-update-button/TitleBarUpdateButton'
@@ -24,6 +25,7 @@ export function TitleBar({ onToggleLeftSidebar, onToggleRightSidebar }: TitleBar
   const activeTabId = useConnectionStore((s) => s.activeTabId)
   const queryTabs = useConnectionStore((s) => s.queryTabs)
   const activeConnections = useConnectionStore((s) => s.activeConnections)
+  const pendingApprovals = useMcpStore((s) => s.pending.length)
 
   const context = useMemo(() => {
     if (!activeTabId) return null
@@ -60,6 +62,14 @@ export function TitleBar({ onToggleLeftSidebar, onToggleRightSidebar }: TitleBar
       {/* Right section — search, settings, toggle right sidebar */}
       <div className="flex items-center h-full pr-1.5 gap-0">
         <TitleBarUpdateButton />
+        {pendingApprovals > 0 && (
+          <span
+            className="mx-1 inline-flex h-5 min-w-5 items-center justify-center rounded-md bg-amber-500/15 px-1.5 text-[10px] font-medium text-amber-600 dark:text-amber-400"
+            title={`${pendingApprovals} MCP approval${pendingApprovals === 1 ? '' : 's'} pending`}
+          >
+            {pendingApprovals}
+          </span>
+        )}
         <TitleBarButton onClick={() => setCommandOpen(true)} tooltip="Search (⌘K)">
           <IconSearch className="size-3.5" />
         </TitleBarButton>
