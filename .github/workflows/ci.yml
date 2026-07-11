@@ -129,7 +129,7 @@ jobs:
         if: matrix.os == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y ruby ruby-dev build-essential squashfs-tools rpm
+          sudo apt-get install -y ruby ruby-dev build-essential squashfs-tools rpm xvfb xauth
           sudo gem install --no-document fpm -v 1.17.0
           sudo curl -fsSL -o /usr/local/bin/appimagetool \
             --proto '=https' --proto-redir '=https' --retry 3 \
@@ -143,6 +143,66 @@ jobs:
 
       - name: Build packaged app
         run: bun run build:app
+
+      - name: Smoke launch packaged app on macOS
+        if: matrix.os == 'macos'
+        shell: bash
+        run: |
+          APP="build/Anko.app/Contents/MacOS/Anko"
+          test -x "$APP" || { echo "::error::Packaged Anko executable is missing"; exit 1; }
+          LOG="$RUNNER_TEMP/anko-launch.log"
+          "$APP" >"$LOG" 2>&1 &
+          PID=$!
+          trap 'kill "$PID" 2>/dev/null || true' EXIT
+          sleep 10
+          if ! kill -0 "$PID" 2>/dev/null; then
+            wait "$PID" || true
+            cat "$LOG"
+            echo "::error::Packaged Anko exited during launch smoke"
+            exit 1
+          fi
+          kill "$PID"
+          wait "$PID" || true
+          trap - EXIT
+
+      - name: Smoke launch packaged app on Windows
+        if: matrix.os == 'windows'
+        shell: pwsh
+        run: |
+          $app = Resolve-Path "build/Anko/Anko.exe"
+          $stdout = Join-Path $env:RUNNER_TEMP "anko-launch.stdout.log"
+          $stderr = Join-Path $env:RUNNER_TEMP "anko-launch.stderr.log"
+          $process = Start-Process -FilePath $app -PassThru `
+            -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+          try {
+            Start-Sleep -Seconds 10
+            if ($process.HasExited) {
+              Get-Content $stdout, $stderr -ErrorAction SilentlyContinue
+              throw "Packaged Anko exited during launch smoke with code $($process.ExitCode)"
+            }
+          } finally {
+            if (-not $process.HasExited) {
+              Stop-Process -Id $process.Id -Force
+              Wait-Process -Id $process.Id -ErrorAction SilentlyContinue
+            }
+          }
+
+      - name: Smoke launch packaged app on Linux
+        if: matrix.os == 'linux'
+        shell: bash
+        run: |
+          APP="build/Anko/Anko"
+          test -x "$APP" || { echo "::error::Packaged Anko executable is missing"; exit 1; }
+          LOG="$RUNNER_TEMP/anko-launch.log"
+          set +e
+          timeout 12s xvfb-run -a "$APP" >"$LOG" 2>&1
+          STATUS=$?
+          set -e
+          if [ "$STATUS" -ne 124 ]; then
+            cat "$LOG"
+            echo "::error::Packaged Anko exited during launch smoke with code $STATUS"
+            exit 1
+          fi
 
       - name: Verify bundled MCP bridge
         shell: bash
