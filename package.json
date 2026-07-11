@@ -1,7 +1,7 @@
 {
   "name": "anko",
   "private": true,
-  "version": "0.8.0",
+  "version": "0.8.1",
   "type": "module",
   "scripts": {
     "start": "bun run build:mcp-bridge && mirin dev",
@@ -48,7 +48,7 @@
     "html-to-image": "^1.11.13",
     "immer": "^11.1.11",
     "lucide-react": "^0.562.0",
-    "mirinjs": "0.1.0-alpha.17",
+    "mirinjs": "0.1.0-alpha.18",
     "next-themes": "^0.4.6",
     "node-sql-parser": "^5.4.0",
     "react": "^19.2.7",
@@ -65,7 +65,7 @@
     "@biomejs/biome": "^2.5.3",
     "@commitlint/cli": "^21.2.1",
     "@commitlint/config-conventional": "^21.2.0",
-    "@mirinjs/cli": "0.1.0-alpha.17",
+    "@mirinjs/cli": "0.1.0-alpha.18",
     "@types/bun": "latest",
     "@types/dagre": "^0.7.54",
     "@types/node": "^24.13.3",

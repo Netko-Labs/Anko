@@ -31,7 +31,7 @@ async function getUpstream(clientName: string): Promise<Client> {
   const config = loadConfig()
   if (!config.enabled) throw new Error('Anko MCP is disabled. Enable it in Anko Settings.')
 
-  const client = new Client({ name: clientName, version: '0.8.0' })
+  const client = new Client({ name: clientName, version: '0.8.1' })
   const transport = new StreamableHTTPClientTransport(
     new URL(`http://127.0.0.1:${config.port}/mcp`),
     { requestInit: { headers: { Authorization: `Bearer ${config.token}` } } },
@@ -52,7 +52,7 @@ async function getUpstream(clientName: string): Promise<Client> {
 }
 
 const server = new Server(
-  { name: 'anko-mcp-bridge', version: '0.8.0' },
+  { name: 'anko-mcp-bridge', version: '0.8.1' },
   { capabilities: { tools: {} } },
 )
 
