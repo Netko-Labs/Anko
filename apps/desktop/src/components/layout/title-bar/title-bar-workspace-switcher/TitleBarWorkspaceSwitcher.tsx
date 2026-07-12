@@ -1,3 +1,4 @@
+import type { Workspace } from '@anko/desktop-domain'
 import { IconChevronDown, IconDatabase, IconPencil, IconPlus } from '@tabler/icons-react'
 import { useState } from 'react'
 import { WorkspaceIcon } from '@/components/sidebar/menus/workspace-icon/WorkspaceIcon'
@@ -13,7 +14,6 @@ import { listWorkspaces } from '@/lib/rpc'
 import { switchWorkspace } from '@/lib/session'
 import { cn } from '@/lib/utils'
 import { useWorkspaceStore } from '@/stores/workspace'
-import type { Workspace } from '@/types'
 
 export function TitleBarWorkspaceSwitcher() {
   const workspaces = useWorkspaceStore((s) => s.workspaces)

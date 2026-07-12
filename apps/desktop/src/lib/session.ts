@@ -8,6 +8,7 @@
  * lazy, manual reconnect rather than auto-connecting.
  */
 
+import type { SerializedConnection, SerializedTab, SessionData } from '@anko/desktop-domain'
 import {
   disconnect,
   getActiveWorkspaceId,
@@ -18,7 +19,6 @@ import {
 } from '@/lib/rpc'
 import { useConnectionStore } from '@/stores/connection'
 import { DEFAULT_WORKSPACE_ID, useWorkspaceStore } from '@/stores/workspace'
-import type { SerializedConnection, SerializedTab, SessionData } from '@/types'
 import { storeLogger } from './debug'
 
 /** Don't persist a tab's result past this many rows — it re-fetches on reconnect. */

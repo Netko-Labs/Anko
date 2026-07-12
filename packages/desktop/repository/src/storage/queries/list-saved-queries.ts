@@ -1,7 +1,7 @@
-import { asc, eq, isNull, or } from 'drizzle-orm'
-import { getDb } from '../client'
 import type { SavedQuery } from '@anko/desktop-domain'
 import { savedQueryTable } from '@anko/desktop-domain/db'
+import { asc, eq, isNull, or } from 'drizzle-orm'
+import { getDb } from '../client'
 
 export function listSavedQueries(workspaceId?: string): SavedQuery[] {
   const query = workspaceId

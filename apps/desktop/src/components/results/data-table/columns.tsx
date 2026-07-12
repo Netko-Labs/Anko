@@ -1,5 +1,5 @@
+import type { ColumnInfo } from '@anko/desktop-domain'
 import type { ColumnDef } from '@tanstack/react-table'
-import type { ColumnInfo } from '@/types'
 import type { ColumnMeta } from '../lib'
 import type { RowData } from './lib'
 import { isPrimaryKey } from './lib/utils'

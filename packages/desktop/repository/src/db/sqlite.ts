@@ -1,5 +1,5 @@
-import { SQL } from 'bun'
 import { AppError } from '@anko/desktop-domain'
+import { SQL } from 'bun'
 import type {
   ColumnDetail,
   ColumnInfo,

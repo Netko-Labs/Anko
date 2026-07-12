@@ -1,8 +1,8 @@
+import type { ConnectionConfig } from '@anko/desktop-domain'
+import { connectionTable } from '@anko/desktop-domain/db'
 import { eq, sql } from 'drizzle-orm'
 import { getDb } from '../client'
 import { encrypt } from '../encryption'
-import type { ConnectionConfig } from '@anko/desktop-domain'
-import { connectionTable } from '@anko/desktop-domain/db'
 
 export function updateConnection(id: string, config: ConnectionConfig): void {
   const encryptedPassword = config.password ? encrypt(config.password) : undefined

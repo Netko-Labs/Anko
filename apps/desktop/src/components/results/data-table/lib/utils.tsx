@@ -1,4 +1,4 @@
-import type { ColumnInfo } from '@/types'
+import type { ColumnInfo } from '@anko/desktop-domain'
 import type { RowData } from './types'
 
 // Format cell value for display

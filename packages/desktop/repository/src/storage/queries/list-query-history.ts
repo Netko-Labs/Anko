@@ -1,7 +1,7 @@
-import { desc, eq } from 'drizzle-orm'
-import { getDb } from '../client'
 import type { QueryHistoryEntry } from '@anko/desktop-domain'
 import { queryHistoryTable } from '@anko/desktop-domain/db'
+import { desc, eq } from 'drizzle-orm'
+import { getDb } from '../client'
 
 export function listQueryHistory(connectionId?: string, limit?: number): QueryHistoryEntry[] {
   const lim = limit ?? 100

@@ -1,4 +1,4 @@
-import type { ConnectionConfig, DatabaseDriver } from '@/types'
+import type { ConnectionConfig, DatabaseDriver } from '@anko/desktop-domain'
 
 /**
  * Parse connection URL like mysql://user:password@host:port/database, postgresql://..., or sqlite://path

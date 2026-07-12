@@ -1,9 +1,9 @@
-import { eq, sql } from 'drizzle-orm'
-import { AppError } from '@anko/desktop-domain'
-import { getDb } from '../client'
 import type { SavedQuery, UpdateSavedQueryInput } from '@anko/desktop-domain'
-import { getSavedQueryById } from '../queries/get-saved-query'
+import { AppError } from '@anko/desktop-domain'
 import { savedQueryTable } from '@anko/desktop-domain/db'
+import { eq, sql } from 'drizzle-orm'
+import { getDb } from '../client'
+import { getSavedQueryById } from '../queries/get-saved-query'
 
 export function updateSavedQuery(id: string, input: UpdateSavedQueryInput): SavedQuery {
   const existing = getSavedQueryById(id)

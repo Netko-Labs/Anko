@@ -1,4 +1,4 @@
-import type { ActiveConnection, ColumnDetail, SchemaInfo, TableInfo } from '@/types'
+import type { ActiveConnection, ColumnDetail, SchemaInfo, TableInfo } from '@anko/desktop-domain'
 
 export type NavItemId = 'connections' | 'saved-queries' | 'history' | 'search'
 

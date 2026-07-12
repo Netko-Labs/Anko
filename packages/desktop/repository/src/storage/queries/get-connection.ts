@@ -1,6 +1,6 @@
+import { connectionTable } from '@anko/desktop-domain/db'
 import { eq } from 'drizzle-orm'
 import { getDb } from '../client'
-import { connectionTable } from '@anko/desktop-domain/db'
 
 /** Returns the raw connection row (includes encrypted_password). Internal use. */
 export function getConnection(id: string) {

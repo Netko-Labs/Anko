@@ -1,6 +1,6 @@
+import type { Workspace } from '@anko/desktop-domain'
 import { create } from 'zustand'
 import { storeLogger } from '@/lib/debug'
-import type { Workspace } from '@/types'
 import { DEFAULT_WORKSPACE_ID } from './lib/constants'
 import type { WorkspaceStore } from './lib/types'
 

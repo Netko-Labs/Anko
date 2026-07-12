@@ -3,12 +3,8 @@ import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
-import { Client } from '@modelcontextprotocol/sdk/client/index.js'
-import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
-import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
-import type { QueryResult } from '@anko/desktop-domain'
+import type { McpApprovalRequest, QueryResult } from '@anko/desktop-domain'
 import type { DatabaseConnector } from '@anko/desktop-repository'
-import type { AppState } from '../../state'
 import {
   getConnectionConfig,
   initializeDb,
@@ -16,9 +12,12 @@ import {
   saveConnection,
   updateConnection,
 } from '@anko/desktop-repository'
+import { Client } from '@modelcontextprotocol/sdk/client/index.js'
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
+import type { AppState } from '../../state'
 import { mcpConfigPath } from '../config'
 import { AnkoMcpService } from '../service'
-import type { McpApprovalRequest } from '@anko/desktop-domain'
 
 const appDataDir = mkdtempSync(join(tmpdir(), 'anko-mcp-test-'))
 const port = 46_000 + Math.floor(Math.random() * 1_000)

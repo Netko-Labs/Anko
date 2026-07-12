@@ -1,7 +1,7 @@
-import { eq } from 'drizzle-orm'
-import { getDb } from '../client'
 import type { QueryHistoryEntry } from '@anko/desktop-domain'
 import { queryHistoryTable } from '@anko/desktop-domain/db'
+import { eq } from 'drizzle-orm'
+import { getDb } from '../client'
 
 export function getQueryHistoryEntry(id: string): QueryHistoryEntry | null {
   const [row] = getDb().select().from(queryHistoryTable).where(eq(queryHistoryTable.id, id)).all()

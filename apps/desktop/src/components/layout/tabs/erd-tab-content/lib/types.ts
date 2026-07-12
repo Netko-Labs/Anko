@@ -1,4 +1,4 @@
-import type { ErdTable } from '@/types'
+import type { ErdTable } from '@anko/desktop-domain'
 
 /** Callbacks a table node uses to mutate the diagram (handled in ErdTabContent). */
 export interface ErdNodeActions {

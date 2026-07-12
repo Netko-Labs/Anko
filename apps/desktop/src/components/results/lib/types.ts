@@ -1,4 +1,9 @@
-import type { ColumnInfo, FilterCondition, PendingRowChange, QueryResult } from '@/types'
+import type {
+  ColumnInfo,
+  FilterCondition,
+  PendingRowChange,
+  QueryResult,
+} from '@anko/desktop-domain'
 
 export interface ResultsTableProps {
   result?: QueryResult

@@ -1,4 +1,4 @@
-import type { CellEdit, DatabaseDriver, PendingRowChange } from '@/types'
+import type { CellEdit, DatabaseDriver, PendingRowChange } from '@anko/desktop-domain'
 
 export interface SQLGeneratorOptions {
   tableName: string

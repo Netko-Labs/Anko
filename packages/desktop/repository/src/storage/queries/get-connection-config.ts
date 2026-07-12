@@ -1,6 +1,6 @@
+import type { ConnectionConfig } from '@anko/desktop-domain'
 import { AppError } from '@anko/desktop-domain'
 import { decrypt } from '../encryption'
-import type { ConnectionConfig } from '@anko/desktop-domain'
 import { getConnection } from './get-connection'
 
 export function getConnectionConfig(id: string): ConnectionConfig {

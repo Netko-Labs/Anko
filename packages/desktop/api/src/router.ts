@@ -1,5 +1,5 @@
-import { rpc } from 'mirinjs/rpc'
 import type { AnkoMcpService, AppState } from '@anko/desktop-service'
+import { rpc } from 'mirinjs/rpc'
 import { connectionRoutes } from './routes/connections'
 import { dataRoutes } from './routes/data'
 import { libraryRoutes } from './routes/library'

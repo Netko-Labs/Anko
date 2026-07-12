@@ -1,11 +1,11 @@
 import {
+  AppError,
   CREATE_TABLE_DATA_TYPES,
   type CreateTableColumnInput,
   type CreateTableDriver,
   type CreateTableInput,
   supportsAutoIncrement,
 } from '@anko/desktop-domain'
-import { AppError } from '@anko/desktop-domain'
 
 const MAX_IDENTIFIER_LENGTH = 128
 const MAX_COLUMNS = 100

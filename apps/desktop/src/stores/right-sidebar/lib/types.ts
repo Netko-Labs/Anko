@@ -1,4 +1,4 @@
-import type { ColumnDetail } from '@/types'
+import type { ColumnDetail } from '@anko/desktop-domain'
 
 // Table info that persists across row/cell selections
 export interface TableInfo {

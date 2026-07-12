@@ -1,3 +1,4 @@
+import type { ActiveConnection } from '@anko/desktop-domain'
 import { useCallback, useEffect, useState } from 'react'
 import { ErrorBoundary } from '@/components/errors/error-boundary'
 import { CloseAppDialog, getCloseAppPreference } from '@/components/layout/close-app-dialog'
@@ -18,7 +19,6 @@ import { useConnectionStore } from '@/stores/connection'
 import { useLeftSidebarStore } from '@/stores/left-sidebar'
 import { useRightSidebarStore } from '@/stores/right-sidebar'
 import { useWorkspaceStore } from '@/stores/workspace'
-import type { ActiveConnection } from '@/types'
 
 function App() {
   const setSavedConnections = useConnectionStore((s) => s.setSavedConnections)

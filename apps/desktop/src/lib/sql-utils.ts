@@ -1,5 +1,5 @@
+import type { DatabaseDriver, FilterCondition } from '@anko/desktop-domain'
 import { quoteIdentifier } from '@/lib/sql-generator'
-import type { DatabaseDriver, FilterCondition } from '@/types'
 
 /**
  * Validates and sanitizes a column name to prevent SQL injection.

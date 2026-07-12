@@ -1,6 +1,6 @@
-import { getDb } from '../client'
 import type { ConnectionInfo } from '@anko/desktop-domain'
 import { connectionTable } from '@anko/desktop-domain/db'
+import { getDb } from '../client'
 
 export function listConnections(): ConnectionInfo[] {
   const rows = getDb()

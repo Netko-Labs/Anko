@@ -1,3 +1,11 @@
+import type { ActiveConnection } from '@anko/desktop-domain'
+import {
+  CREATE_TABLE_DATA_TYPES,
+  type CreateTableColumnInput,
+  type CreateTableDriver,
+  defaultCreateTableType,
+  supportsAutoIncrement,
+} from '@anko/desktop-domain'
 import { IconPlus, IconTrash } from '@tabler/icons-react'
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -24,14 +32,6 @@ import {
 import { formatErrorMessage } from '@/lib/error-utils'
 import { genId } from '@/lib/id'
 import { createTable } from '@/lib/rpc'
-import {
-  CREATE_TABLE_DATA_TYPES,
-  type CreateTableColumnInput,
-  type CreateTableDriver,
-  defaultCreateTableType,
-  supportsAutoIncrement,
-} from '@/shared/create-table'
-import type { ActiveConnection } from '@/types'
 
 interface DraftColumn extends CreateTableColumnInput {
   id: string

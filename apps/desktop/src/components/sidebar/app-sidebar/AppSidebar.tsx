@@ -1,3 +1,4 @@
+import type { ConnectionInfo } from '@anko/desktop-domain'
 import { IconDatabase, IconDeviceFloppy, IconHistory, IconSearch } from '@tabler/icons-react'
 import { useState } from 'react'
 import { ConnectionDialog } from '@/components/connection/connection-dialog'
@@ -5,7 +6,6 @@ import { listWorkspaces } from '@/lib/rpc'
 import { cn } from '@/lib/utils'
 import { useLeftSidebarStore } from '@/stores/left-sidebar'
 import { useWorkspaceStore } from '@/stores/workspace'
-import type { ConnectionInfo } from '@/types'
 import type { AppSidebarProps, NavItem, NavItemId } from '../lib'
 import { DatabasesPanel, HistoryPanel, SavedQueriesPanel, SearchPanel } from '../panels'
 

@@ -1,4 +1,4 @@
-import type { ActiveConnection, ConnectionInfo } from '@/types'
+import type { ActiveConnection, ConnectionInfo } from '@anko/desktop-domain'
 
 export type Page = 'main' | 'new-tab'
 

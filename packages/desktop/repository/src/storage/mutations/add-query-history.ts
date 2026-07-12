@@ -1,9 +1,9 @@
-import { asc, count, eq, lt, sql } from 'drizzle-orm'
-import { AppError } from '@anko/desktop-domain'
-import { getDb } from '../client'
 import type { AddQueryHistoryInput, QueryHistoryEntry } from '@anko/desktop-domain'
-import { getQueryHistoryEntry } from '../queries/get-query-history-entry'
+import { AppError } from '@anko/desktop-domain'
 import { queryHistoryTable } from '@anko/desktop-domain/db'
+import { asc, count, eq, lt, sql } from 'drizzle-orm'
+import { getDb } from '../client'
+import { getQueryHistoryEntry } from '../queries/get-query-history-entry'
 
 const MAX_HISTORY_ENTRIES = 1000
 const HISTORY_RETENTION_DAYS = 30

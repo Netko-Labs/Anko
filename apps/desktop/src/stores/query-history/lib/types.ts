@@ -1,4 +1,4 @@
-import type { QueryHistoryEntry } from '@/types'
+import type { QueryHistoryEntry } from '@anko/desktop-domain'
 
 export interface QueryHistoryStore {
   entries: QueryHistoryEntry[]

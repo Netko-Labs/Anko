@@ -1,6 +1,6 @@
+import { workspaceSessionTable } from '@anko/desktop-domain/db'
 import { sql } from 'drizzle-orm'
 import { getDb } from '../client'
-import { workspaceSessionTable } from '@anko/desktop-domain/db'
 
 /** Upsert the JSON session blob for a workspace. */
 export function saveWorkspaceSession(workspaceId: string, data: string): void {

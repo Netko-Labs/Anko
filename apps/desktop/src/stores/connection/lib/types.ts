@@ -9,7 +9,7 @@ import type {
   SerializedConnection,
   SessionData,
   TableInfo,
-} from '@/types'
+} from '@anko/desktop-domain'
 
 export interface SchemaCache {
   databases: SchemaInfo[]

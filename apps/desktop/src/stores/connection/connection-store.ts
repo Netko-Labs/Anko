@@ -1,13 +1,14 @@
 // conventions: >300 lines — single Zustand store spanning saved/active connections, schema cache, session, query tabs, and table editing; split into slice creators when next touched
+
+import type { QueryTab } from '@anko/desktop-domain'
+import { DEFAULT_TABLE_EDIT_STATE } from '@anko/desktop-domain'
 import { enableMapSet } from 'immer'
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
-import { DEFAULT_TABLE_EDIT_STATE } from '@/entities'
 import { storeLogger } from '@/lib/debug'
 import { genId } from '@/lib/id'
 import { createPrimaryKeyHash } from '@/lib/table-utils'
-import type { QueryTab } from '@/types'
 import { DEFAULT_SCHEMA_CACHE } from './lib/constants'
 import type { ConnectionStore } from './lib/types'
 

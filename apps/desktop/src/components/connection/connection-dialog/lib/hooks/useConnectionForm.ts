@@ -1,3 +1,4 @@
+import type { ConnectionConfig, ConnectionInfo, DatabaseDriver } from '@anko/desktop-domain'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { DEFAULT_PORTS, DEFAULT_USERS, type InputMode } from '@/components/connection/lib'
@@ -11,7 +12,6 @@ import {
 } from '@/lib/rpc'
 import { ensureMinimumToastDuration, resolveToast } from '@/lib/toast-utils'
 import { useConnectionStore } from '@/stores/connection'
-import type { ConnectionConfig, ConnectionInfo, DatabaseDriver } from '@/types'
 
 type OperationState =
   | { type: 'idle' }

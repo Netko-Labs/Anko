@@ -1,3 +1,4 @@
+import type { DatabaseDriver } from '@anko/desktop-domain'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -17,7 +18,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import type { DatabaseDriver } from '@/types'
 import { type ConnectionDialogProps, DEFAULT_PORTS, DEFAULT_USERS } from '../lib'
 import { useConnectionForm } from './lib/hooks/useConnectionForm'
 

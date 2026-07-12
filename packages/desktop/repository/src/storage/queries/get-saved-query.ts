@@ -1,7 +1,7 @@
-import { eq } from 'drizzle-orm'
-import { getDb } from '../client'
 import type { SavedQuery } from '@anko/desktop-domain'
 import { savedQueryTable } from '@anko/desktop-domain/db'
+import { eq } from 'drizzle-orm'
+import { getDb } from '../client'
 
 export function getSavedQueryById(id: string): SavedQuery | null {
   const [row] = getDb().select().from(savedQueryTable).where(eq(savedQueryTable.id, id)).all()

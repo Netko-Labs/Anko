@@ -1,4 +1,4 @@
-import type { ActiveConnection, ConnectionInfo, Workspace } from '@/types'
+import type { ActiveConnection, ConnectionInfo, Workspace } from '@anko/desktop-domain'
 
 export interface DatabasesPanelProps {
   workspaces: Workspace[]

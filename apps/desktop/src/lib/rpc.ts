@@ -1,9 +1,6 @@
 // conventions: >300 lines — typed RPC wrappers for every backend command; split by domain (connections, schema, queries, workspaces) re-exported from here when next touched
-import { client } from 'mirinjs/client'
-import type { McpApprovalRequest, McpSettings } from '@/bun/mcp/types'
-import type { Router } from '@/bun/rpc/router'
-import type { CreateTableInput, CreateTableResult } from '@/shared/create-table'
-import type { UpdateCheckResult, UpdateDownloadStatus } from '@/shared/rpc-types'
+
+import type { Router } from '@anko/desktop-api'
 import type {
   ActiveConnection,
   AddQueryHistoryInput,
@@ -11,16 +8,23 @@ import type {
   ConnectionConfig,
   ConnectionInfo,
   CreateSavedQueryInput,
+  CreateTableInput,
+  CreateTableResult,
   ErdSchema,
+  McpApprovalRequest,
+  McpSettings,
   QueryHistoryEntry,
   QueryResult,
   SavedQuery,
   SchemaInfo,
   TableInfo,
+  UpdateCheckResult,
+  UpdateDownloadStatus,
   UpdateSavedQueryInput,
   Workspace,
   WorkspaceConfig,
-} from '@/types'
+} from '@anko/desktop-domain'
+import { client } from 'mirinjs/client'
 import { rpcLogger } from './debug'
 
 // Typed client over mirin's RPC transport (window.mirin WebSocket to the worker).

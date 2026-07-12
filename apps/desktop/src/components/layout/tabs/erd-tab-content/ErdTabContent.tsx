@@ -2,6 +2,12 @@
 // layout, and export callbacks are tightly coupled through shared RF hooks; graph/layout
 // helpers already extracted to utils/. Split remaining canvas hooks when next touched.
 import '@xyflow/react/dist/style.css'
+import type {
+  ErdCustomRelation,
+  ErdLayoutDirection,
+  ErdNodeState,
+  ErdTabState,
+} from '@anko/desktop-domain'
 import { IconDatabaseOff, IconPlugConnected } from '@tabler/icons-react'
 import {
   Background,
@@ -29,7 +35,6 @@ import { formatErrorMessage } from '@/lib/error-utils'
 import { genId } from '@/lib/id'
 import { getErdSchema, saveImageFile, showSaveDialog, writeTextFile } from '@/lib/rpc'
 import { useConnectionStore } from '@/stores/connection'
-import type { ErdCustomRelation, ErdLayoutDirection, ErdNodeState, ErdTabState } from '@/types'
 import { ErdNoteNode } from './ErdNoteNode'
 import { ErdTableNode } from './ErdTableNode'
 import { ErdToolbar } from './ErdToolbar'

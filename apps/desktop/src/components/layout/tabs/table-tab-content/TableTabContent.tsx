@@ -1,3 +1,4 @@
+import type { FilterCondition } from '@anko/desktop-domain'
 import type { Table } from '@tanstack/react-table'
 import { Columns } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
@@ -11,7 +12,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useConnectionStore } from '@/stores/connection'
-import type { FilterCondition } from '@/types'
 import type { TableTabContentProps } from '../lib'
 import { TableFooter } from '../table-footer/TableFooter'
 import { UnsavedChangesDialog } from '../unsaved-changes-dialog/UnsavedChangesDialog'

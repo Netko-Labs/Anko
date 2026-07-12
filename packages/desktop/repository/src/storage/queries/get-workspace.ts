@@ -1,7 +1,7 @@
-import { eq } from 'drizzle-orm'
-import { getDb } from '../client'
 import type { Workspace } from '@anko/desktop-domain'
 import { workspaceTable } from '@anko/desktop-domain/db'
+import { eq } from 'drizzle-orm'
+import { getDb } from '../client'
 import { getWorkspaceConnections } from './get-workspace-connections'
 
 export function getWorkspaceById(id: string): Workspace | null {

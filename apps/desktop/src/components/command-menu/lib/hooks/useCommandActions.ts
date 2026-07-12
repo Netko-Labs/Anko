@@ -1,10 +1,10 @@
+import type { ConnectionInfo } from '@anko/desktop-domain'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
 import { connectSaved } from '@/lib/connect'
 import { formatErrorMessage } from '@/lib/error-utils'
 import { ensureMinimumToastDuration, resolveToast } from '@/lib/toast-utils'
 import { useConnectionStore } from '@/stores/connection'
-import type { ConnectionInfo } from '@/types'
 import type { CommandActions, CommandDatabaseItem, CommandTableItem } from '..'
 
 /**

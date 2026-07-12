@@ -1,7 +1,7 @@
+import type { QueryResult } from '@anko/desktop-domain'
 import { useCallback, useMemo, useRef } from 'react'
 import { toast } from 'sonner'
 import { useRightSidebarStore } from '@/stores/right-sidebar'
-import type { QueryResult } from '@/types'
 
 // Special markers for new rows
 const NEW_ROW_MARKER = '__isNewRow'

@@ -1,3 +1,4 @@
+import type { ActiveConnection } from '@anko/desktop-domain'
 import type { Dispatch } from 'react'
 import { useCallback, useRef } from 'react'
 import { toast } from 'sonner'
@@ -6,7 +7,6 @@ import { formatErrorMessage } from '@/lib/error-utils'
 import { disconnect } from '@/lib/rpc'
 import type { TreeAction, TreeState } from '@/reducers/tree-reducer'
 import { useConnectionStore } from '@/stores/connection'
-import type { ActiveConnection } from '@/types'
 import type { useTreeDataLoading } from './useTreeDataLoading'
 
 interface UseTreeEventHandlersParams {

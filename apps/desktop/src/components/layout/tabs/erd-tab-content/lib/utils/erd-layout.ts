@@ -1,5 +1,5 @@
+import type { ErdLayoutDirection, ErdTable } from '@anko/desktop-domain'
 import dagre from '@dagrejs/dagre'
-import type { ErdLayoutDirection, ErdTable } from '@/types'
 import type { LayoutEdge, LayoutInput, Positioned } from '..'
 import { COLLAPSED_HEIGHT, HEADER_HEIGHT, NODE_WIDTH, ROW_HEIGHT } from '..'
 

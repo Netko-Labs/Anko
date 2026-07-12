@@ -1,6 +1,6 @@
+import { workspaceConnectionTable, workspaceTable } from '@anko/desktop-domain/db'
 import { eq } from 'drizzle-orm'
 import { getDb } from '../client'
-import { workspaceConnectionTable, workspaceTable } from '@anko/desktop-domain/db'
 
 export function clearWorkspaces(): void {
   const db = getDb()

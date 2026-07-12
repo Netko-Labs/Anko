@@ -1,4 +1,4 @@
-import type { PendingRowChange, QueryResult } from '@/types'
+import type { PendingRowChange, QueryResult } from '@anko/desktop-domain'
 
 export type TabActionMode = 'query' | 'table'
 

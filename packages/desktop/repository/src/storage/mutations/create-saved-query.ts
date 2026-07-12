@@ -1,8 +1,8 @@
-import { AppError } from '@anko/desktop-domain'
-import { getDb } from '../client'
 import type { CreateSavedQueryInput, SavedQuery } from '@anko/desktop-domain'
-import { getSavedQueryById } from '../queries/get-saved-query'
+import { AppError } from '@anko/desktop-domain'
 import { savedQueryTable } from '@anko/desktop-domain/db'
+import { getDb } from '../client'
+import { getSavedQueryById } from '../queries/get-saved-query'
 
 export function createSavedQuery(input: CreateSavedQueryInput): SavedQuery {
   const id = crypto.randomUUID()

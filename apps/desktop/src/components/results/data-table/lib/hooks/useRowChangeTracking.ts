@@ -1,6 +1,6 @@
+import type { PendingRowChange } from '@anko/desktop-domain'
 import { useCallback, useMemo } from 'react'
 import { createPrimaryKeyHash } from '@/lib/table-utils'
-import type { PendingRowChange } from '@/types'
 
 export function useRowChangeTracking(
   pendingChanges: PendingRowChange[],

@@ -1,3 +1,4 @@
+import type { ErdColumn } from '@anko/desktop-domain'
 import {
   IconChevronDown,
   IconChevronRight,
@@ -20,7 +21,6 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu'
 import { cn } from '@/lib/utils'
-import type { ErdColumn } from '@/types'
 import { ERD_COLORS, type ErdTableNodeData, HEADER_HEIGHT, NODE_WIDTH, ROW_HEIGHT } from './lib'
 import { sourceHandleId, targetHandleId } from './lib/utils/erd-graph'
 

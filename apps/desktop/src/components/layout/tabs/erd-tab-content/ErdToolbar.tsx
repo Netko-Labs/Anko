@@ -1,3 +1,4 @@
+import type { ErdLayoutDirection } from '@anko/desktop-domain'
 import {
   IconArrowsHorizontal,
   IconArrowsVertical,
@@ -15,7 +16,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
-import type { ErdLayoutDirection } from '@/types'
 
 interface ErdToolbarProps {
   showColumnTypes: boolean

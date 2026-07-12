@@ -1,7 +1,7 @@
-import { eq } from 'drizzle-orm'
-import { getDb } from '../client'
 import type { WindowState } from '@anko/desktop-domain'
 import { windowStateTable } from '@anko/desktop-domain/db'
+import { eq } from 'drizzle-orm'
+import { getDb } from '../client'
 
 const DEFAULT_STATE: WindowState = {
   x: 200,

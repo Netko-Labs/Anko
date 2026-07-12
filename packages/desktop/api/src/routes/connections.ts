@@ -1,6 +1,4 @@
-import { rpc } from 'mirinjs/rpc'
 import type { ConnectionConfig } from '@anko/desktop-domain'
-import type { AppState } from '@anko/desktop-service'
 import {
   deleteConnection,
   listConnections,
@@ -8,6 +6,8 @@ import {
   saveConnection,
   updateConnection,
 } from '@anko/desktop-repository'
+import type { AppState } from '@anko/desktop-service'
+import { rpc } from 'mirinjs/rpc'
 
 /** Live-connection lifecycle plus persisted connection CRUD. */
 export function connectionRoutes(state: AppState) {

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import type { ColumnDetail } from '@/types'
+import type { ColumnDetail } from '@anko/desktop-domain'
 import { generateSchema } from '../schema-generators'
 
 const columns: ColumnDetail[] = [

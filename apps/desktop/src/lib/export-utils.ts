@@ -1,4 +1,4 @@
-import type { QueryResult } from '@/types'
+import type { QueryResult } from '@anko/desktop-domain'
 
 /**
  * Escapes a value for CSV format.

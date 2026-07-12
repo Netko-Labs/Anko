@@ -1,9 +1,9 @@
+import type { ActiveConnection } from '@anko/desktop-domain'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { formatErrorMessage } from '@/lib/error-utils'
 import { getDatabases, getSchemas, getTables } from '@/lib/rpc'
 import { useConnectionStore } from '@/stores/connection'
-import type { ActiveConnection } from '@/types'
 
 interface UseDatabaseHierarchyLoaderParams {
   open: boolean

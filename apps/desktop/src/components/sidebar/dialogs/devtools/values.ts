@@ -1,4 +1,4 @@
-import type { ConnectionConfig, DatabaseDriver } from '@/types'
+import type { ConnectionConfig, DatabaseDriver } from '@anko/desktop-domain'
 
 // Test database configurations matching docker-compose.yml
 export const TEST_DATABASES: ConnectionConfig[] = [

@@ -1,8 +1,8 @@
+import type { QueryResult } from '@anko/desktop-domain'
 import { useCallback, useMemo, useRef } from 'react'
 import { toast } from 'sonner'
 import { tableLogger } from '@/lib/debug'
 import { useConnectionStore } from '@/stores/connection'
-import type { QueryResult } from '@/types'
 
 export function useTableEditing(tabId: string, tabResult: QueryResult | undefined) {
   // Store actions - use refs to stabilize dependencies

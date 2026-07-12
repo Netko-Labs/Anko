@@ -1,6 +1,6 @@
+import { workspaceConnectionTable, workspaceTable } from '@anko/desktop-domain/db'
 import { eq, sql } from 'drizzle-orm'
 import { getDb } from '../client'
-import { workspaceConnectionTable, workspaceTable } from '@anko/desktop-domain/db'
 
 export function addWorkspaceConnection(workspaceId: string, connectionId: string): void {
   const db = getDb()

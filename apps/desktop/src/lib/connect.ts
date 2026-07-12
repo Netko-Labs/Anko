@@ -3,9 +3,9 @@
  * command menu, and the "reconnect" affordances on restored session tabs.
  */
 
+import type { ActiveConnection, ConnectionInfo } from '@anko/desktop-domain'
 import { connectSavedConnection } from '@/lib/rpc'
 import { useConnectionStore } from '@/stores/connection'
-import type { ActiveConnection, ConnectionInfo } from '@/types'
 
 /**
  * Open a backend connection for a saved connection and add it to the store as an

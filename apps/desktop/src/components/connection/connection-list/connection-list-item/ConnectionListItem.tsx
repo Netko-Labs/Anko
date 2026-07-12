@@ -1,3 +1,4 @@
+import type { ConnectionInfo } from '@anko/desktop-domain'
 import { Loader2 } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -7,7 +8,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
-import type { ConnectionInfo } from '@/types'
 
 interface ConnectionListItemProps {
   connection: ConnectionInfo

@@ -1,6 +1,6 @@
-import { getDb } from '../client'
 import type { WindowState } from '@anko/desktop-domain'
 import { windowStateTable } from '@anko/desktop-domain/db'
+import { getDb } from '../client'
 
 export function saveWindowState(state: WindowState): void {
   getDb()

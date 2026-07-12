@@ -1,4 +1,6 @@
 // conventions: >300 lines — single tanstack-table render with intertwined edit/context-menu closures; split when next touched
+
+import type { PendingRowChange } from '@anko/desktop-domain'
 import { IconClipboard, IconCode, IconEye, IconRowInsertBottom } from '@tabler/icons-react'
 import {
   type ColumnSizingState,
@@ -26,7 +28,6 @@ import {
 } from '@/components/ui/table'
 import { tableLogger } from '@/lib/debug'
 import { cn } from '@/lib/utils'
-import type { PendingRowChange } from '@/types'
 import type { ColumnMeta, DataTableProps } from '../lib'
 import { DataTableCell } from './cell'
 import { createDynamicColumns } from './columns'

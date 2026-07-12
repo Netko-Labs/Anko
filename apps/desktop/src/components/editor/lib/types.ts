@@ -4,7 +4,7 @@ import type {
   DatabaseDriver,
   SchemaInfo,
   TableInfo,
-} from '@/entities'
+} from '@anko/desktop-domain'
 
 export interface SchemaContext {
   databases: SchemaInfo[]

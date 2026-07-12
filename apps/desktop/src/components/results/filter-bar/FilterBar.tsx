@@ -1,3 +1,4 @@
+import type { FilterCondition, FilterOperator } from '@anko/desktop-domain'
 import { Plus, X } from 'lucide-react'
 import { memo, useState } from 'react'
 import type { FilterBarProps } from '@/components/results/lib'
@@ -12,7 +13,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { filterLogger } from '@/lib/debug'
-import type { FilterCondition, FilterOperator } from '@/types'
 
 export const FilterBar = memo(function FilterBar({
   columns,

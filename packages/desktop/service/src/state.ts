@@ -1,9 +1,14 @@
-import type { ActiveConnectionInfo, ConnectionInfo } from '@anko/desktop-domain'
-import type { ConnectionConfig } from '@anko/desktop-domain'
-import type { DatabaseConnector } from '@anko/desktop-repository'
-import { MySqlConnector, PostgresConnector, SqliteConnector } from '@anko/desktop-repository'
+import type { ActiveConnectionInfo, ConnectionConfig, ConnectionInfo } from '@anko/desktop-domain'
 import { AppError } from '@anko/desktop-domain'
-import { getConnection, getConnectionConfig, initializeDb } from '@anko/desktop-repository'
+import type { DatabaseConnector } from '@anko/desktop-repository'
+import {
+  getConnection,
+  getConnectionConfig,
+  initializeDb,
+  MySqlConnector,
+  PostgresConnector,
+  SqliteConnector,
+} from '@anko/desktop-repository'
 
 interface LiveConnection {
   connector: DatabaseConnector

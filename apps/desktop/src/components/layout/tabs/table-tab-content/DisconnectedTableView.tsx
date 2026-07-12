@@ -1,3 +1,4 @@
+import type { QueryResult } from '@anko/desktop-domain'
 import { IconDatabaseOff, IconPlugConnected } from '@tabler/icons-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -5,7 +6,6 @@ import { ResultsTable } from '@/components/results/results-table/ResultsTable'
 import { connectSaved } from '@/lib/connect'
 import { formatErrorMessage } from '@/lib/error-utils'
 import { useConnectionStore } from '@/stores/connection'
-import type { QueryResult } from '@/types'
 
 /**
  * Read-only view for a restored table tab whose connection isn't live yet. Shows

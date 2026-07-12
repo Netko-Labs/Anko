@@ -1,7 +1,7 @@
-import { rpc } from 'mirinjs/rpc'
 import type { CreateTableInput } from '@anko/desktop-domain'
 import { buildCreateTableSql } from '@anko/desktop-repository'
 import type { AppState } from '@anko/desktop-service'
+import { rpc } from 'mirinjs/rpc'
 
 /** Query execution and schema-browsing commands against a live connection. */
 export function dataRoutes(state: AppState) {

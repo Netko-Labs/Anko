@@ -1,4 +1,4 @@
-import type { ColumnDetail } from '@/types'
+import type { ColumnDetail } from '@anko/desktop-domain'
 
 export interface ZodGeneratorViewProps {
   tableName: string

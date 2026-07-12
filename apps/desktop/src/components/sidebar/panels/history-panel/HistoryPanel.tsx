@@ -1,3 +1,4 @@
+import type { QueryHistoryEntry } from '@anko/desktop-domain'
 import {
   IconCheck,
   IconClipboard,
@@ -29,7 +30,6 @@ import { useConnectionStore } from '@/stores/connection'
 import { useQueryHistoryStore } from '@/stores/query-history'
 import { useSavedQueriesStore } from '@/stores/saved-queries'
 import { useWorkspaceStore } from '@/stores/workspace'
-import type { QueryHistoryEntry } from '@/types'
 import type { HistoryEntryProps } from './lib'
 
 export function HistoryPanel() {

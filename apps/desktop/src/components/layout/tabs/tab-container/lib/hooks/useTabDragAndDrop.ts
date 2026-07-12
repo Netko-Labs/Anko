@@ -1,6 +1,6 @@
+import type { QueryTab } from '@anko/desktop-domain'
 import React, { useCallback, useRef, useState } from 'react'
 import { useConnectionStore } from '@/stores/connection'
-import type { QueryTab } from '@/types'
 
 interface DragState {
   isDragging: boolean

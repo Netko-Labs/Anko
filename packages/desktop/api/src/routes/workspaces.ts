@@ -1,4 +1,3 @@
-import { rpc } from 'mirinjs/rpc'
 import type { WorkspaceConfig } from '@anko/desktop-domain'
 import {
   addWorkspaceConnection,
@@ -13,6 +12,7 @@ import {
   setAppMeta,
   updateWorkspace,
 } from '@anko/desktop-repository'
+import { rpc } from 'mirinjs/rpc'
 
 const ACTIVE_WORKSPACE_KEY = 'activeWorkspaceId'
 

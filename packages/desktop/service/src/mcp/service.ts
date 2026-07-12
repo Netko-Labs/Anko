@@ -1,12 +1,18 @@
 import { chmodSync, copyFileSync, mkdirSync } from 'node:fs'
 import { dirname } from 'node:path'
+import type {
+  McpApprovalRequest,
+  McpEvents,
+  McpSettings,
+  StoredMcpConfig,
+} from '@anko/desktop-domain'
+import { addQueryHistory, listConnections } from '@anko/desktop-repository'
 import { mcpEndpoint } from '@anko/mcp-contract'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js'
 import { resolveSidecar } from 'mirinjs'
 import { z } from 'zod'
 import type { AppState } from '../state'
-import { addQueryHistory, listConnections } from '@anko/desktop-repository'
 import { McpApprovalManager } from './approval-manager'
 import {
   getBridgeStatus,
@@ -16,20 +22,14 @@ import {
   newMcpToken,
   saveMcpConfig,
 } from './config'
-import { authorizeMcpRequest } from './security'
-import { classifySql, wrapReadOnlyQuery } from './sql-safety'
-import type {
-  McpApprovalRequest,
-  McpEvents,
-  McpSettings,
-  StoredMcpConfig,
-} from '@anko/desktop-domain'
 import {
   DEFAULT_MCP_MAX_ROWS,
   MAX_MCP_ROWS,
   MCP_BRIDGE_VERSION,
   MCP_QUERY_TIMEOUT_MS,
 } from './constants'
+import { authorizeMcpRequest } from './security'
+import { classifySql, wrapReadOnlyQuery } from './sql-safety'
 
 interface McpSession {
   server: McpServer

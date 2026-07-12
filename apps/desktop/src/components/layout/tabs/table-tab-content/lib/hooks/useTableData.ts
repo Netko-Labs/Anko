@@ -1,3 +1,9 @@
+import type {
+  ActiveConnection,
+  DatabaseDriver,
+  FilterCondition,
+  QueryTab,
+} from '@anko/desktop-domain'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { createTimer, tableLogger } from '@/lib/debug'
@@ -8,7 +14,6 @@ import { buildWhereClause } from '@/lib/sql-utils'
 import { ensureMinimumToastDuration, resolveToast } from '@/lib/toast-utils'
 import { useConnectionStore } from '@/stores/connection'
 import { useRightSidebarStore } from '@/stores/right-sidebar'
-import type { ActiveConnection, DatabaseDriver, FilterCondition, QueryTab } from '@/types'
 
 const PAGE_SIZE = 100
 

@@ -1,10 +1,9 @@
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { app, menu, notification } from 'mirinjs'
-import { AnkoMcpService } from './mcp/service'
 import { createRouter } from '@anko/desktop-api'
-import { AppState } from './state'
-import { getWindowState, saveWindowState } from './storage'
+import { getWindowState, saveWindowState } from '@anko/desktop-repository'
+import { AnkoMcpService, AppState } from '@anko/desktop-service'
+import { app, menu, notification } from 'mirinjs'
 
 // ---- App state + storage ----
 const state = new AppState()

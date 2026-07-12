@@ -1,3 +1,4 @@
+import type { DatabaseDriver, PendingRowChange } from '@anko/desktop-domain'
 import { useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 import { createTimer, tableLogger } from '@/lib/debug'
@@ -5,7 +6,6 @@ import { formatErrorMessage } from '@/lib/error-utils'
 import { executeQuery } from '@/lib/rpc'
 import { generateCommitSQL } from '@/lib/sql-generator'
 import { useConnectionStore } from '@/stores/connection'
-import type { DatabaseDriver, PendingRowChange } from '@/types'
 
 interface UseTableCommitParams {
   tabId: string

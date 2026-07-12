@@ -1,3 +1,4 @@
+import type { WorkspaceConfig } from '@anko/desktop-domain'
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
 import {
@@ -13,7 +14,6 @@ import { Label } from '@/components/ui/label'
 import { createWorkspace, updateWorkspace } from '@/lib/rpc'
 import { cn } from '@/lib/utils'
 import { useWorkspaceStore } from '@/stores/workspace'
-import type { WorkspaceConfig } from '@/types'
 import { DEFAULT_WORKSPACE_ICON, WORKSPACE_ICONS, type WorkspaceDialogProps } from '../lib'
 
 export function WorkspaceDialog({ open, onOpenChange, editWorkspace }: WorkspaceDialogProps) {

@@ -1,5 +1,5 @@
+import type { McpApprovalRequest, McpSettings } from '@anko/desktop-domain'
 import { create } from 'zustand'
-import type { McpApprovalRequest, McpSettings } from '@/bun/mcp/types'
 
 interface McpStore {
   settingsOpen: boolean

@@ -1,4 +1,3 @@
-import { rpc } from 'mirinjs/rpc'
 import type {
   AddQueryHistoryInput,
   CreateSavedQueryInput,
@@ -14,6 +13,7 @@ import {
   listSavedQueries,
   updateSavedQuery,
 } from '@anko/desktop-repository'
+import { rpc } from 'mirinjs/rpc'
 
 /** Query history and saved-query persistence commands. */
 export function libraryRoutes() {

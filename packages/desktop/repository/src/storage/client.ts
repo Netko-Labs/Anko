@@ -1,10 +1,10 @@
 import { Database } from 'bun:sqlite'
 import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
-import { eq } from 'drizzle-orm'
-import { type BunSQLiteDatabase, drizzle } from 'drizzle-orm/bun-sqlite'
 import * as schema from '@anko/desktop-domain/db'
 import { workspaceTable } from '@anko/desktop-domain/db'
+import { eq } from 'drizzle-orm'
+import { type BunSQLiteDatabase, drizzle } from 'drizzle-orm/bun-sqlite'
 
 export type DrizzleDB = BunSQLiteDatabase<typeof schema>
 

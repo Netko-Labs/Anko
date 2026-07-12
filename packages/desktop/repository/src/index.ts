@@ -1,4 +1,11 @@
 // Storage (local persistence)
+
+// Database connectors
+export type { DatabaseConnector } from './db/connector'
+export { buildCreateTableSql } from './db/create-table'
+export { MySqlConnector } from './db/mysql'
+export { PostgresConnector } from './db/postgres'
+export { SqliteConnector } from './db/sqlite'
 export type { DrizzleDB } from './storage/client'
 export { initializeDb } from './storage/client'
 export { addQueryHistory } from './storage/mutations/add-query-history'
@@ -36,10 +43,3 @@ export { listConnections } from './storage/queries/list-connections'
 export { listQueryHistory } from './storage/queries/list-query-history'
 export { listSavedQueries } from './storage/queries/list-saved-queries'
 export { listWorkspaces } from './storage/queries/list-workspaces'
-
-// Database connectors
-export type { DatabaseConnector } from './db/connector'
-export { buildCreateTableSql } from './db/create-table'
-export { MySqlConnector } from './db/mysql'
-export { PostgresConnector } from './db/postgres'
-export { SqliteConnector } from './db/sqlite'

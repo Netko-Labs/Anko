@@ -1,4 +1,4 @@
-import type { FilterOperator } from '@/types'
+import type { FilterOperator } from '@anko/desktop-domain'
 
 export const FILTER_OPERATORS: { value: FilterOperator; label: string }[] = [
   { value: 'equals', label: '=' },

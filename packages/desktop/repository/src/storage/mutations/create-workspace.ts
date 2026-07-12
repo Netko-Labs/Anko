@@ -1,8 +1,8 @@
-import { AppError } from '@anko/desktop-domain'
-import { getDb } from '../client'
 import type { Workspace, WorkspaceConfig } from '@anko/desktop-domain'
-import { getWorkspaceById } from '../queries/get-workspace'
+import { AppError } from '@anko/desktop-domain'
 import { workspaceTable } from '@anko/desktop-domain/db'
+import { getDb } from '../client'
+import { getWorkspaceById } from '../queries/get-workspace'
 
 export function createWorkspace(config: WorkspaceConfig): Workspace {
   const id = crypto.randomUUID()

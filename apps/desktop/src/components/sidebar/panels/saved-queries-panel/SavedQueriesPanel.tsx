@@ -1,3 +1,4 @@
+import type { SavedQuery } from '@anko/desktop-domain'
 import { IconPlus } from '@tabler/icons-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -6,7 +7,6 @@ import { createSavedQuery, deleteSavedQuery, listSavedQueries, updateSavedQuery 
 import { useConnectionStore } from '@/stores/connection'
 import { useSavedQueriesStore } from '@/stores/saved-queries'
 import { useWorkspaceStore } from '@/stores/workspace'
-import type { SavedQuery } from '@/types'
 import { SaveQueryDialog } from '../save-query-dialog'
 import { SavedQueryItem } from '../saved-query-item'
 

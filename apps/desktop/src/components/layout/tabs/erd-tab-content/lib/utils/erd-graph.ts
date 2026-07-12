@@ -1,5 +1,5 @@
+import type { ErdNote, ErdRelation, ErdSchema, ErdTabState } from '@anko/desktop-domain'
 import { type Edge, MarkerType, type Node } from '@xyflow/react'
-import type { ErdNote, ErdRelation, ErdSchema, ErdTabState } from '@/types'
 import type { ErdNoteNodeData, ErdTableNodeData, GraphActions } from '..'
 
 /** Handle ids for a column's right (source) and left (target) connection points. */

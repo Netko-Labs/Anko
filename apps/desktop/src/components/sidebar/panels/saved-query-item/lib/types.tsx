@@ -1,4 +1,4 @@
-import type { SavedQuery } from '@/types'
+import type { SavedQuery } from '@anko/desktop-domain'
 
 export interface SavedQueryItemProps {
   query: SavedQuery
