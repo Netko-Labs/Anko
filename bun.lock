@@ -92,7 +92,7 @@
         "typescript": "~5.9.3",
       },
     },
-    "packages/mcp-contract": {
+    "packages/shared/mcp-contract": {
       "name": "@anko/mcp-contract",
       "version": "0.8.4",
       "devDependencies": {
@@ -120,7 +120,7 @@
 
     "@anko/mcp-bridge": ["@anko/mcp-bridge@workspace:apps/mcp-bridge"],
 
-    "@anko/mcp-contract": ["@anko/mcp-contract@workspace:packages/mcp-contract"],
+    "@anko/mcp-contract": ["@anko/mcp-contract@workspace:packages/shared/mcp-contract"],
 
     "@babel/code-frame": ["@babel/code-frame@7.29.7", "", { "dependencies": { "@babel/helper-validator-identifier": "^7.29.7", "js-tokens": "^4.0.0", "picocolors": "^1.1.1" } }, "sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw=="],
 

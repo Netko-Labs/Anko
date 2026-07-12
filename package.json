@@ -5,13 +5,14 @@
   "type": "module",
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/desktop/*",
+    "packages/shared/*"
   ],
   "scripts": {
     "start": "bun run build:mcp-bridge && bun run --cwd apps/desktop dev",
     "dev": "bun run start",
     "build": "bun run typecheck && bun run --cwd apps/desktop build:renderer && bun run --cwd apps/mcp-bridge build:binary",
-    "typecheck": "bun run --cwd packages/mcp-contract typecheck && bun run --cwd apps/mcp-bridge typecheck && bun run --cwd apps/desktop typecheck",
+    "typecheck": "bun run --cwd packages/shared/mcp-contract typecheck && bun run --cwd apps/mcp-bridge typecheck && bun run --cwd apps/desktop typecheck",
     "build:mcp-bridge": "bun run --cwd apps/mcp-bridge build",
     "build:app": "bun run build:mcp-bridge && bun run --cwd apps/desktop build:app",
     "release": "bun run build:mcp-bridge && bun run --cwd apps/desktop release",
