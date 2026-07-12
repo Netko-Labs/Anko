@@ -1,13 +1,13 @@
 import { rpc } from 'mirinjs/rpc'
-import type { ConnectionConfig } from '../../../shared/rpc-types'
-import type { AppState } from '../../state'
+import type { ConnectionConfig } from '@anko/desktop-domain'
+import type { AppState } from '@anko/desktop-service'
 import {
   deleteConnection,
   listConnections,
   removeConnectionFromAllWorkspaces,
   saveConnection,
   updateConnection,
-} from '../../storage'
+} from '@anko/desktop-repository'
 
 /** Live-connection lifecycle plus persisted connection CRUD. */
 export function connectionRoutes(state: AppState) {

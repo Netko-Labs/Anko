@@ -1,7 +1,7 @@
 import { rpc } from 'mirinjs/rpc'
-import type { QueryHistoryEntry } from '../../../shared/rpc-types'
-import type { AnkoMcpService } from '../../mcp/service'
-import type { McpApprovalRequest, McpSettings } from '../../mcp/types'
+import type { QueryHistoryEntry } from '@anko/desktop-domain'
+import type { AnkoMcpService } from '@anko/desktop-service'
+import type { McpApprovalRequest, McpSettings } from '@anko/desktop-domain'
 
 /** Local MCP lifecycle, approval decisions, and renderer push events. */
 export function mcpRoutes(service: AnkoMcpService) {

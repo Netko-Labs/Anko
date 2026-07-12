@@ -2,7 +2,7 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { app, menu, notification } from 'mirinjs'
 import { AnkoMcpService } from './mcp/service'
-import { createRouter } from './rpc/router'
+import { createRouter } from '@anko/desktop-api'
 import { AppState } from './state'
 import { getWindowState, saveWindowState } from './storage'
 

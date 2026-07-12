@@ -1,13 +1,13 @@
 import { app, dialog } from 'mirinjs'
 import { rpc } from 'mirinjs/rpc'
-import pkg from '../../../../package.json'
-import type { UpdateDownloadStatus } from '../../../shared/rpc-types'
+import pkg from '../../package.json'
+import type { UpdateDownloadStatus } from '@anko/desktop-domain'
 import {
   clearConnections,
   clearQueryHistory,
   clearSavedQueries,
   clearWorkspaces,
-} from '../../storage'
+} from '@anko/desktop-repository'
 
 const APP_VERSION = (pkg as { version?: string }).version ?? '0.0.0'
 

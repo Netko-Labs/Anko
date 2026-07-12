@@ -1,0 +1,27 @@
+import { rpc } from 'mirinjs/rpc'
+import type { AnkoMcpService, AppState } from '@anko/desktop-service'
+import { connectionRoutes } from './routes/connections'
+import { dataRoutes } from './routes/data'
+import { libraryRoutes } from './routes/library'
+import { mcpRoutes } from './routes/mcp'
+import { systemRoutes } from './routes/system'
+import { workspaceRoutes } from './routes/workspaces'
+
+/**
+ * Anko's RPC surface as a mirin router. The frontend imports only the `Router`
+ * type (see src/lib/rpc.ts); handlers run in the Bun worker. Handlers are
+ * grouped by concern under `./routes/` and composed here — this file stays a
+ * thin composition root.
+ */
+export function createRouter(state: AppState, mcp: AnkoMcpService) {
+  return rpc.router({
+    ...connectionRoutes(state),
+    ...dataRoutes(state),
+    ...workspaceRoutes(),
+    ...libraryRoutes(),
+    ...mcpRoutes(mcp),
+    ...systemRoutes(),
+  })
+}
+
+export type Router = ReturnType<typeof createRouter>

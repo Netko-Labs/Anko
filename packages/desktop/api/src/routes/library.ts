@@ -3,7 +3,7 @@ import type {
   AddQueryHistoryInput,
   CreateSavedQueryInput,
   UpdateSavedQueryInput,
-} from '../../../shared/rpc-types'
+} from '@anko/desktop-domain'
 import {
   addQueryHistory,
   clearQueryHistory,
@@ -13,7 +13,7 @@ import {
   listQueryHistory,
   listSavedQueries,
   updateSavedQuery,
-} from '../../storage'
+} from '@anko/desktop-repository'
 
 /** Query history and saved-query persistence commands. */
 export function libraryRoutes() {

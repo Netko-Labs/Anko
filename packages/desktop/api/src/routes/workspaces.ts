@@ -1,5 +1,5 @@
 import { rpc } from 'mirinjs/rpc'
-import type { WorkspaceConfig } from '../../../shared/rpc-types'
+import type { WorkspaceConfig } from '@anko/desktop-domain'
 import {
   addWorkspaceConnection,
   createWorkspace,
@@ -12,7 +12,7 @@ import {
   saveWorkspaceSession,
   setAppMeta,
   updateWorkspace,
-} from '../../storage'
+} from '@anko/desktop-repository'
 
 const ACTIVE_WORKSPACE_KEY = 'activeWorkspaceId'
 
