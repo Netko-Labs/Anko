@@ -17,6 +17,10 @@
     "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
+    "@anko/desktop-api": "workspace:*",
+    "@anko/desktop-domain": "workspace:*",
+    "@anko/desktop-repository": "workspace:*",
+    "@anko/desktop-service": "workspace:*",
     "@anko/mcp-contract": "workspace:*",
     "@base-ui/react": "^1.6.0",
     "@codemirror/autocomplete": "^6.20.3",

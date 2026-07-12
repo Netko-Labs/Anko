@@ -1,0 +1,25 @@
+{
+  "name": "@anko/desktop-service",
+  "private": true,
+  "version": "0.8.4",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check-types": "tsgo -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@anko/desktop-domain": "workspace:*",
+    "@anko/desktop-repository": "workspace:*",
+    "@anko/mcp-contract": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "mirinjs": "0.1.0-alpha.18",
+    "node-sql-parser": "^5.4.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@anko/typescript-config": "workspace:*",
+    "@types/bun": "latest"
+  }
+}

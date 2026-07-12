@@ -26,6 +26,10 @@
       "name": "@anko/desktop",
       "version": "0.8.4",
       "dependencies": {
+        "@anko/desktop-api": "workspace:*",
+        "@anko/desktop-domain": "workspace:*",
+        "@anko/desktop-repository": "workspace:*",
+        "@anko/desktop-service": "workspace:*",
         "@anko/mcp-contract": "workspace:*",
         "@base-ui/react": "^1.6.0",
         "@codemirror/autocomplete": "^6.20.3",
@@ -93,6 +97,64 @@
         "@types/bun": "latest",
       },
     },
+    "packages/desktop/api": {
+      "name": "@anko/desktop-api",
+      "version": "0.8.4",
+      "dependencies": {
+        "@anko/desktop-domain": "workspace:*",
+        "@anko/desktop-repository": "workspace:*",
+        "@anko/desktop-service": "workspace:*",
+        "mirinjs": "0.1.0-alpha.18",
+      },
+      "devDependencies": {
+        "@anko/typescript-config": "workspace:*",
+        "@types/bun": "latest",
+      },
+    },
+    "packages/desktop/domain": {
+      "name": "@anko/desktop-domain",
+      "version": "0.8.4",
+      "dependencies": {
+        "@anko/mcp-contract": "workspace:*",
+        "drizzle-orm": "^0.45.2",
+        "drizzle-zod": "^0.8.3",
+        "zod": "^4.4.3",
+      },
+      "devDependencies": {
+        "@anko/typescript-config": "workspace:*",
+        "@types/bun": "latest",
+      },
+    },
+    "packages/desktop/repository": {
+      "name": "@anko/desktop-repository",
+      "version": "0.8.4",
+      "dependencies": {
+        "@anko/desktop-domain": "workspace:*",
+        "drizzle-orm": "^0.45.2",
+      },
+      "devDependencies": {
+        "@anko/typescript-config": "workspace:*",
+        "@types/bun": "latest",
+        "drizzle-kit": "^0.31.10",
+      },
+    },
+    "packages/desktop/service": {
+      "name": "@anko/desktop-service",
+      "version": "0.8.4",
+      "dependencies": {
+        "@anko/desktop-domain": "workspace:*",
+        "@anko/desktop-repository": "workspace:*",
+        "@anko/mcp-contract": "workspace:*",
+        "@modelcontextprotocol/sdk": "^1.29.0",
+        "mirinjs": "0.1.0-alpha.18",
+        "node-sql-parser": "^5.4.0",
+        "zod": "^4.4.3",
+      },
+      "devDependencies": {
+        "@anko/typescript-config": "workspace:*",
+        "@types/bun": "latest",
+      },
+    },
     "packages/shared/mcp-contract": {
       "name": "@anko/mcp-contract",
       "version": "0.8.4",
@@ -121,6 +183,14 @@
   },
   "packages": {
     "@anko/desktop": ["@anko/desktop@workspace:apps/desktop"],
+
+    "@anko/desktop-api": ["@anko/desktop-api@workspace:packages/desktop/api"],
+
+    "@anko/desktop-domain": ["@anko/desktop-domain@workspace:packages/desktop/domain"],
+
+    "@anko/desktop-repository": ["@anko/desktop-repository@workspace:packages/desktop/repository"],
+
+    "@anko/desktop-service": ["@anko/desktop-service@workspace:packages/desktop/service"],
 
     "@anko/mcp-bridge": ["@anko/mcp-bridge@workspace:apps/mcp-bridge"],
 

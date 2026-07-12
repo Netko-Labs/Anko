@@ -1,0 +1,22 @@
+{
+  "name": "@anko/desktop-api",
+  "private": true,
+  "version": "0.8.4",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check-types": "tsgo -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@anko/desktop-domain": "workspace:*",
+    "@anko/desktop-repository": "workspace:*",
+    "@anko/desktop-service": "workspace:*",
+    "mirinjs": "0.1.0-alpha.18"
+  },
+  "devDependencies": {
+    "@anko/typescript-config": "workspace:*",
+    "@types/bun": "latest"
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "extends": "@anko/typescript-config/bun.json",
+  "include": ["src"]
+}

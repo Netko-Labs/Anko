@@ -1,0 +1,23 @@
+{
+  "name": "@anko/desktop-domain",
+  "private": true,
+  "version": "0.8.4",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./db": "./src/db/index.ts"
+  },
+  "scripts": {
+    "check-types": "tsgo -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@anko/mcp-contract": "workspace:*",
+    "drizzle-orm": "^0.45.2",
+    "drizzle-zod": "^0.8.3",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@anko/typescript-config": "workspace:*",
+    "@types/bun": "latest"
+  }
+}

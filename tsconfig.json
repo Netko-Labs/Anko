@@ -3,6 +3,10 @@
   "references": [
     { "path": "./apps/desktop/tsconfig.json" },
     { "path": "./apps/mcp-bridge/tsconfig.json" },
-    { "path": "./packages/shared/mcp-contract/tsconfig.json" }
+    { "path": "./packages/shared/mcp-contract/tsconfig.json" },
+    { "path": "./packages/desktop/domain/tsconfig.json" },
+    { "path": "./packages/desktop/repository/tsconfig.json" },
+    { "path": "./packages/desktop/service/tsconfig.json" },
+    { "path": "./packages/desktop/api/tsconfig.json" }
   ]
 }
