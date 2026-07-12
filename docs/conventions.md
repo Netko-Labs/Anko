@@ -13,17 +13,15 @@ package API.
 
 | Term | Meaning in Anko |
 | --- | --- |
-| context | A grouping folder that owns child modules: `src/components/{context}/` (e.g. `sidebar/`, `layout/`, `results/`), `src/stores/`, `src/bun/db/`, `src/bun/storage/`. |
+| context | A grouping folder that owns child modules: `src/components/{context}/` (e.g. `sidebar/`, `layout/`, `results/`), `src/stores/`, or a context inside a layer package (e.g. `repository/src/storage/`). |
 | module | A folder with a public surface and an `index.ts` barrel. A **component module** has a `.tsx` at its root; a **logic module** does not. |
 | `lib/` | A module's (or context's) internal implementation bucket: `hooks/`, `types.ts`, `constants.ts`, `values.ts`, `utils.ts` (+ `index.ts`). Private to the module/context. Distinct from the app-level `src/lib/`. |
 | `hooks/` | Obligatory subfolder for module-local React hooks (`useThing.ts`), inside the module's `lib/`. |
 | `src/hooks/` | App-level shared hooks context: hooks consumed by two or more feature contexts. |
 | `src/lib/` | App-level shared utilities (pure helpers, RPC wrappers, bridges). |
-| `src/entities/` | Domain schemas: TypeScript interfaces for connections, queries, workspaces, etc. |
-| `src/shared/` | Cross-process contract: types shared between the Bun backend and the React frontend (`rpc-types.ts`). |
 | store | Zustand client-state coordination in `src/stores/{feature}/`. |
 | barrel | An `index.ts` that only re-exports. |
-| layer | A backend area under `src/bun/`: `db` (connectors), `storage` (local persistence), `rpc` (router). |
+| layer | A backend package under `packages/desktop/`: `domain` (data model), `repository` (IO), `service` (business logic), `api` (RPC composition). |
 
 ## 2. Modules & Scope
 
@@ -82,7 +80,7 @@ stores/{feature}/
   their importers updated to the module barrel.
 - **No inline type declarations** in implementation files (`.tsx`, hooks, stores, handlers,
   `utils.ts`) beyond component-local `Props`. Shared or exported types live in the module's
-  `lib/types.ts`; domain types in `src/entities/`.
+  `lib/types.ts`; domain types in `@anko/desktop-domain`.
 - **Constants** export as `UPPER_SNAKE_CASE` (e.g. `DEFAULT_PAGE_SIZE`, `SQL_KEYWORDS`).
 - **`lib/` declaration files (`types`/`constants`/`values`) hold no JSX beyond static value/label
   elements and no side effects.**
@@ -93,9 +91,9 @@ stores/{feature}/
 
 1. **module-internal** → the module's `lib/` (or the module root for a logic module)
 2. **context reuse** → the context's `lib/` or a sibling logic module (e.g. `components/editor/lib/`)
-3. **app-wide frontend** → `src/hooks/` (hooks), `src/lib/` (helpers), `src/entities/` (domain
-   types), `src/stores/` (shared client state), `src/components/ui/` (primitives)
-4. **cross-process** → `src/shared/` (RPC contract types only)
+3. **app-wide frontend** → `src/hooks/` (hooks), `src/lib/` (helpers), `src/stores/` (shared
+   client state), `src/components/ui/` (primitives)
+4. **cross-process / domain** → `@anko/desktop-domain` (`schemas/` for renderer↔worker types)
 
 ### Placement
 
@@ -108,33 +106,39 @@ A module's "internal area" = `lib/` for a component module, or the module root f
 | a pure helper for one module | the internal area's `utils.ts` |
 | a helper used by 2+ contexts | `src/lib/` |
 | a type/interface/enum for one module | the internal area's `types.ts` |
-| a domain type (Connection, QueryTab, …) | `src/entities/` |
-| a type crossing the RPC boundary | `src/shared/rpc-types.ts` |
+| a domain type (Connection, QueryTab, …) | `@anko/desktop-domain` `src/schemas/` |
+| a type crossing the RPC boundary | `@anko/desktop-domain` `src/schemas/` |
 | immutable config / limit / key | the internal area's `constants.ts` (`UPPER_SNAKE_CASE`) |
 | static copy / preset / label map | the internal area's `values.ts` |
 | shared client state / command registration | `src/stores/{feature}/` |
 | a UI primitive | `src/components/ui/` (via shadcn CLI when possible) |
 
-## 3. Backend Layering (`src/bun/`)
+## 3. Backend Layering (`packages/desktop/*`)
 
-Strict one-way dependency:
+Strict one-way dependency between layer packages:
 
 ```
-src/shared + src/bun/storage/entities  →  db / storage  →  rpc  →  ui (via RPC)
+domain  →  repository  →  service  →  api  →  ui (via RPC)
 ```
 
-- **`db/`** — database connectors only. Each connector implements `DatabaseConnector`
-  (`connector.ts`). All target-database IO (MySQL/Postgres/SQLite via Bun.SQL) lives here.
-- **`storage/`** — local persistence (bun:sqlite): `schema.ts`, `entities.ts`, `client.ts`,
-  `encryption.ts`, and **folder-per-operation** `queries/{op}.ts` and `mutations/{op}.ts`, each a
-  single exported function, re-exported from `storage/index.ts`.
-- **`rpc/`** — API composition only. `router.ts` wires RPC handlers to `db`/`storage`/`state`
-  calls; no business logic or direct IO in handlers beyond delegation. When the router grows,
-  split by concern and merge, instead of growing one file.
-- Direct DB / file / crypto IO lives only in `db/` and `storage/`. `state.ts` coordinates active
-  connections; it does not run SQL itself.
-- New storage operations follow the existing one-function-per-file pattern; new connectors follow
-  “Adding a New Database Connector” in `CLAUDE.md`.
+- **`domain`** (`@anko/desktop-domain`) — the data model. `db/` holds drizzle table
+  definitions, `entities/` the drizzle-zod row schemas, `schemas/` the shared
+  interfaces (connection, query, ERD, MCP, …), `shared/` cross-layer leaves
+  (`AppError`). No IO, no application code.
+- **`repository`** (`@anko/desktop-repository`) — the only layer with direct DB / file /
+  crypto IO. `db/` holds connectors implementing `DatabaseConnector` (target-database IO
+  via Bun.SQL); `storage/` holds local persistence (bun:sqlite + drizzle) with
+  **folder-per-operation** `queries/{op}.ts` and `mutations/{op}.ts`, each a single
+  exported function, re-exported from the package barrel.
+- **`service`** (`@anko/desktop-service`) — business logic: `AppState` (live connection
+  registry; it does not run SQL itself) and the MCP service (approvals, security,
+  SQL safety). Reads its own `package.json` for the bridge version.
+- **`api`** (`@anko/desktop-api`) — RPC composition only. `router.ts` wires route modules
+  to `service`/`repository` calls; no business logic or direct IO in handlers beyond
+  delegation. When the router grows, split by concern and merge, instead of growing
+  one file. `api → repository` is allowed for plain storage delegation.
+- New storage operations follow the existing one-function-per-file pattern; new connectors
+  follow “Adding a New Database Connector” in `CLAUDE.md`.
 
 ## 4. Component Authoring
 
@@ -193,7 +197,8 @@ why in a comment).
 - Use the `@/*` alias instead of deep relative imports.
 - Prefer existing shadcn/ui primitives and `@tabler/icons-react` before hand-rolling UI.
 - Avoid `any`, `@ts-ignore`, and loosely typed boundaries when a type-safe alternative is
-  practical. The RPC boundary stays fully typed via `src/shared/rpc-types.ts`.
+  practical. The RPC boundary stays fully typed via `@anko/desktop-domain` and the
+  `Router` type from `@anko/desktop-api`.
 - Keep changes tightly scoped; do not refactor unrelated areas while fixing a focused problem.
 
 ## 7. Workflow

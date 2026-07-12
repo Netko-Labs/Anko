@@ -48,7 +48,11 @@ jobs:
             package.json \
             apps/desktop/package.json \
             apps/mcp-bridge/package.json \
-            packages/mcp-contract/package.json; do
+            packages/desktop/api/package.json \
+            packages/desktop/domain/package.json \
+            packages/desktop/repository/package.json \
+            packages/desktop/service/package.json \
+            packages/shared/mcp-contract/package.json; do
             PACKAGE_VERSION=$(bun -e "console.log(require('./$MANIFEST').version)")
             if [[ "$VERSION" != "$PACKAGE_VERSION" ]]; then
               echo "::error::Release commit $RELEASE_TAG does not match $MANIFEST $PACKAGE_VERSION"

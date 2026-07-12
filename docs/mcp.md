@@ -13,7 +13,7 @@ For stdio clients, install the bridge from Settings and use the displayed
 MCP endpoint configuration and never reads database credentials.
 
 The bridge source is isolated in the `apps/mcp-bridge` workspace and shares only
-the endpoint configuration contract from `packages/mcp-contract`. Packaging
+the endpoint configuration contract from `packages/shared/mcp-contract`. Packaging
 compiles it before Mirin bundles it as a desktop sidecar.
 
 ## Install in Codex or Claude Code

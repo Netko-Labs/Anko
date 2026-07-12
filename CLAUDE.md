@@ -53,34 +53,40 @@ bun run typecheck
 ```
 anko/
 ├── apps/
-│   ├── desktop/                      # Mirin desktop application
+│   ├── desktop/                      # Mirin desktop application (shell)
 │   │   ├── mirin.config.ts           # Native windows, release, and CEF config
+│   │   ├── scripts/copy-sidecar.ts   # Stages the bridge binary for Mirin
 │   │   └── src/
-│   │       ├── bun/                  # Bun Worker backend
-│   │       │   ├── index.ts          # Worker entrypoint and app lifecycle
-│   │       │   ├── state.ts          # Process state and active connections
-│   │       │   ├── db/               # Database connector implementations
-│   │       │   ├── rpc/              # Mirin router and concern-based routes
-│   │       │   └── storage/          # SQLite schema, queries, and mutations
-│   │       ├── shared/               # Contracts shared by backend and UI
+│   │       ├── bun/index.ts          # Worker entrypoint; wires the layer packages
 │   │       ├── components/           # Feature folders and shadcn primitives
 │   │       ├── stores/               # Domain-scoped Zustand stores
 │   │       ├── hooks/                # Reusable React hooks
 │   │       ├── lib/                  # Frontend adapters and pure utilities
 │   │       └── App.tsx
-│   └── mcp-bridge/                   # Compiled stdio MCP bridge
+│   └── mcp-bridge/                   # stdio MCP bridge, compiled to dist/
 ├── packages/
-│   └── mcp-contract/                 # Desktop/bridge endpoint contract
+│   ├── desktop/                      # Backend layer packages (one-way deps)
+│   │   ├── domain/                   # @anko/desktop-domain — tables, entities, schemas
+│   │   ├── repository/               # @anko/desktop-repository — connectors + storage IO
+│   │   ├── service/                  # @anko/desktop-service — AppState + MCP service
+│   │   └── api/                      # @anko/desktop-api — RPC router + routes
+│   └── shared/
+│       ├── mcp-contract/             # Desktop/bridge endpoint contract
+│       └── typescript-config/        # Shared tsconfig bases
+├── turbo.json                        # Task graph (check-types, build, sidecar chain)
 ├── docs/architecture.md              # Workspace boundaries and build flow
 ├── docs/conventions.md               # Folder and code-style rules
 └── docs/releasing.md                 # Release-commit automation runbook
 ```
 
+Layer flow: `domain → repository → service → api → ui` (api may also call
+repository for plain storage delegation). See `docs/architecture.md`.
+
 ### Frontend-Backend Communication
 
 The frontend communicates with the Bun Worker through Mirin RPC. Type-safe
-wrappers are in `apps/desktop/src/lib/rpc.ts`, while the router and routes live
-under `apps/desktop/src/bun/rpc/`:
+wrappers are in `apps/desktop/src/lib/rpc.ts`; the router and routes live in
+`packages/desktop/api`:
 
 ```typescript
 // Example: Execute a query
@@ -88,25 +94,28 @@ import { executeQuery } from "@/lib/rpc";
 const result = await executeQuery(connectionId, "SELECT * FROM users");
 ```
 
-RPC types are defined in `apps/desktop/src/shared/rpc-types.ts` and shared
-between frontend and backend.
+Cross-process types live in `@anko/desktop-domain` (`src/schemas/`); the
+renderer imports the `Router` type from `@anko/desktop-api`.
 
 ### Adding a New Database Connector
 
-1. Create a new file in `apps/desktop/src/bun/db/` (e.g., `sqlite.ts`)
+1. Create a new file in `packages/desktop/repository/src/db/` (e.g., `sqlite.ts`)
 2. Implement the `DatabaseConnector` interface from `connector.ts`
-3. Add the driver variant to `DatabaseDriver` type in `connector.ts`
-4. Update connection logic in `state.ts` to handle the new driver
-5. Update frontend types in `apps/desktop/src/entities/`
+3. Add the driver variant to `DatabaseDriver` in `@anko/desktop-domain` (`schemas/database.ts`)
+4. Update connection logic in `packages/desktop/service/src/state.ts` for the new driver
+5. Export the connector from the repository barrel (`src/index.ts`)
 
 ### State Management
 
-- **Bun side**: `AppState` in `state.ts` manages active connections (Map) and storage
+- **Bun side**: `AppState` (`packages/desktop/service/src/state.ts`) manages active
+  connections (Map); storage lives in `@anko/desktop-repository`
 - **React side**: Zustand stores in `stores/` manage UI state (tabs, connections, query results)
 
 ### Key Patterns
 
-- All database operations use Bun.SQL (built-in async SQL driver)
+- All target-database operations use Bun.SQL (built-in async SQL driver)
+- Local storage is bun:sqlite with drizzle as a typed query builder (no runtime
+  migrations; `drizzle.config.ts` lives in the repository package)
 - Passwords are encrypted with AES-256-GCM before storage (node:crypto)
 - Each active connection has a UUID identifier for frontend reference
 - Query tabs are associated with connection IDs

@@ -7,9 +7,14 @@ MCP access for local coding agents.
 ## Workspaces
 
 ```text
-apps/desktop/          Mirin desktop application, renderer, and Bun worker
-apps/mcp-bridge/       Compiled stdio-to-HTTP MCP bridge
-packages/mcp-contract/ Shared MCP endpoint and configuration contract
+apps/desktop/                     Mirin desktop application shell (renderer + worker entry)
+apps/mcp-bridge/                  Compiled stdio-to-HTTP MCP bridge
+packages/desktop/domain/          Data model: tables, entities, cross-process schemas
+packages/desktop/repository/      Database connectors and local storage (all IO)
+packages/desktop/service/         Business logic: connection state + MCP service
+packages/desktop/api/             Mirin RPC router and routes
+packages/shared/mcp-contract/     Shared MCP endpoint and configuration contract
+packages/shared/typescript-config/ Shared tsconfig bases
 ```
 
 The root package is private and owns orchestration, linting, tests, and release
