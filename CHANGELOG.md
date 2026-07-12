@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.9.0] - 2026-07-12
+
+### Highlights
+
+Anko 0.9 restructures the codebase into a layered monorepo. The desktop backend
+now ships as four workspace packages — `@anko/desktop-domain`,
+`@anko/desktop-repository`, `@anko/desktop-service`, and `@anko/desktop-api` —
+with one-way dependencies enforced by the package graph, and the desktop app is
+a thin shell on top. No user-facing behavior changes.
+
+### Improvements
+
+- Split the backend into domain / repository / service / api layer packages
+  with a single deduplicated type model in `@anko/desktop-domain`.
+- Adopted Turborepo for typechecking and builds with local caching; `bun start`
+  now skips rebuilding the MCP bridge when it is unchanged.
+- Added a shared `@anko/typescript-config` package and unified strict compiler
+  settings across every workspace.
+- The MCP bridge now builds into its own workspace and is staged as a Mirin
+  sidecar by a dedicated copy step.
+
 ## [v0.8.4] - 2026-07-12
 
 ### New Features
