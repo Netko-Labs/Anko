@@ -10,7 +10,7 @@ GitHub tag after validating the release commit and `package.json` version.
 3. Commit the version change with the exact release subject, for example:
 
 ```bash
-git commit -m "🚀 release: v0.8.3"
+git commit -m "🚀 release: v0.8.4"
 git push origin main
 ```
 
