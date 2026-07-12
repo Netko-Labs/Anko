@@ -171,8 +171,11 @@ export const DataTable = memo(function DataTable({
     <div className="h-full flex flex-col bg-background overflow-hidden">
       <ContextMenu>
         <ContextMenuTrigger className="flex-1 flex flex-col min-h-0">
-          <div className="flex-1 overflow-auto">
-            <Table className="w-full text-xs border-collapse">
+          <div className="flex-1 min-h-0">
+            <Table
+              containerClassName="h-full overflow-auto"
+              className="w-full text-xs border-collapse"
+            >
               <TableHeader className="sticky top-0 z-10">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="bg-card border-b border-border">
