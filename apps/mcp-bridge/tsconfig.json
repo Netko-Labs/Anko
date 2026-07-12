@@ -1,15 +1,7 @@
 {
+  "extends": "@anko/typescript-config/bun.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2022", "DOM"],
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "types": ["bun"],
-    "strict": true,
-    "skipLibCheck": true,
-    "noEmit": true,
-    "verbatimModuleSyntax": true,
-    "noUncheckedSideEffectImports": true
+    "lib": ["ES2022", "DOM"]
   },
   "include": ["src"]
 }

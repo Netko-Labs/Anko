@@ -1,25 +1,7 @@
 {
+  "extends": "@anko/typescript-config/bun.json",
   "compilerOptions": {
     "tsBuildInfoFile": "../../node_modules/.tmp/anko-desktop-bun.tsbuildinfo",
-    "target": "ES2022",
-    "lib": ["ES2022"],
-    "module": "ESNext",
-    "types": ["bun"],
-    "skipLibCheck": true,
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-    /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true,
-    /* Path aliases */
     "paths": {
       "@/*": ["./src/*"]
     }
