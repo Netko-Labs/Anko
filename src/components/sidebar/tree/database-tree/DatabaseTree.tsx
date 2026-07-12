@@ -1,5 +1,5 @@
 import { IconPencil, IconPlugConnected, IconTrash } from '@tabler/icons-react'
-import { useReducer } from 'react'
+import { useReducer, useState } from 'react'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -10,6 +10,7 @@ import {
 import { initialTreeState, treeReducer } from '@/reducers/tree-reducer'
 import { useConnectionStore } from '@/stores/connection'
 import type { DatabaseTreeProps } from '../../lib'
+import { CreateTableDialog } from '../create-table-dialog/CreateTableDialog'
 import { DatabaseTypeIcon } from '../database-icons'
 import { DatabaseNode } from '../nodes'
 import { TreeNode } from '../tree-node'
@@ -23,6 +24,10 @@ export function DatabaseTree({ connection, onEdit, onDelete, onInsertText }: Dat
   const isPostgreSQL = info.driver === 'postgresql'
 
   const [state, dispatch] = useReducer(treeReducer, initialTreeState)
+  const [createTableTarget, setCreateTableTarget] = useState<{
+    database: string
+    schema?: string
+  } | null>(null)
 
   // Get cached data
   const databases = schemaCache?.databases || []
@@ -110,10 +115,28 @@ export function DatabaseTree({ connection, onEdit, onDelete, onInsertText }: Dat
               onRefreshTables={(schema) => handleRefreshTables(db.name, schema)}
               onRefreshColumns={(schema, table) => handleRefreshColumns(db.name, schema, table)}
               onOpenTable={(schema, table) => handleOpenTable(db.name, schema, table)}
+              onCreateTable={(schema) => setCreateTableTarget({ database: db.name, schema })}
               onGenerateErd={(schema) => handleGenerateErd(db.name, schema)}
             />
           ))}
         </div>
+      )}
+
+      {createTableTarget && (
+        <CreateTableDialog
+          open
+          connection={connection}
+          database={createTableTarget.database}
+          schema={createTableTarget.schema}
+          onOpenChange={(open) => {
+            if (!open) setCreateTableTarget(null)
+          }}
+          onCreated={async (tableName) => {
+            const schema = createTableTarget.schema || ''
+            await handleRefreshTables(createTableTarget.database, schema)
+            handleOpenTable(createTableTarget.database, schema, tableName)
+          }}
+        />
       )}
     </div>
   )

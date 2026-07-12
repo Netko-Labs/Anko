@@ -40,11 +40,17 @@ it reads Anko's endpoint and bearer token itself, so the token is not copied int
 another tool's configuration. Anko must remain open with MCP enabled while the
 client uses its tools.
 
-MCP clients can inspect saved connections and database schemas. Opening a saved
-connection always requires approval in Anko. A single parsed read-only `SELECT`
-can execute automatically inside a database-enforced read-only transaction and
-is capped at 200 rows by default. Every other query requires a fresh approval;
-there is no remembered trust or session-wide write permission.
+MCP clients can inspect saved connections and database schemas. By default,
+opening a saved connection requires approval in Anko. A single parsed read-only
+`SELECT` can execute automatically inside a database-enforced read-only
+transaction and is capped at 200 rows by default. Every other query requires a
+fresh approval.
+
+**Bypass approvals** is an explicit, default-off setting for trusted local MCP
+clients. When enabled, MCP clients can open saved connections and run dangerous
+SQL without confirmation. Existing pending requests are rejected whenever the
+setting changes. Authentication, query timeouts, safe-read limits, and credential
+redaction remain enabled.
 
 The connection list exposed through MCP includes only the saved ID, name,
 driver, default database, and active state. Hosts, usernames, passwords, and

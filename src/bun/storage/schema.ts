@@ -54,7 +54,7 @@ export const queryHistoryTable = sqliteTable(
       .notNull()
       .default('ui'),
     approvalStatus: text('approval_status', {
-      enum: ['not_required', 'approved', 'rejected', 'timed_out'],
+      enum: ['not_required', 'approved', 'rejected', 'timed_out', 'bypassed'],
     }),
   },
   (table) => [index('idx_query_history_executed_at').on(table.executedAt)],

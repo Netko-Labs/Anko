@@ -1,4 +1,6 @@
 import { rpc } from 'mirinjs/rpc'
+import type { CreateTableInput } from '../../../shared/create-table'
+import { buildCreateTableSql } from '../../db/create-table'
 import type { AppState } from '../../state'
 
 /** Query execution and schema-browsing commands against a live connection. */
@@ -20,6 +22,16 @@ export function dataRoutes(state: AppState) {
         return conn.executeWithContext(query, database, context)
       },
     ),
+
+    createTable: rpc.mutation(async ({ input }: { input: CreateTableInput }) => {
+      const info = state.getConnectionInfo(input.connectionId)
+      const { connectionId, ...definition } = input
+      const result = buildCreateTableSql(info.driver, definition)
+      await state
+        .getConnection(connectionId)
+        .executeWithContext(result.sql, input.database, input.schema)
+      return { tableName: result.tableName }
+    }),
 
     getDatabases: rpc.query(async ({ connectionId }: { connectionId: string }) => {
       return state.getConnection(connectionId).getDatabases()

@@ -8,6 +8,9 @@ export function mcpRoutes(service: AnkoMcpService) {
   return {
     getMcpSettings: rpc.query(() => service.getSettings()),
     setMcpEnabled: rpc.mutation(({ enabled }: { enabled: boolean }) => service.setEnabled(enabled)),
+    setMcpBypassPermissions: rpc.mutation(({ bypassPermissions }: { bypassPermissions: boolean }) =>
+      service.setBypassPermissions(bypassPermissions),
+    ),
     setMcpPort: rpc.mutation(({ port }: { port: number }) => service.setPort(port)),
     rotateMcpToken: rpc.mutation(() => service.rotateToken()),
     listPendingMcpApprovals: rpc.query(() => service.listPendingApprovals()),

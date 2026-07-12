@@ -110,7 +110,9 @@ export const QueryHistoryEntrySchema = z.object({
   success: z.boolean(),
   errorMessage: z.string().nullable(),
   source: z.enum(['ui', 'mcp']),
-  approvalStatus: z.enum(['not_required', 'approved', 'rejected', 'timed_out']).nullable(),
+  approvalStatus: z
+    .enum(['not_required', 'approved', 'rejected', 'timed_out', 'bypassed'])
+    .nullable(),
 })
 export type QueryHistoryEntry = z.infer<typeof QueryHistoryEntrySchema>
 
@@ -125,7 +127,7 @@ export const AddQueryHistoryInputSchema = z.object({
   errorMessage: z.string().nullable(),
   source: z.enum(['ui', 'mcp']).optional(),
   approvalStatus: z
-    .enum(['not_required', 'approved', 'rejected', 'timed_out'])
+    .enum(['not_required', 'approved', 'rejected', 'timed_out', 'bypassed'])
     .nullable()
     .optional(),
 })

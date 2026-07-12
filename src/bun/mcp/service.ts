@@ -78,6 +78,7 @@ export class AnkoMcpService {
   getSettings(): McpSettings {
     return {
       enabled: this.config.enabled,
+      bypassPermissions: this.config.bypassPermissions,
       port: this.config.port,
       endpoint: `http://127.0.0.1:${this.config.port}/mcp`,
       token: this.config.token,
@@ -103,6 +104,15 @@ export class AnkoMcpService {
     saveMcpConfig(this.appDataDir, this.config)
     if (enabled) await this.start()
     else await this.stop()
+    return this.getSettings()
+  }
+
+  setBypassPermissions(bypassPermissions: boolean): McpSettings {
+    if (this.config.bypassPermissions === bypassPermissions) return this.getSettings()
+    this.config.bypassPermissions = bypassPermissions
+    saveMcpConfig(this.appDataDir, this.config)
+    this.approvalManager.rejectAll()
+    this.emitStatus()
     return this.getSettings()
   }
 
@@ -226,7 +236,7 @@ export class AnkoMcpService {
       'open_connection',
       {
         title: 'Open an Anko connection',
-        description: 'Ask the user in Anko before opening a saved database connection.',
+        description: 'Open a saved database connection according to Anko approval settings.',
         inputSchema: z.object({ connectionId: z.string().min(1) }),
         annotations: { readOnlyHint: false, destructiveHint: false },
       },
@@ -234,20 +244,22 @@ export class AnkoMcpService {
         const info = this.savedConnection(connectionId)
         const active = this.state.getActiveConnection(connectionId)
         if (active) return this.toolResult(this.connectionSummary(connectionId))
-        const status = await this.approvalManager.request(
-          {
-            kind: 'open_connection',
-            clientName: clientName(),
-            connectionId,
-            connectionName: info.name,
-            database: info.database,
-            riskReasons: [
-              'This opens a saved database connection using credentials stored in Anko',
-            ],
-          },
-          extra.signal,
-        )
-        if (status !== 'approved') return this.toolError(`Connection request ${status}`)
+        if (!this.config.bypassPermissions) {
+          const status = await this.approvalManager.request(
+            {
+              kind: 'open_connection',
+              clientName: clientName(),
+              connectionId,
+              connectionName: info.name,
+              database: info.database,
+              riskReasons: [
+                'This opens a saved database connection using credentials stored in Anko',
+              ],
+            },
+            extra.signal,
+          )
+          if (status !== 'approved') return this.toolError(`Connection request ${status}`)
+        }
         try {
           await this.state.connectSaved(connectionId)
           this.events.connectionChanged()
@@ -316,8 +328,7 @@ export class AnkoMcpService {
       'execute_query',
       {
         title: 'Execute SQL in Anko',
-        description:
-          'Execute SQL on an open Anko connection. Mutations and unclassifiable SQL require approval in Anko.',
+        description: 'Execute SQL on an open Anko connection according to Anko approval settings.',
         inputSchema: z.object({
           connectionId: z.string().min(1),
           sql: z.string().min(1),
@@ -367,9 +378,10 @@ export class AnkoMcpService {
     const active = this.state.getActiveConnection(input.connectionId)
     if (!active) return this.toolError('Connection is not open. Call open_connection first.')
     const safety = classifySql(input.sql, active.info.driver)
-    let approvalStatus: 'not_required' | 'approved' | 'rejected' | 'timed_out' = 'not_required'
+    let approvalStatus: 'not_required' | 'approved' | 'rejected' | 'timed_out' | 'bypassed' =
+      safety.safe ? 'not_required' : 'bypassed'
 
-    if (!safety.safe) {
+    if (!safety.safe && !this.config.bypassPermissions) {
       const decision = await this.approvalManager.request(
         {
           kind: 'execute_query',
@@ -429,7 +441,7 @@ export class AnkoMcpService {
     rowCount: number | null,
     success: boolean,
     errorMessage: string | null,
-    approvalStatus: 'not_required' | 'approved' | 'rejected' | 'timed_out',
+    approvalStatus: 'not_required' | 'approved' | 'rejected' | 'timed_out' | 'bypassed',
   ): void {
     const entry = addQueryHistory({
       query: input.sql.trim(),

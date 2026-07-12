@@ -1,4 +1,4 @@
-import { IconCopy, IconSchema, IconSitemap } from '@tabler/icons-react'
+import { IconCopy, IconSchema, IconSitemap, IconTablePlus } from '@tabler/icons-react'
 import { memo } from 'react'
 import { toast } from 'sonner'
 import {
@@ -28,6 +28,7 @@ export const SchemaNode = memo(
     onInsertText,
     onRefreshColumns,
     onOpenTable,
+    onCreateTable,
     onGenerateErd,
   }: SchemaNodeProps) {
     const handleCopyName = () => {
@@ -83,6 +84,10 @@ export const SchemaNode = memo(
             Copy Name
           </ContextMenuItem>
           <ContextMenuSeparator />
+          <ContextMenuItem onClick={onCreateTable}>
+            <IconTablePlus className="size-4 mr-2" />
+            Create Table
+          </ContextMenuItem>
           <ContextMenuItem onClick={() => onGenerateErd?.()}>
             <IconSitemap className="size-4 mr-2" />
             Generate ERD
@@ -106,6 +111,7 @@ export const SchemaNode = memo(
       prev.onInsertText === next.onInsertText &&
       prev.onRefreshColumns === next.onRefreshColumns &&
       prev.onOpenTable === next.onOpenTable &&
+      prev.onCreateTable === next.onCreateTable &&
       prev.onGenerateErd === next.onGenerateErd
     )
   },

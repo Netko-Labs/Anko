@@ -1,4 +1,3 @@
-import { Switch } from '@base-ui/react/switch'
 import {
   IconCheck,
   IconClipboard,
@@ -19,10 +18,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
 import {
   getMcpSettings,
   installMcpBridge,
   rotateMcpToken,
+  setMcpBypassPermissions,
   setMcpEnabled,
   setMcpPort,
 } from '@/lib/rpc'
@@ -89,19 +90,38 @@ export function McpSettingsDialog() {
                 >
                   {settings.status}
                 </Badge>
-                <Switch.Root
+                <Switch
                   checked={settings.enabled}
                   disabled={busy}
                   onCheckedChange={(enabled) => void run(() => setMcpEnabled(enabled))}
-                  className="h-5 w-9 rounded-full bg-muted p-0.5 transition-colors data-checked:bg-primary"
                   aria-label="Enable MCP server"
-                >
-                  <Switch.Thumb className="block size-4 rounded-full bg-background shadow-sm transition-transform data-checked:translate-x-4" />
-                </Switch.Root>
+                />
               </div>
             </div>
 
             {settings.error && <p className="text-destructive">{settings.error}</p>}
+
+            <SettingRow label="Bypass approvals">
+              <div className="flex items-start justify-between gap-3">
+                <span
+                  className={
+                    settings.bypassPermissions ? 'text-destructive' : 'text-muted-foreground'
+                  }
+                >
+                  {settings.bypassPermissions
+                    ? 'Connections and dangerous SQL run without confirmation.'
+                    : 'Require confirmation for connections and dangerous SQL.'}
+                </span>
+                <Switch
+                  checked={settings.bypassPermissions}
+                  disabled={busy}
+                  onCheckedChange={(bypassPermissions) =>
+                    void run(() => setMcpBypassPermissions(bypassPermissions))
+                  }
+                  aria-label="Bypass MCP approvals"
+                />
+              </div>
+            </SettingRow>
 
             <SettingRow label="Port">
               <div className="flex gap-1.5">

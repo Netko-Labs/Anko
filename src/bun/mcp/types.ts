@@ -27,6 +27,7 @@ export interface McpApprovalRequest {
 
 export interface McpSettings {
   enabled: boolean
+  bypassPermissions: boolean
   port: number
   endpoint: string
   token: string
@@ -48,6 +49,7 @@ export interface McpEvents {
 
 export interface StoredMcpConfig {
   enabled: boolean
+  bypassPermissions: boolean
   port: number
   token: string
   bridgeVersion?: string

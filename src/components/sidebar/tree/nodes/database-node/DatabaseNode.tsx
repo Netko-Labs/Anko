@@ -3,6 +3,7 @@ import {
   IconCopy,
   IconRefresh,
   IconSitemap,
+  IconTablePlus,
 } from '@tabler/icons-react'
 import { memo } from 'react'
 import { toast } from 'sonner'
@@ -39,6 +40,7 @@ export const DatabaseNode = memo(
     onRefreshTables,
     onRefreshColumns,
     onOpenTable,
+    onCreateTable,
     onGenerateErd,
   }: DatabaseNodeProps) {
     const handleCopyName = () => {
@@ -89,6 +91,7 @@ export const DatabaseNode = memo(
                       onInsertText={onInsertText}
                       onRefreshColumns={(table: string) => onRefreshColumns?.(schema.name, table)}
                       onOpenTable={(table: string) => onOpenTable?.(schema.name, table)}
+                      onCreateTable={() => onCreateTable?.(schema.name)}
                       onGenerateErd={() => onGenerateErd?.(schema.name)}
                     />
                   )
@@ -127,6 +130,12 @@ export const DatabaseNode = memo(
             Copy Name
           </ContextMenuItem>
           {!isPostgreSQL && (
+            <ContextMenuItem onClick={() => onCreateTable?.()}>
+              <IconTablePlus className="size-4 mr-2" />
+              Create Table
+            </ContextMenuItem>
+          )}
+          {!isPostgreSQL && (
             <ContextMenuItem onClick={() => onGenerateErd?.()}>
               <IconSitemap className="size-4 mr-2" />
               Generate ERD
@@ -161,6 +170,7 @@ export const DatabaseNode = memo(
       prev.onRefreshTables === next.onRefreshTables &&
       prev.onRefreshColumns === next.onRefreshColumns &&
       prev.onOpenTable === next.onOpenTable &&
+      prev.onCreateTable === next.onCreateTable &&
       prev.onGenerateErd === next.onGenerateErd
     )
   },

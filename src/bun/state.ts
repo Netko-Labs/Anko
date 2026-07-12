@@ -76,6 +76,12 @@ export class AppState {
     return live.connector
   }
 
+  getConnectionInfo(connectionId: string): ConnectionInfo {
+    const live = this.connections.get(connectionId)
+    if (!live) throw AppError.connectionNotFound(connectionId)
+    return live.info
+  }
+
   getConnectionBySavedId(savedConnectionId: string): DatabaseConnector {
     const runtimeId = this.runtimeIdBySavedId.get(savedConnectionId)
     if (!runtimeId) throw AppError.connectionNotFound(savedConnectionId)

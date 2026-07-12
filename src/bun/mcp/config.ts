@@ -49,6 +49,7 @@ export function newMcpToken(): string {
 function normalizeConfig(value: Partial<StoredMcpConfig>): StoredMcpConfig {
   return {
     enabled: value.enabled === true,
+    bypassPermissions: value.bypassPermissions === true,
     port:
       Number.isInteger(value.port) && Number(value.port) >= 1024 && Number(value.port) <= 65535
         ? Number(value.port)

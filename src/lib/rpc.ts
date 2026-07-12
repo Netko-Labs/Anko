@@ -2,6 +2,7 @@
 import { client } from 'mirinjs/client'
 import type { McpApprovalRequest, McpSettings } from '@/bun/mcp/types'
 import type { Router } from '@/bun/rpc/router'
+import type { CreateTableInput, CreateTableResult } from '@/shared/create-table'
 import type { UpdateCheckResult, UpdateDownloadStatus } from '@/shared/rpc-types'
 import type {
   ActiveConnection,
@@ -70,6 +71,12 @@ export async function setMcpEnabled(enabled: boolean): Promise<McpSettings> {
   return trackedRequest('setMcpEnabled', () => api.setMcpEnabled({ enabled }))
 }
 
+export async function setMcpBypassPermissions(bypassPermissions: boolean): Promise<McpSettings> {
+  return trackedRequest('setMcpBypassPermissions', () =>
+    api.setMcpBypassPermissions({ bypassPermissions }),
+  )
+}
+
 export async function setMcpPort(port: number): Promise<McpSettings> {
   return trackedRequest('setMcpPort', () => api.setMcpPort({ port }))
 }
@@ -108,6 +115,10 @@ export async function executeQuery(
   return trackedRequest('executeQuery', () =>
     api.executeQuery({ connectionId, query, database, context }),
   )
+}
+
+export async function createTable(input: CreateTableInput): Promise<CreateTableResult> {
+  return trackedRequest('createTable', () => api.createTable({ input }))
 }
 
 // Schema commands

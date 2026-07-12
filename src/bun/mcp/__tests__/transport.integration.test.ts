@@ -263,6 +263,53 @@ describe('MCP transports', () => {
     expect(executed.length).toBe(before + 1)
     expect(executed.at(-1)).toBe('UPDATE users SET active = false')
   })
+
+  test('rejects pending requests when the bypass policy changes', async () => {
+    const before = executed.length
+    const pending = httpClient.callTool({
+      name: 'execute_query',
+      arguments: { connectionId: active.id, sql: 'DELETE FROM pending_users' },
+    })
+    await waitForApproval()
+
+    service.setBypassPermissions(true)
+    const response = await pending
+
+    expect(response.isError).toBe(true)
+    expect(executed).toHaveLength(before)
+    service.setBypassPermissions(false)
+  })
+
+  test('bypasses connection and dangerous-query approvals when explicitly enabled', async () => {
+    const beforeApprovals = approvals.length
+    const beforeExecutions = executed.length
+    const settings = service.setBypassPermissions(true)
+    expect(settings.bypassPermissions).toBe(true)
+
+    const opened = await httpClient.callTool({
+      name: 'open_connection',
+      arguments: { connectionId: savedConnectionId },
+    })
+    const queried = await stdioClient.callTool({
+      name: 'execute_query',
+      arguments: { connectionId: active.id, sql: 'DELETE FROM bypassed_users' },
+    })
+
+    expect(opened.isError).not.toBe(true)
+    expect(queried.isError).not.toBe(true)
+    expect(approvals).toHaveLength(beforeApprovals)
+    expect(executed).toHaveLength(beforeExecutions + 1)
+    expect(executed.at(-1)).toBe('DELETE FROM bypassed_users')
+    expect(
+      listQueryHistory().find((entry) => entry.query === 'DELETE FROM bypassed_users'),
+    ).toMatchObject({
+      source: 'mcp',
+      approvalStatus: 'bypassed',
+      success: true,
+    })
+
+    expect(service.setBypassPermissions(false).bypassPermissions).toBe(false)
+  })
 })
 
 async function waitForApproval(): Promise<void> {

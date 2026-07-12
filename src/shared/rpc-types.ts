@@ -118,7 +118,7 @@ export interface AddQueryHistoryInput {
   success: boolean
   errorMessage: string | null
   source?: 'ui' | 'mcp'
-  approvalStatus?: 'not_required' | 'approved' | 'rejected' | 'timed_out' | null
+  approvalStatus?: 'not_required' | 'approved' | 'rejected' | 'timed_out' | 'bypassed' | null
 }
 
 export interface QueryHistoryEntry {
@@ -133,7 +133,7 @@ export interface QueryHistoryEntry {
   success: boolean
   errorMessage: string | null
   source: 'ui' | 'mcp'
-  approvalStatus: 'not_required' | 'approved' | 'rejected' | 'timed_out' | null
+  approvalStatus: 'not_required' | 'approved' | 'rejected' | 'timed_out' | 'bypassed' | null
 }
 
 export interface CreateSavedQueryInput {
