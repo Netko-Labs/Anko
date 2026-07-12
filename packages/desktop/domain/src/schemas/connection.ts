@@ -26,3 +26,6 @@ export interface ActiveConnection {
   info: ConnectionInfo
   selectedDatabase?: string
 }
+
+/** RPC-layer alias for {@link ActiveConnection}. */
+export type ActiveConnectionInfo = ActiveConnection

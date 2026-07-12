@@ -1,19 +1,7 @@
-export interface ColumnInfo {
-  name: string
-  data_type: string
-  nullable: boolean
-}
-
-export interface QueryResult {
-  columns: ColumnInfo[]
-  rows: unknown[][]
-  affected_rows: number
-  execution_time_ms: number
-  /** Debug: original query sent from frontend */
-  original_query?: string
-  /** Debug: actual query executed (after adding context like USE db) */
-  executed_query?: string
-}
+import type { QueryResult } from './database'
+import type { ErdTabState } from './erd'
+// Import TableEditState - using inline import to avoid circular dependencies
+import type { TableEditState } from './table-edit'
 
 export type FilterOperator =
   | 'equals'
@@ -32,10 +20,6 @@ export interface FilterCondition {
   operator: FilterOperator
   value: string
 }
-
-import type { ErdTabState } from './erd'
-// Import TableEditState - using inline import to avoid circular dependencies
-import type { TableEditState } from './table-edit'
 
 export interface QueryTab {
   id: string
