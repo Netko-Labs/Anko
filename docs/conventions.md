@@ -4,6 +4,11 @@ Code-style and folder-structure rules for this repository, adapted from a portab
 `CLAUDE.md` holds project topology, commands, and data-flow notes; this file holds the structural
 rules. When they conflict, this file wins for structure, `CLAUDE.md` wins for project facts.
 
+Paths beginning with `src/` in this document are relative to the desktop
+workspace, `apps/desktop/`. New top-level applications belong in `apps/`; code
+shared by multiple workspaces belongs in `packages/` and must expose a deliberate
+package API.
+
 ## 1. Vocabulary
 
 | Term | Meaning in Anko |
@@ -193,6 +198,11 @@ why in a comment).
 
 ## 7. Workflow
 
+- Add dependencies to the workspace that imports them. Root dependencies are
+  reserved for repository-wide tooling and orchestration.
+- Keep workspace-specific configs and generated output inside their owning
+  workspace. Use root scripts for normal development, verification, and release
+  commands.
 - Prefer the smallest safe change that solves the problem.
 - Follow existing patterns before introducing new abstractions.
 - Fix root causes instead of layering on workarounds.

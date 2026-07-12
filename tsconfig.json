@@ -1,5 +1,8 @@
 {
   "files": [],
-  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }],
-  "compilerOptions": {}
+  "references": [
+    { "path": "./apps/desktop/tsconfig.json" },
+    { "path": "./apps/mcp-bridge/tsconfig.json" },
+    { "path": "./packages/mcp-contract/tsconfig.json" }
+  ]
 }

@@ -20,7 +20,7 @@ function getQuoteChar(driver?: DatabaseDriver): string {
  */
 export function quoteIdentifier(name: string, driver?: DatabaseDriver): string {
   const q = getQuoteChar(driver)
-  return `${q}${name}${q}`
+  return `${q}${name.replaceAll(q, `${q}${q}`)}${q}`
 }
 
 /**

@@ -28,16 +28,22 @@ export function setupToastRelay() {
   const channel = new BroadcastChannel(CHANNEL_NAME)
 
   for (const method of ['success', 'error', 'info', 'warning'] as const) {
-    // biome-ignore lint: intentional override of toast methods for cross-window relay
-    ;(toast as any)[method] = (message: string, options?: Record<string, unknown>) => {
-      const msg: ToastMessage = { type: method, message }
-      if (options) {
+    const relay: typeof toast.success = (message, options) => {
+      const msg: ToastMessage = {
+        type: method,
+        message: typeof message === 'string' ? message : String(message ?? ''),
+      }
+      const description = typeof options?.description === 'string' ? options.description : undefined
+      const duration = typeof options?.duration === 'number' ? options.duration : undefined
+      if (description !== undefined || duration !== undefined) {
         msg.options = {
-          description: options.description as string | undefined,
-          duration: options.duration as number | undefined,
+          description,
+          duration,
         }
       }
       channel.postMessage(msg)
+      return options?.id ?? crypto.randomUUID()
     }
+    toast[method] = relay
   }
 }

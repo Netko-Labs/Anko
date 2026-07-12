@@ -30,7 +30,7 @@ bun install
 # Run in development mode (Vite + Mirin)
 bun start
 
-# Build frontend only
+# Typecheck and build all workspace artifacts
 bun run build
 
 # Build production app
@@ -39,11 +39,11 @@ bun run build:app
 # Run tests
 bun test
 
-# Type check frontend only
+# Typecheck every workspace and desktop process
 bun run typecheck
 
 # Add shadcn/ui component
-bunx --bun shadcn@latest add <component-name>
+(cd apps/desktop && bunx --bun shadcn@latest add <component-name>)
 ```
 
 ## Architecture
@@ -52,29 +52,35 @@ bunx --bun shadcn@latest add <component-name>
 
 ```
 anko/
-├── mirin.config.ts                   # Native windows, release, and CEF config
-├── src/
-│   ├── bun/                          # Bun Worker backend
-│   │   ├── index.ts                  # Worker entrypoint and app lifecycle
-│   │   ├── state.ts                  # Process state and active connections
-│   │   ├── db/                       # Database connector implementations
-│   │   ├── rpc/                      # Mirin router and concern-based routes
-│   │   └── storage/                  # SQLite schema, queries, and mutations
-│   ├── shared/                       # Contracts shared by backend and UI
-│   ├── components/                   # Feature folders and shadcn primitives
-│   ├── stores/                       # Domain-scoped Zustand stores
-│   ├── hooks/                        # Reusable React hooks
-│   ├── lib/                          # Frontend adapters and pure utilities
-│   └── App.tsx
+├── apps/
+│   ├── desktop/                      # Mirin desktop application
+│   │   ├── mirin.config.ts           # Native windows, release, and CEF config
+│   │   └── src/
+│   │       ├── bun/                  # Bun Worker backend
+│   │       │   ├── index.ts          # Worker entrypoint and app lifecycle
+│   │       │   ├── state.ts          # Process state and active connections
+│   │       │   ├── db/               # Database connector implementations
+│   │       │   ├── rpc/              # Mirin router and concern-based routes
+│   │       │   └── storage/          # SQLite schema, queries, and mutations
+│   │       ├── shared/               # Contracts shared by backend and UI
+│   │       ├── components/           # Feature folders and shadcn primitives
+│   │       ├── stores/               # Domain-scoped Zustand stores
+│   │       ├── hooks/                # Reusable React hooks
+│   │       ├── lib/                  # Frontend adapters and pure utilities
+│   │       └── App.tsx
+│   └── mcp-bridge/                   # Compiled stdio MCP bridge
+├── packages/
+│   └── mcp-contract/                 # Desktop/bridge endpoint contract
+├── docs/architecture.md              # Workspace boundaries and build flow
 ├── docs/conventions.md               # Folder and code-style rules
-└── docs/releasing.md                 # Tag-based release runbook
+└── docs/releasing.md                 # Release-commit automation runbook
 ```
 
 ### Frontend-Backend Communication
 
 The frontend communicates with the Bun Worker through Mirin RPC. Type-safe
-wrappers are in `src/lib/rpc.ts`, while the router and routes live under
-`src/bun/rpc/`:
+wrappers are in `apps/desktop/src/lib/rpc.ts`, while the router and routes live
+under `apps/desktop/src/bun/rpc/`:
 
 ```typescript
 // Example: Execute a query
@@ -82,15 +88,16 @@ import { executeQuery } from "@/lib/rpc";
 const result = await executeQuery(connectionId, "SELECT * FROM users");
 ```
 
-RPC types are defined in `src/shared/rpc-types.ts` and shared between frontend and backend.
+RPC types are defined in `apps/desktop/src/shared/rpc-types.ts` and shared
+between frontend and backend.
 
 ### Adding a New Database Connector
 
-1. Create a new file in `src/bun/db/` (e.g., `sqlite.ts`)
+1. Create a new file in `apps/desktop/src/bun/db/` (e.g., `sqlite.ts`)
 2. Implement the `DatabaseConnector` interface from `connector.ts`
 3. Add the driver variant to `DatabaseDriver` type in `connector.ts`
 4. Update connection logic in `state.ts` to handle the new driver
-5. Update frontend types in `src/entities/`
+5. Update frontend types in `apps/desktop/src/entities/`
 
 ### State Management
 
@@ -178,10 +185,10 @@ Table editing uses a pending changes pattern:
 
 ## Configuration Files
 
-- `mirin.config.ts` - Mirin window, CEF, packaging, and update configuration
-- `components.json` - shadcn/ui configuration
-- `vite.config.ts` - Vite configuration with Tailwind and path aliases
-- `docs/releasing.md` - validated tag-based release process
+- `apps/desktop/mirin.config.ts` - Mirin window, packaging, and update configuration
+- `apps/desktop/components.json` - shadcn/ui configuration
+- `apps/desktop/vite.config.ts` - Vite configuration with Tailwind and path aliases
+- `docs/releasing.md` - validated release-commit automation
 
 ## Commit Message Format
 
@@ -200,7 +207,7 @@ This project uses conventional commits with emojis. Format: `<emoji> <type>(<sco
 | 🏗️ | build | Build system |
 | 👷 | ci | CI/CD |
 | 🔒 | security | Security fix |
-| 🚀 | release | Release metadata; publishing is triggered by a version tag |
+| 🚀 | release | Release metadata; publishing is triggered by the commit on `main` |
 
 **Examples:**
 ```

@@ -50,7 +50,7 @@ jobs:
       - name: Test
         run: bun test
 
-      - name: Typecheck and build frontend
+      - name: Typecheck and build workspaces
         run: bun run build
 
   review:
@@ -148,7 +148,7 @@ jobs:
         if: matrix.os == 'macos'
         shell: bash
         run: |
-          APP="build/Anko.app/Contents/MacOS/Anko"
+          APP="apps/desktop/build/Anko.app/Contents/MacOS/Anko"
           test -x "$APP" || { echo "::error::Packaged Anko executable is missing"; exit 1; }
           LOG="$RUNNER_TEMP/anko-launch.log"
           "$APP" >"$LOG" 2>&1 &
@@ -169,7 +169,7 @@ jobs:
         if: matrix.os == 'windows'
         shell: pwsh
         run: |
-          $app = Resolve-Path "build/Anko/Anko.exe"
+          $app = Resolve-Path "apps/desktop/build/Anko/Anko.exe"
           $stdout = Join-Path $env:RUNNER_TEMP "anko-launch.stdout.log"
           $stderr = Join-Path $env:RUNNER_TEMP "anko-launch.stderr.log"
           $process = Start-Process -FilePath $app -PassThru `
@@ -191,7 +191,7 @@ jobs:
         if: matrix.os == 'linux'
         shell: bash
         run: |
-          APP="build/Anko/Anko"
+          APP="apps/desktop/build/Anko/Anko"
           test -x "$APP" || { echo "::error::Packaged Anko executable is missing"; exit 1; }
           LOG="$RUNNER_TEMP/anko-launch.log"
           set +e
@@ -207,6 +207,6 @@ jobs:
       - name: Verify bundled MCP bridge
         shell: bash
         run: |
-          BRIDGE=$(find build -type f -path '*/sidecars/anko-mcp' ! -path 'build/sidecars/*' -print -quit)
+          BRIDGE=$(find apps/desktop/build -type f \( -path '*/sidecars/anko-mcp' -o -path '*/sidecars/anko-mcp.exe' \) ! -path 'apps/desktop/build/sidecars/*' -print -quit)
           test -n "$BRIDGE" || { echo "::error::anko-mcp sidecar is missing"; exit 1; }
           echo "Bundled MCP bridge: $BRIDGE"

@@ -1,5 +1,6 @@
 import { chmodSync, copyFileSync, mkdirSync } from 'node:fs'
 import { dirname } from 'node:path'
+import { mcpEndpoint } from '@anko/mcp-contract'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js'
 import { resolveSidecar } from 'mirinjs'
@@ -80,7 +81,7 @@ export class AnkoMcpService {
       enabled: this.config.enabled,
       bypassPermissions: this.config.bypassPermissions,
       port: this.config.port,
-      endpoint: `http://127.0.0.1:${this.config.port}/mcp`,
+      endpoint: mcpEndpoint(this.config),
       token: this.config.token,
       status: this.status,
       error: this.error,
@@ -214,7 +215,7 @@ export class AnkoMcpService {
 
   private createProtocolServer(): McpServer {
     const server = new McpServer(
-      { name: 'anko', version: '0.8.4' },
+      { name: 'anko', version: MCP_BRIDGE_VERSION },
       {
         instructions:
           'Use list_connections before schema tools. Open a saved connection before querying it. Read results are capped at 1000 rows.',

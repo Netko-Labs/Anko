@@ -2,7 +2,7 @@ import { Database } from 'bun:sqlite'
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
@@ -136,7 +136,7 @@ beforeAll(async () => {
   await stdioClient.connect(
     new StdioClientTransport({
       command: process.execPath,
-      args: ['run', 'src/mcp-bridge/index.ts'],
+      args: ['run', resolve(import.meta.dir, '../../../../../mcp-bridge/src/index.ts')],
       cwd: process.cwd(),
       env: { ...process.env, ANKO_MCP_CONFIG: mcpConfigPath(appDataDir) },
       stderr: 'pipe',

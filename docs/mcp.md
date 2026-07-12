@@ -12,6 +12,10 @@ For stdio clients, install the bridge from Settings and use the displayed
 `anko-mcp` command as the MCP server executable. The bridge reads Anko's local
 MCP endpoint configuration and never reads database credentials.
 
+The bridge source is isolated in the `apps/mcp-bridge` workspace and shares only
+the endpoint configuration contract from `packages/mcp-contract`. Packaging
+compiles it before Mirin bundles it as a desktop sidecar.
+
 ## Install in Codex or Claude Code
 
 1. Keep Anko open, open **Settings > MCP**, enable MCP, and confirm the status is

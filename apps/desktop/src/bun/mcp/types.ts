@@ -1,3 +1,5 @@
+import type { McpBridgeConfig } from '@anko/mcp-contract'
+import pkg from '../../../package.json'
 import type { QueryHistoryEntry } from '../../shared/rpc-types'
 
 export const DEFAULT_MCP_PORT = 43821
@@ -5,7 +7,7 @@ export const MCP_APPROVAL_TIMEOUT_MS = 120_000
 export const MCP_QUERY_TIMEOUT_MS = 60_000
 export const DEFAULT_MCP_MAX_ROWS = 200
 export const MAX_MCP_ROWS = 1_000
-export const MCP_BRIDGE_VERSION = '0.8.4'
+export const MCP_BRIDGE_VERSION = (pkg as { version?: string }).version ?? '0.0.0'
 
 export type McpApprovalKind = 'open_connection' | 'execute_query'
 export type McpApprovalStatus = 'approved' | 'rejected' | 'timed_out'
@@ -47,10 +49,7 @@ export interface McpEvents {
   notifyApproval(request: McpApprovalRequest): void
 }
 
-export interface StoredMcpConfig {
-  enabled: boolean
+export interface StoredMcpConfig extends McpBridgeConfig {
   bypassPermissions: boolean
-  port: number
-  token: string
   bridgeVersion?: string
 }

@@ -5,9 +5,10 @@ set -euo pipefail
 : "${GITHUB_REPOSITORY:?GITHUB_REPOSITORY is required}"
 
 shopt -s nullglob
-files=(build/release/*)
+build_dir="${ANKO_BUILD_DIR:-apps/desktop/build}"
+files=("$build_dir"/release/*)
 if ((${#files[@]} == 0)); then
-  echo "::error::No release assets found in build/release"
+  echo "::error::No release assets found in $build_dir/release"
   exit 1
 fi
 
@@ -20,7 +21,7 @@ for file in "${files[@]}"; do
 done
 
 if ((${#pids[@]} == 0)); then
-  echo "::error::No regular release assets found in build/release"
+  echo "::error::No regular release assets found in $build_dir/release"
   exit 1
 fi
 

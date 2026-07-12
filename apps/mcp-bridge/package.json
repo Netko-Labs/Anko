@@ -1,0 +1,20 @@
+{
+  "name": "@anko/mcp-bridge",
+  "private": true,
+  "version": "0.8.4",
+  "type": "module",
+  "scripts": {
+    "build": "bun run typecheck && bun run build:binary",
+    "build:binary": "bun build src/index.ts --compile --outfile ../desktop/build/sidecars/anko-mcp",
+    "typecheck": "tsgo -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@anko/mcp-contract": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.29.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@typescript/native-preview": "^7.0.0-dev.20260707.2",
+    "typescript": "~5.9.3"
+  }
+}

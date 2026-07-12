@@ -1,0 +1,16 @@
+{
+  "name": "@anko/mcp-contract",
+  "private": true,
+  "version": "0.8.4",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsgo -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@typescript/native-preview": "^7.0.0-dev.20260707.2",
+    "typescript": "~5.9.3"
+  }
+}

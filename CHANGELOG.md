@@ -6,6 +6,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!-- CHANGELOG_INSERT_MARKER -->
+## [v0.8.4] - 2026-07-12
+
+### New Features
+
+- Added a schema and database context-menu action for creating tables with
+  typed columns, nullability, defaults, and primary keys.
+- Added an explicit MCP bypass-approvals option for trusted local clients.
+
+### Bug Fixes
+
+- Anchored the table view's horizontal scrollbar above the footer so it remains
+  reachable regardless of the result row count.
+
+## [v0.8.3] - 2026-07-11
+
+### Improvements
+
+- Added SQL syntax highlighting to dangerous-query approval dialogs.
+- Switched publishing to release-commit automation so release tags are created
+  only after version validation.
+
+### Bug Fixes
+
+- Published update descriptions in the legacy manifest field used by older Anko
+  clients.
+
 ## [v0.8.2] - 2026-07-11
 
 ### Highlights
