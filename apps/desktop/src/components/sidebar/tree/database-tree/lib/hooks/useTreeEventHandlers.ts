@@ -2,10 +2,13 @@ import type { ActiveConnection } from '@anko/desktop-domain'
 import type { Dispatch } from 'react'
 import { useCallback, useRef } from 'react'
 import { toast } from 'sonner'
+import type {
+  TreeAction,
+  TreeState,
+} from '@/components/sidebar/tree/database-tree/lib/tree-reducer'
 import { treeLogger } from '@/lib/debug'
 import { formatErrorMessage } from '@/lib/error-utils'
 import { disconnect } from '@/lib/rpc'
-import type { TreeAction, TreeState } from '@/reducers/tree-reducer'
 import { useConnectionStore } from '@/stores/connection'
 import type { useTreeDataLoading } from './useTreeDataLoading'
 

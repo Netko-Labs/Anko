@@ -1,6 +1,10 @@
 import type { Dispatch } from 'react'
 import { useCallback, useRef } from 'react'
 import { toast } from 'sonner'
+import type {
+  TreeAction,
+  TreeState,
+} from '@/components/sidebar/tree/database-tree/lib/tree-reducer'
 import { createTimer, treeLogger } from '@/lib/debug'
 import { formatErrorMessage } from '@/lib/error-utils'
 import {
@@ -9,7 +13,6 @@ import {
   getTables as fetchTables,
   getDatabases,
 } from '@/lib/rpc'
-import type { TreeAction, TreeState } from '@/reducers/tree-reducer'
 import { useConnectionStore } from '@/stores/connection'
 
 export function useTreeDataLoading(

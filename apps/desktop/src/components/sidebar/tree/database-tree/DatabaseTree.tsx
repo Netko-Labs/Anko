@@ -1,13 +1,16 @@
 import { IconPencil, IconPlugConnected, IconTrash } from '@tabler/icons-react'
 import { useReducer, useState } from 'react'
 import {
+  initialTreeState,
+  treeReducer,
+} from '@/components/sidebar/tree/database-tree/lib/tree-reducer'
+import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from '@/components/ui/context-menu'
-import { initialTreeState, treeReducer } from '@/reducers/tree-reducer'
 import { useConnectionStore } from '@/stores/connection'
 import type { DatabaseTreeProps } from '../../lib'
 import { CreateTableDialog } from '../create-table-dialog/CreateTableDialog'
