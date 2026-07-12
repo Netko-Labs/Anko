@@ -6,7 +6,8 @@ import { join, resolve } from 'node:path'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
-import type { DatabaseConnector, QueryResult } from '../../db/connector'
+import type { QueryResult } from '@anko/desktop-domain'
+import type { DatabaseConnector } from '@anko/desktop-repository'
 import type { AppState } from '../../state'
 import {
   getConnectionConfig,
@@ -14,10 +15,10 @@ import {
   listQueryHistory,
   saveConnection,
   updateConnection,
-} from '../../storage'
+} from '@anko/desktop-repository'
 import { mcpConfigPath } from '../config'
 import { AnkoMcpService } from '../service'
-import type { McpApprovalRequest } from '../types'
+import type { McpApprovalRequest } from '@anko/desktop-domain'
 
 const appDataDir = mkdtempSync(join(tmpdir(), 'anko-mcp-test-'))
 const port = 46_000 + Math.floor(Math.random() * 1_000)
@@ -136,7 +137,7 @@ beforeAll(async () => {
   await stdioClient.connect(
     new StdioClientTransport({
       command: process.execPath,
-      args: ['run', resolve(import.meta.dir, '../../../../../mcp-bridge/src/index.ts')],
+      args: ['run', resolve(import.meta.dir, '../../../../../../apps/mcp-bridge/src/index.ts')],
       cwd: process.cwd(),
       env: { ...process.env, ANKO_MCP_CONFIG: mcpConfigPath(appDataDir) },
       stderr: 'pipe',

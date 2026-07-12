@@ -1,7 +1,8 @@
 import { randomBytes } from 'node:crypto'
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { DEFAULT_MCP_PORT, MCP_BRIDGE_VERSION, type StoredMcpConfig } from './types'
+import type { StoredMcpConfig } from '@anko/desktop-domain'
+import { DEFAULT_MCP_PORT, MCP_BRIDGE_VERSION } from './constants'
 
 export function mcpConfigPath(appDataDir: string): string {
   return join(appDataDir, 'mcp.json')

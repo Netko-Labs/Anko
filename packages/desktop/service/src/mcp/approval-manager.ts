@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
-import { MCP_APPROVAL_TIMEOUT_MS, type McpApprovalRequest, type McpApprovalStatus } from './types'
+import type { McpApprovalRequest, McpApprovalStatus } from '@anko/desktop-domain'
+import { MCP_APPROVAL_TIMEOUT_MS } from './constants'
 
 interface ApprovalInput {
   kind: McpApprovalRequest['kind']

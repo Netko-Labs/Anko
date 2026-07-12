@@ -1,5 +1,5 @@
 import { Parser } from 'node-sql-parser'
-import type { DatabaseDriver } from '../db/connector'
+import type { DatabaseDriver } from '@anko/desktop-domain'
 
 export interface SqlSafetyResult {
   safe: boolean
