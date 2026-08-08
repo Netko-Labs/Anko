@@ -32,18 +32,18 @@
     "@biomejs/biome": "^2.5.3",
     "@commitlint/cli": "^21.2.1",
     "@commitlint/config-conventional": "^21.2.0",
-    "@mirinjs/cli": "0.1.0-alpha.18",
+    "@mirinjs/cli": "0.1.0-alpha.19",
     "@typescript/native-preview": "^7.0.0-dev.20260707.2",
     "husky": "^9.1.7",
     "turbo": "^2.10.4",
     "typescript": "~5.9.3"
   },
   "optionalDependencies": {
-    "@mirinjs/darwin-arm64": "0.1.0-alpha.18",
-    "@mirinjs/linux-arm64": "0.1.0-alpha.18",
-    "@mirinjs/linux-x64": "0.1.0-alpha.18",
-    "@mirinjs/win32-arm64": "0.1.0-alpha.18",
-    "@mirinjs/win32-x64": "0.1.0-alpha.18"
+    "@mirinjs/darwin-arm64": "0.1.0-alpha.19",
+    "@mirinjs/linux-arm64": "0.1.0-alpha.19",
+    "@mirinjs/linux-x64": "0.1.0-alpha.19",
+    "@mirinjs/win32-arm64": "0.1.0-alpha.19",
+    "@mirinjs/win32-x64": "0.1.0-alpha.19"
   },
   "overrides": {
     "@babel/core": "7.29.7",
