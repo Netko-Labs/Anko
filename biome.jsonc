@@ -123,7 +123,10 @@
       "!**/src-tauri/target",
       "!**/build",
       "!**/artifacts",
-      "!**/.mirin"
+      "!**/.mirin",
+      // Icon Composer owns this document's formatting; reformatting it churns
+      // against every re-save from the app.
+      "!**/*.icon"
     ]
   }
 }
