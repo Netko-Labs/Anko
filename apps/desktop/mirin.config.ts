@@ -7,7 +7,13 @@ export default defineConfig({
   name: 'Anko',
   publisher: 'Netko Labs',
   main: 'src/bun/index.ts',
-  icon: 'icon.iconset',
+  // macOS takes the layered Icon Composer document (light/dark appearances plus
+  // the per-layer depth its glass treatment needs); neither Linux nor Windows
+  // can read `.icon`, so they stay on the iconset.
+  icon: {
+    default: 'icon.iconset',
+    macos: 'AppIcon.icon',
+  },
   sidecars: {
     'anko-mcp': mcpBridgeBinary,
   },

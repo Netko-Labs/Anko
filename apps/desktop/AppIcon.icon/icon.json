@@ -16,14 +16,15 @@
     {
       "layers": [
         {
-          "name": "anko-light-foreground-1024",
+          "name": "bean",
+          "glass": true,
           "image-name-specializations": [
             {
-              "value": "anko-light-foreground-1024.png"
+              "value": "bean-light.png"
             },
             {
               "appearance": "dark",
-              "value": "anko-dark-foreground-1024.png"
+              "value": "bean-dark.png"
             }
           ]
         }
@@ -31,6 +32,31 @@
       "shadow": {
         "kind": "neutral",
         "opacity": 0.6
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.2
+      }
+    },
+    {
+      "layers": [
+        {
+          "name": "prompt",
+          "glass": true,
+          "image-name-specializations": [
+            {
+              "value": "prompt-light.png"
+            },
+            {
+              "appearance": "dark",
+              "value": "prompt-dark.png"
+            }
+          ]
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.45
       },
       "translucency": {
         "enabled": true,
