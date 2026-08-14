@@ -1,0 +1,47 @@
+{
+  "fill-specializations": [
+    {
+      "value": {
+        "solid": "display-p3:0.99216,0.94510,0.96863,1.00000"
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "solid": "display-p3:0.04706,0.02353,0.03922,1.00000"
+      }
+    }
+  ],
+  "groups": [
+    {
+      "layers": [
+        {
+          "name": "anko-light-foreground-1024",
+          "image-name-specializations": [
+            {
+              "value": "anko-light-foreground-1024.png"
+            },
+            {
+              "appearance": "dark",
+              "value": "anko-dark-foreground-1024.png"
+            }
+          ]
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.6
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.2
+      }
+    }
+  ],
+  "supported-platforms": {
+    "circles": [
+      "watchOS"
+    ],
+    "squares": "shared"
+  }
+}
