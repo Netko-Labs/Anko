@@ -17,7 +17,6 @@
       "layers": [
         {
           "name": "bean",
-          "glass": true,
           "image-name-specializations": [
             {
               "value": "bean-light.png"
@@ -42,7 +41,6 @@
       "layers": [
         {
           "name": "prompt",
-          "glass": true,
           "image-name-specializations": [
             {
               "value": "prompt-light.png"
