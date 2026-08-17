@@ -13,7 +13,7 @@
     "@anko/desktop-domain": "workspace:*",
     "@anko/desktop-repository": "workspace:*",
     "@anko/desktop-service": "workspace:*",
-    "mirinjs": "0.1.0-alpha.19"
+    "mirinjs": "0.1.0-alpha.22"
   },
   "devDependencies": {
     "@anko/typescript-config": "workspace:*",

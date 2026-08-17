@@ -14,7 +14,7 @@
     "@anko/desktop-repository": "workspace:*",
     "@anko/mcp-contract": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "mirinjs": "0.1.0-alpha.19",
+    "mirinjs": "0.1.0-alpha.22",
     "node-sql-parser": "^5.4.0",
     "zod": "^4.4.3"
   },

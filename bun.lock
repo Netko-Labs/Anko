@@ -98,7 +98,7 @@
         "@anko/desktop-domain": "workspace:*",
         "@anko/desktop-repository": "workspace:*",
         "@anko/desktop-service": "workspace:*",
-        "mirinjs": "0.1.0-alpha.19",
+        "mirinjs": "0.1.0-alpha.22",
       },
       "devDependencies": {
         "@anko/typescript-config": "workspace:*",
@@ -140,7 +140,7 @@
         "@anko/desktop-repository": "workspace:*",
         "@anko/mcp-contract": "workspace:*",
         "@modelcontextprotocol/sdk": "^1.29.0",
-        "mirinjs": "0.1.0-alpha.19",
+        "mirinjs": "0.1.0-alpha.22",
         "node-sql-parser": "^5.4.0",
         "zod": "^4.4.3",
       },
@@ -1483,10 +1483,6 @@
     "zustand": ["zustand@5.0.14", "", { "peerDependencies": { "@types/react": ">=18.0.0", "immer": ">=9.0.6", "react": ">=18.0.0", "use-sync-external-store": ">=1.2.0" }, "optionalPeers": ["@types/react", "immer", "react", "use-sync-external-store"] }, "sha512-/8tAspM5LMPr28b3fwLYrtdj77ECpfZviaP75CMTnwO8ISyaE4GDIG/9rDDYq/cH9D2Xw2A2RXglLInmVBQB/g=="],
 
     "zwitch": ["zwitch@2.0.4", "", {}, "sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A=="],
-
-    "@anko/desktop-api/mirinjs": ["mirinjs@0.1.0-alpha.19", "", {}, "sha512-QGBOvZfKW7uv/PV9p4222mXxI4Dx2H8xPLgJ2xLyEAHebpNvyLKW35tkiMPIDCj1GQFYpJjG6DIvZ95beNPzlg=="],
-
-    "@anko/desktop-service/mirinjs": ["mirinjs@0.1.0-alpha.19", "", {}, "sha512-QGBOvZfKW7uv/PV9p4222mXxI4Dx2H8xPLgJ2xLyEAHebpNvyLKW35tkiMPIDCj1GQFYpJjG6DIvZ95beNPzlg=="],
 
     "@commitlint/is-ignored/semver": ["semver@7.8.5", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA=="],
 
