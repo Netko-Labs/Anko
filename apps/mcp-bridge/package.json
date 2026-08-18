@@ -1,7 +1,7 @@
 {
   "name": "@anko/mcp-bridge",
   "private": true,
-  "version": "0.10.1",
+  "version": "0.10.2",
   "type": "module",
   "scripts": {
     "build:binary": "bun build src/index.ts --compile --outfile dist/anko-mcp",
