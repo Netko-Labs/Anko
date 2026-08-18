@@ -101,7 +101,7 @@ jobs:
       matrix:
         include:
           - label: macOS arm64
-            runner: blacksmith-6vcpu-macos-15
+            runner: blacksmith-6vcpu-macos-26
             os: macos
           - label: Windows x64
             runner: blacksmith-4vcpu-windows-2025
