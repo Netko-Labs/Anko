@@ -115,27 +115,42 @@ jobs:
       - name: Generate changelog
         id: changelog
         continue-on-error: true
-        uses: vercel/ai-action@bd265252c9d1d8295ceda28dadb56ad9321c8ccc # v2
-        with:
-          api-key: ${{ secrets.AI_GATEWAY_API_KEY }}
-          model: anthropic/claude-haiku-4-5
-          system: |
-            You write concise release notes for Anko, a cross-platform SQL desktop client.
-            Be friendly and lightly playful while keeping every change technically clear.
-          prompt: |
-            Write release notes for Anko ${{ steps.version.outputs.tag }}.
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+          COMMITS: ${{ steps.commits.outputs.commits }}
+        run: |
+          SYSTEM='You write concise release notes for Anko, a cross-platform SQL desktop client.
+          Be friendly and lightly playful while keeping every change technically clear.'
+          PROMPT="Write release notes for Anko ${RELEASE_TAG}.
 
-            Commits:
-            ${{ steps.commits.outputs.commits }}
+          Commits:
+          ${COMMITS}
 
-            Use these sections only when relevant:
-            - Highlights
-            - New Features
-            - Improvements
-            - Bug Fixes
-            - Security
+          Use these sections only when relevant:
+          - Highlights
+          - New Features
+          - Improvements
+          - Bug Fixes
+          - Security
 
-            Use present tense, omit commit hashes, and output only Markdown.
+          Use present tense, omit commit hashes, and output only Markdown."
+          PAYLOAD=$(jq -n \
+            --arg model "deepseek/deepseek-v4-flash-0731" \
+            --arg system "$SYSTEM" \
+            --arg prompt "$PROMPT" \
+            '{model: $model, messages: [{role: "system", content: $system}, {role: "user", content: $prompt}]}')
+          TEXT=$(curl -sS --fail --max-time 180 https://openrouter.ai/api/v1/chat/completions \
+            -H "Authorization: Bearer $OPENROUTER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" | jq -re '.choices[0].message.content')
+          test -n "$TEXT"
+          DELIMITER="NOTES_$(openssl rand -hex 8)"
+          {
+            echo "text<<$DELIMITER"
+            printf '%s\n' "$TEXT"
+            echo "$DELIMITER"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create draft release
         id: create_release
