@@ -28,15 +28,30 @@ async function waitUntil(predicate: () => boolean, what: string, timeoutMs = 100
 /** Raw substring search over the JSON tree the app last sent to the renderer. */
 const treeHas = (text: string) => (root.lastTree() ?? '').includes(text)
 
+/** What the check did last, printed when a step fails. */
+const trail: string[] = []
+
 async function click(testID: string): Promise<void> {
   await waitUntil(() => root.nodeId(testID) !== undefined, `node ${testID} mounted`)
   const id = root.nodeId(testID)
   if (!id) throw new Error(`no mounted node with testID ${testID}`)
+  trail.push(`click ${testID} (#${id})`)
+  const before = root.lastTree()
   transport.simulate({ kind: 'click', id })
+  // A press round-trips through the host and React before the next action can
+  // target the resulting tree; a focus click changes nothing, so cap the wait.
+  const settled = Date.now() + 250
+  while (Date.now() < settled && root.lastTree() === before) await sleep(10)
 }
 
-const type = (text: string) => transport.simulate({ kind: 'type', text })
-const key = (keystroke: string) => transport.simulate({ kind: 'key', keystroke })
+const type = (text: string) => {
+  trail.push(`type ${JSON.stringify(text)}`)
+  transport.simulate({ kind: 'type', text })
+}
+const key = (keystroke: string) => {
+  trail.push(`key ${keystroke}`)
+  transport.simulate({ kind: 'key', keystroke })
+}
 
 async function step(name: string, run: () => Promise<void>): Promise<void> {
   const started = performance.now()
@@ -125,6 +140,54 @@ try {
     )
   })
 
+  // Optional: ANKO_CHECK_POSTGRES=host:port:user:password:db drives the same
+  // flow against a real PostgreSQL (e.g. a throwaway container).
+  const postgres = process.env.ANKO_CHECK_POSTGRES?.split(':')
+  if (postgres && postgres.length === 5) {
+    const [host, port, user, password, database] = postgres
+    await step('connect to PostgreSQL through the form and query it', async () => {
+      await click('panel:connections')
+      await click('new-connection')
+      await click('driver:postgresql')
+      await click('form:name')
+      type('Check Postgres')
+      await click('form:host')
+      key('ctrl-a')
+      type(host)
+      await click('form:port')
+      key('ctrl-a')
+      type(port)
+      await click('form:username')
+      key('ctrl-a')
+      type(user)
+      await click('form:password')
+      type(password)
+      await click('form:database')
+      type(database)
+      await waitUntil(
+        () => treeHas('"value":"Check Postgres"') && treeHas(`"value":"${database}"`),
+        'form filled',
+      )
+      await click('form:test')
+      await waitUntil(() => treeHas('Connection successful'), 'test connection', 20000)
+      await click('form:save')
+      await waitUntil(
+        () => treeHas('TABLES (') && treeHas('Check Postgres / '),
+        'connected to postgres',
+        20000,
+      )
+      await click('new-tab')
+      await click('editor')
+      type("select 1 as one, 'pg' as who, now()::date as today")
+      key('ctrl-enter')
+      await waitUntil(
+        () => treeHas('"pg"') && treeHas('1 row(s)'),
+        'postgres query rendered',
+        20000,
+      )
+    })
+  }
+
   await step('the layout query reports painted nodes', async () => {
     let nodes = 0
     transport.onEvent((event) => {
@@ -139,6 +202,14 @@ try {
   console.error(
     `✗ anko metal check failed: ${error instanceof Error ? error.message : String(error)}`,
   )
+  // Surface whatever the shell was showing in its error colour at the time.
+  console.error(`  trail: ${trail.slice(-8).join(' → ')}`)
+  const tree = root.lastTree() ?? ''
+  const shown = [...tree.matchAll(/"color":"#f87171"[^\]]*"children":\["((?:[^"\\]|\\.)*)"/g)].map(
+    (m) => m[1],
+  )
+  if (shown.length > 0) console.error(`  shell errors: ${shown.join(' | ')}`)
+  console.error(`  tree length ${tree.length}, running: ${tree.includes('Running…')}`)
 } finally {
   root.unmount()
   rmSync(dataDir, { recursive: true, force: true })

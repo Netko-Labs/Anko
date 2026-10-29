@@ -22,6 +22,9 @@ export type Dispatch = (action: Action) => void
 
 const message = (error: unknown) => (error instanceof Error ? error.message : String(error))
 
+/** Schemas the tree hides, as the desktop app does. */
+const SYSTEM_SCHEMAS = new Set(['pg_catalog', 'information_schema', 'pg_toast'])
+
 export function createActions(state: AppState, get: () => Store, dispatch: Dispatch) {
   const refreshLibrary = () => {
     dispatch({ type: 'history', history: listQueryHistory(undefined, 100) })
@@ -34,13 +37,21 @@ export function createActions(state: AppState, get: () => Store, dispatch: Dispa
     try {
       const connector = state.getConnection(active.connectionId)
       const databases = await connector.getDatabases()
+      // Scope to the active database (or the first one), like the desktop app.
+      const database =
+        databases.find((entry) => entry.name === active.selectedDatabase)?.name ??
+        databases[0]?.name
+      if (!database) {
+        dispatch({ type: 'schema', schema: { tables: [] } })
+        return
+      }
+      const schemas = (await connector.getSchemas(database))
+        .map((schema) => schema.name)
+        .filter((name) => !SYSTEM_SCHEMAS.has(name))
+      const names = schemas.length > 0 ? schemas : [database]
       const tables: TableInfo[] = []
-      for (const database of databases) {
-        const schemas = await connector.getSchemas(database.name)
-        const names = schemas.length > 0 ? schemas.map((schema) => schema.name) : [database.name]
-        for (const schema of names) {
-          tables.push(...(await connector.getTables(database.name, schema)))
-        }
+      for (const schema of names) {
+        tables.push(...(await connector.getTables(database, schema)))
       }
       dispatch({ type: 'schema', schema: { tables } })
     } catch (error) {
