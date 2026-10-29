@@ -20,6 +20,7 @@ export function Editor({ sql, canRun, onChange, onRun }: EditorProps) {
         onSubmitEditing={(text) => {
           if (canRun) onRun(text)
         }}
+        testID="editor"
         style={{
           minHeight: 160,
           fontFamily: 'monospace',
@@ -41,6 +42,7 @@ export function Editor({ sql, canRun, onChange, onRun }: EditorProps) {
           onPress={() => {
             if (canRun) onRun(sql)
           }}
+          testID="run"
           style={{
             paddingHorizontal: 16,
             paddingVertical: 7,

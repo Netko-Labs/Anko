@@ -6,6 +6,7 @@
   "description": "Anko on mirin metal: the same Bun backend, rendered as native GPU UI through GPUI instead of a webview.",
   "scripts": {
     "dev": "bun src/main.tsx",
+    "check": "bun check.ts",
     "check-types": "tsgo -p tsconfig.json --noEmit"
   },
   "dependencies": {

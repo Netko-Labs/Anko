@@ -77,6 +77,7 @@ function ConnectionRow({
   return (
     <View
       onPress={onPress}
+      testID={`connection:${connection.name}`}
       style={{
         flexDirection: 'row',
         alignItems: 'center',
@@ -129,6 +130,7 @@ function TableList({
           <View
             key={`${table.schema}.${table.name}`}
             onPress={() => onBrowse(table)}
+            testID={`table:${table.name}`}
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -187,16 +189,24 @@ function AddSqlite({ onAdd }: { onAdd: (name: string, path: string) => void }) {
       }}
     >
       <Text style={{ color: theme.muted, fontSize: 11, fontWeight: 'semibold' }}>NEW SQLITE</Text>
-      <TextInput value={name} placeholder="Name" onChangeText={setName} style={field} />
+      <TextInput
+        value={name}
+        placeholder="Name"
+        onChangeText={setName}
+        style={field}
+        testID="new-sqlite-name"
+      />
       <TextInput
         value={path}
         placeholder="/path/to/database.db or :memory:"
         onChangeText={setPath}
         onSubmitEditing={submit}
         style={{ ...field, fontFamily: 'monospace' }}
+        testID="new-sqlite-path"
       />
       <View
         onPress={submit}
+        testID="new-sqlite-save"
         style={{
           alignItems: 'center',
           paddingVertical: 7,
