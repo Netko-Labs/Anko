@@ -1,4 +1,9 @@
-import type { ActiveConnectionInfo, ConnectionInfo, QueryResult } from '@anko/desktop-domain'
+import type {
+  ActiveConnectionInfo,
+  ConnectionInfo,
+  QueryResult,
+  TableInfo,
+} from '@anko/desktop-domain'
 import { listConnections, saveConnection } from '@anko/desktop-repository'
 import type { AppState } from '@anko/desktop-service'
 import { Text, View } from '@mirinjs/metal'
@@ -18,8 +23,30 @@ export function App({ state }: { state: AppState }) {
   const [connections, setConnections] = useState<ConnectionInfo[]>(() => listConnections())
   const [active, setActive] = useState<ActiveConnectionInfo | null>(null)
   const [connectError, setConnectError] = useState<string | null>(null)
+  const [tables, setTables] = useState<TableInfo[]>([])
   const [sql, setSql] = useState('')
   const [run, setRun] = useState<RunState>({ status: 'idle' })
+
+  const loadTables = useCallback(
+    async (info: ActiveConnectionInfo) => {
+      try {
+        const connector = state.getConnection(info.connectionId)
+        const databases = await connector.getDatabases()
+        const found: TableInfo[] = []
+        for (const database of databases) {
+          const schemas = await connector.getSchemas(database.name)
+          const names = schemas.length > 0 ? schemas.map((schema) => schema.name) : [database.name]
+          for (const schema of names) {
+            found.push(...(await connector.getTables(database.name, schema)))
+          }
+        }
+        setTables(found)
+      } catch {
+        setTables([])
+      }
+    },
+    [state],
+  )
 
   const connect = useCallback(
     async (connection: ConnectionInfo) => {
@@ -28,11 +55,12 @@ export function App({ state }: { state: AppState }) {
         const info = await state.connectSaved(connection.id)
         setActive(info)
         setRun({ status: 'idle' })
+        void loadTables(info)
       } catch (error) {
         setConnectError(error instanceof Error ? error.message : String(error))
       }
     },
-    [state],
+    [state, loadTables],
   )
 
   const addSqlite = useCallback(
@@ -61,11 +89,21 @@ export function App({ state }: { state: AppState }) {
           .getConnection(active.connectionId)
           .executeWithContext(trimmed, active.selectedDatabase)
         setRun({ status: 'done', result })
+        void loadTables(active)
       } catch (error) {
         setRun({ status: 'error', error: error instanceof Error ? error.message : String(error) })
       }
     },
-    [active, state],
+    [active, state, loadTables],
+  )
+
+  const browseTable = useCallback(
+    (table: TableInfo) => {
+      const query = `select * from "${table.name}" limit 100`
+      setSql(query)
+      void execute(query)
+    },
+    [execute],
   )
 
   return (
@@ -75,9 +113,11 @@ export function App({ state }: { state: AppState }) {
         <Sidebar
           connections={connections}
           activeId={active?.id ?? null}
+          tables={tables}
           error={connectError}
           onConnect={connect}
           onAddSqlite={addSqlite}
+          onBrowseTable={browseTable}
         />
         <View style={{ flex: 1, flexDirection: 'column' }}>
           <Editor

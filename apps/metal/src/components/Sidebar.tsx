@@ -1,4 +1,4 @@
-import type { ConnectionInfo } from '@anko/desktop-domain'
+import type { ConnectionInfo, TableInfo } from '@anko/desktop-domain'
 import { ScrollView, Text, TextInput, View } from '@mirinjs/metal'
 import { useState } from 'react'
 import { theme } from '../theme'
@@ -6,12 +6,22 @@ import { theme } from '../theme'
 interface SidebarProps {
   connections: ConnectionInfo[]
   activeId: string | null
+  tables: TableInfo[]
   error: string | null
   onConnect: (connection: ConnectionInfo) => void
   onAddSqlite: (name: string, path: string) => void
+  onBrowseTable: (table: TableInfo) => void
 }
 
-export function Sidebar({ connections, activeId, error, onConnect, onAddSqlite }: SidebarProps) {
+export function Sidebar({
+  connections,
+  activeId,
+  tables,
+  error,
+  onConnect,
+  onAddSqlite,
+  onBrowseTable,
+}: SidebarProps) {
   return (
     <View
       style={{
@@ -43,6 +53,7 @@ export function Sidebar({ connections, activeId, error, onConnect, onAddSqlite }
             />
           ))
         )}
+        {activeId !== null ? <TableList tables={tables} onBrowse={onBrowseTable} /> : null}
       </ScrollView>
       {error ? (
         <View style={{ paddingHorizontal: 14, paddingVertical: 8 }}>
@@ -91,6 +102,56 @@ function ConnectionRow({
             : `${connection.driver}://${connection.host}:${connection.port}`}
         </Text>
       </View>
+    </View>
+  )
+}
+
+function TableList({
+  tables,
+  onBrowse,
+}: {
+  tables: TableInfo[]
+  onBrowse: (table: TableInfo) => void
+}) {
+  return (
+    <View style={{ flexDirection: 'column', gap: 2, paddingVertical: 10 }}>
+      <View style={{ paddingHorizontal: 6, paddingVertical: 6 }}>
+        <Text style={{ color: theme.muted, fontSize: 11, fontWeight: 'semibold' }}>
+          {`TABLES (${tables.length})`}
+        </Text>
+      </View>
+      {tables.length === 0 ? (
+        <View style={{ paddingHorizontal: 10 }}>
+          <Text style={{ color: theme.faint, fontSize: 12 }}>No tables</Text>
+        </View>
+      ) : (
+        tables.map((table) => (
+          <View
+            key={`${table.schema}.${table.name}`}
+            onPress={() => onBrowse(table)}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 8,
+              paddingHorizontal: 10,
+              paddingVertical: 6,
+              borderRadius: 6,
+              hoverBackgroundColor: theme.hover,
+            }}
+          >
+            <Text style={{ color: theme.accent, fontSize: 11 }}>▦</Text>
+            <Text
+              numberOfLines={1}
+              style={{ color: theme.text, fontSize: 12, fontFamily: 'monospace' }}
+            >
+              {table.name}
+            </Text>
+            {table.table_type === 'VIEW' ? (
+              <Text style={{ color: theme.faint, fontSize: 10 }}>view</Text>
+            ) : null}
+          </View>
+        ))
+      )}
     </View>
   )
 }
