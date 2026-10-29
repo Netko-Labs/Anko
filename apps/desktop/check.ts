@@ -48,8 +48,18 @@ export default defineCheck(async (app) => {
   app.step('connect and run a query')
   await app.click('text=Check SQLite')
   await app.screenshot('after-connect-click')
-  await app.waitFor('.cm-content', { timeoutMs: 15000 })
-  await app.click('.cm-content')
+  // Restored sessions keep earlier tabs mounted but hidden; tag the visible editor.
+  await app.waitUntil(
+    async () =>
+      app.evaluate<boolean>(`(() => {
+        const editor = [...document.querySelectorAll('.cm-content')].find((el) => el.getClientRects().length > 0)
+        if (editor) editor.setAttribute('data-check-editor', '')
+        return Boolean(editor)
+      })()`),
+    'no visible query editor',
+    { timeoutMs: 15000 },
+  )
+  await app.click('[data-check-editor]')
   await app.type("select 42 as answer, 'fedora' as distro")
   await app.click('text=Run')
   await app.waitUntil(async () => {
@@ -57,6 +67,42 @@ export default defineCheck(async (app) => {
     return text.includes('answer') && text.includes('fedora')
   }, 'the query result never rendered')
   await app.screenshot('query-results')
+
+  app.step('export the results as CSV')
+  // The export is a browser download; the core routes it to a native save
+  // dialog. The toast fires as soon as the download is handed to the engine, so
+  // the dialog itself is left to the person (or driver) running the check.
+  // Toasts stack over the footer; let them clear so the click reaches the menu.
+  await app.waitUntil(
+    async () =>
+      !(await app.evaluate<boolean>("Boolean(document.querySelector('[data-sonner-toast]'))")),
+    'toasts never cleared',
+    { timeoutMs: 15000 },
+  )
+  const tagged = await app.evaluate<boolean>(`(() => {
+    const trigger = [...document.querySelectorAll('[data-slot=dropdown-menu-trigger]')]
+      .find((el) => el.textContent?.includes('Download') && el.getClientRects().length > 0)
+    if (trigger) trigger.setAttribute('data-check-download', '')
+    return Boolean(trigger)
+  })()`)
+  app.assert(tagged, 'no Download menu in the results footer')
+  await app.click('[data-check-download]')
+  await app.waitUntil(
+    async () =>
+      app.evaluate<boolean>(`(() => {
+        const item = [...document.querySelectorAll('[data-slot=dropdown-menu-item]')]
+          .find((el) => el.textContent?.includes('Export as CSV') && el.getClientRects().length > 0)
+        if (item) item.setAttribute('data-check-export-csv', '')
+        return Boolean(item)
+      })()`),
+    'the Download menu never opened',
+  )
+  await app.click('[data-check-export-csv]')
+  await app.waitUntil(
+    async () => (await bodyText(app)).includes('Exported to CSV'),
+    'the CSV export never started',
+    { timeoutMs: 10000 },
+  )
 
   app.step('no RPC call failed along the way')
   const failed = await app.logs({ type: 'rpc.error' })
