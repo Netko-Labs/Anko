@@ -9,6 +9,7 @@ shared packages.
 ```text
 apps/
   desktop                Mirin application: React renderer + Bun worker entrypoint
+  metal                  Anko on mirin metal (alpha): React in Bun, drawn by GPUI, no webview
   mcp-bridge             stdio MCP bridge, compiled to a native executable
 packages/
   desktop/
@@ -51,6 +52,19 @@ not import application code.
 Mirin commands must run with `apps/desktop` as their working directory. The root
 scripts enforce that rule so Mirin resolves the correct config and writes output
 to `apps/desktop/build`.
+
+## Metal application (alpha)
+
+`apps/metal` is Anko without a webview. The same React mental model runs
+inside Bun and the UI is drawn natively by GPUI through mirin metal
+(`@mirinjs/metal`); there is no RPC hop, so the components call
+`@anko/desktop-service` and `@anko/desktop-repository` directly. It stores its
+data under `<data dir>/dev.netko.anko-metal` so it can run next to the desktop
+app. Today it covers the connection list, a quick SQLite connection form, the
+query editor, and the results table; run it with `bun run dev` from
+`apps/metal` after building `mirin-metal-host` in the mirin checkout (or set
+`ANKO_METAL_HOST`). The dependency is a `file:` path into a sibling mirin
+checkout until `@mirinjs/metal` is published, so CI does not install it yet.
 
 ## MCP bridge
 
