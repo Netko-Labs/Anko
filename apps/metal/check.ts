@@ -28,11 +28,15 @@ async function waitUntil(predicate: () => boolean, what: string, timeoutMs = 100
 /** Raw substring search over the JSON tree the app last sent to the renderer. */
 const treeHas = (text: string) => (root.lastTree() ?? '').includes(text)
 
-function click(testID: string): void {
+async function click(testID: string): Promise<void> {
+  await waitUntil(() => root.nodeId(testID) !== undefined, `node ${testID} mounted`)
   const id = root.nodeId(testID)
   if (!id) throw new Error(`no mounted node with testID ${testID}`)
   transport.simulate({ kind: 'click', id })
 }
+
+const type = (text: string) => transport.simulate({ kind: 'type', text })
+const key = (keystroke: string) => transport.simulate({ kind: 'key', keystroke })
 
 async function step(name: string, run: () => Promise<void>): Promise<void> {
   const started = performance.now()
@@ -44,45 +48,81 @@ let failed = false
 try {
   await step('the shell renders', async () => {
     await waitUntil(() => treeHas('No connections yet'), 'first tree')
-    // Give the host a moment to open the window and paint before clicking.
     await sleep(1500)
   })
 
-  await step('create and connect a SQLite database', async () => {
-    click('new-sqlite-name')
-    transport.simulate({ kind: 'type', text: 'Check SQLite' })
+  await step('create and connect a SQLite database through the form', async () => {
+    await click('new-connection')
+    await click('driver:sqlite')
+    await click('form:name')
+    type('Check SQLite')
     await waitUntil(() => treeHas('"value":"Check SQLite"'), 'name typed')
-    click('new-sqlite-path')
-    transport.simulate({ kind: 'type', text: dbPath })
+    await click('form:host')
+    type(dbPath)
     await waitUntil(() => treeHas(dbPath), 'path typed')
-    click('new-sqlite-save')
+    await click('form:save')
     await waitUntil(() => treeHas('TABLES (0)'), 'connected with an empty schema')
   })
 
-  await step('run DDL, DML, and a query through the editor', async () => {
-    click('editor')
-    transport.simulate({
-      kind: 'type',
-      text: 'create table distros(name text, family text, year int)',
-    })
-    transport.simulate({ kind: 'key', keystroke: 'ctrl-enter' })
-    await waitUntil(() => treeHas('table:distros') || treeHas('TABLES (1)'), 'table created')
-    transport.simulate({ kind: 'key', keystroke: 'ctrl-a' })
-    transport.simulate({
-      kind: 'type',
-      text: "insert into distros values ('Fedora','rpm',2003),('Nobara','rpm',2022),('Debian','deb',1993)",
-    })
-    transport.simulate({ kind: 'key', keystroke: 'ctrl-enter' })
-    await waitUntil(() => treeHas('3 row(s)') || treeHas('0 row(s)'), 'insert ran')
-    transport.simulate({ kind: 'key', keystroke: 'ctrl-a' })
-    transport.simulate({ kind: 'type', text: 'select * from distros order by year' })
-    transport.simulate({ kind: 'key', keystroke: 'ctrl-enter' })
+  await step('run DDL, DML, and a query; history records them', async () => {
+    await click('editor')
+    type('create table distros(name text, family text, year int)')
+    key('ctrl-enter')
+    await waitUntil(() => treeHas('TABLES (1)'), 'table created')
+    key('ctrl-a')
+    type(
+      "insert into distros values ('Fedora','rpm',2003),('Nobara','rpm',2022),('Debian','deb',1993)",
+    )
+    key('ctrl-enter')
+    await waitUntil(() => treeHas('row(s) affected') || treeHas('0 row(s)'), 'insert ran')
+    key('ctrl-a')
+    type('select * from distros order by year')
+    key('ctrl-enter')
     await waitUntil(() => treeHas('Nobara') && treeHas('3 row(s)'), 'select rendered three rows')
+    await click('panel:history')
+    await waitUntil(
+      () => treeHas('select * from distros order by year') && treeHas('3 rows'),
+      'history lists the select',
+    )
+    await click('panel:connections')
   })
 
-  await step('browse a table from the sidebar', async () => {
-    click('table:distros')
-    await waitUntil(() => treeHas('select * from \\"distros\\" limit 100'), 'table browse query')
+  await step('expand a table to see its columns, then browse it in a new tab', async () => {
+    await click('expand:distros')
+    await waitUntil(() => treeHas('family') && treeHas('year'), 'columns listed')
+    await click('table:distros')
+    await waitUntil(
+      () =>
+        treeHas('select * from \\"distros\\" limit 100') && root.nodeId('tab:tab-2') !== undefined,
+      'table browse opened a second tab',
+    )
+    key('ctrl-enter')
+    await waitUntil(() => treeHas('3 row(s)'), 'browse query ran')
+  })
+
+  await step('select a row to see its details', async () => {
+    await click('row:1')
+    await waitUntil(
+      () => treeHas('DETAILS') && treeHas('name · text'),
+      'details panel shows the row',
+    )
+  })
+
+  await step('save the query and find it in the saved panel', async () => {
+    await click('save-query')
+    await click('save-query-name')
+    type('All distros')
+    key('enter')
+    await click('panel:saved')
+    await waitUntil(() => treeHas('All distros'), 'saved query listed')
+  })
+
+  await step('close a tab and fall back to the previous one', async () => {
+    await click('close:tab-2')
+    await waitUntil(
+      () => root.nodeId('tab:tab-2') === undefined && root.nodeId('tab:tab-1') !== undefined,
+      'tab closed',
+    )
   })
 
   await step('the layout query reports painted nodes', async () => {
