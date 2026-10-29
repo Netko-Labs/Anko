@@ -1,0 +1,3 @@
+# React picks its development or production build from NODE_ENV, which Bun
+# leaves unset; the development build renders two to three times slower.
+define = { "process.env.NODE_ENV" = "\"production\"" }
